@@ -15,6 +15,8 @@ public partial class FloatingUsageWindow : Window
     private readonly ISettingsService _settingsService;
     private readonly DispatcherTimer _saveTimer;
     private bool _isDocked;
+    private bool _isDragging;
+    private Point _dragOffset;
 
     public FloatingUsageWindow()
     {
@@ -76,20 +78,32 @@ public partial class FloatingUsageWindow : Window
 
     private void DragHandle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (!_isDocked && e.ButtonState == MouseButtonState.Pressed)
-        {
-            try
-            {
-                DragMove();
-            }
-            catch (InvalidOperationException)
-            {
-                // DragMove can throw if mouse button is released during the modal
-                // drag loop (common when VS debugger breaks mid-drag). Release
-                // capture to prevent the window from holding all mouse input.
-                ReleaseMouseCapture();
-            }
-        }
+        if (_isDocked) return;
+
+        // Manual drag — no DragMove(), no Win32 modal loop, no stuck capture.
+        _isDragging = true;
+        _dragOffset = e.GetPosition(this);
+        ((UIElement)sender).CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void DragHandle_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_isDragging) return;
+
+        // Position in screen coordinates via the drag handle element
+        var screenPos = ((UIElement)sender).PointToScreen(e.GetPosition((UIElement)sender));
+        Left = screenPos.X - _dragOffset.X;
+        Top = screenPos.Y - _dragOffset.Y;
+    }
+
+    private void DragHandle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isDragging) return;
+
+        _isDragging = false;
+        ((UIElement)sender).ReleaseMouseCapture();
+        e.Handled = true;
     }
 
     private void ToggleDocked()
