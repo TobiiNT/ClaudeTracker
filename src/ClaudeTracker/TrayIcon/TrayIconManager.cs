@@ -1,17 +1,18 @@
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Threading;
-using Hardcodet.Wpf.TaskbarNotification;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.Utilities;
 using ClaudeTracker.Views;
+using Hardcodet.Wpf.TaskbarNotification;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace ClaudeTracker.TrayIcon;
 
+/// <summary>Manages the system tray icon, popover window, tooltip, and context menu.</summary>
 public class TrayIconManager : IDisposable
 {
     private readonly IProfileService _profileService;
@@ -25,7 +26,8 @@ public class TrayIconManager : IDisposable
     private Window? _tooltipWindow;
     private TextBlock? _tooltipTextBlock;
     private string _tooltipText = "ClaudeTracker - Claude Usage Monitor";
-    private readonly DispatcherTimer _tooltipHideTimer = new() { Interval = TimeSpan.FromMilliseconds(1500) };
+    private POINT _tooltipAnchor;
+    private readonly DispatcherTimer _tooltipPollTimer = new() { Interval = TimeSpan.FromMilliseconds(100) };
 
     public TrayIconManager(
         IProfileService profileService,
@@ -37,7 +39,15 @@ public class TrayIconManager : IDisposable
         _refreshCoordinator = refreshCoordinator;
         _settingsService = settingsService;
         _renderer = renderer;
-        _tooltipHideTimer.Tick += (_, _) => HideTooltip();
+        _tooltipPollTimer.Tick += (_, _) =>
+        {
+            // Hide when cursor moves away from the icon area
+            GetCursorPos(out var now);
+            var dx = Math.Abs(now.X - _tooltipAnchor.X);
+            var dy = Math.Abs(now.Y - _tooltipAnchor.Y);
+            if (dx > 40 || dy > 40)
+                HideTooltip();
+        };
     }
 
     public void Initialize()
@@ -103,15 +113,20 @@ public class TrayIconManager : IDisposable
         }
     }
 
-    private void OnTrayLeftClick(object sender, RoutedEventArgs e)
-    {
-        if (_popoverWindow != null && _popoverWindow.IsVisible)
-        {
-            _popoverWindow.Hide();
-            return;
-        }
+    private void OnTrayLeftClick(object sender, RoutedEventArgs e) => TogglePopover();
 
-        ShowPopover();
+    public void TogglePopover()
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            if (_popoverWindow != null && _popoverWindow.IsVisible)
+            {
+                _popoverWindow.Hide();
+                return;
+            }
+
+            ShowPopover();
+        });
     }
 
     private void ShowPopover()
@@ -158,7 +173,7 @@ public class TrayIconManager : IDisposable
 
         var taskbarEdge = GetTaskbarEdge();
         double left, top;
-        const double gap = 8;
+        const double gap = 4;
 
         switch (taskbarEdge)
         {
@@ -255,9 +270,13 @@ public class TrayIconManager : IDisposable
         if (_popoverWindow is { IsVisible: true })
             return;
 
-        _tooltipHideTimer.Stop();
-        _tooltipHideTimer.Start();
-        ShowTooltip();
+        // Record anchor position on first show
+        if (_tooltipWindow == null || !_tooltipWindow.IsVisible)
+        {
+            GetCursorPos(out _tooltipAnchor);
+            ShowTooltip();
+            _tooltipPollTimer.Start();
+        }
     }
 
     private void ShowTooltip()
@@ -296,22 +315,53 @@ public class TrayIconManager : IDisposable
             };
         }
 
-        _tooltipTextBlock!.Text = _tooltipText;
-
-        // Position near cursor with DPI correction
-        GetCursorPos(out var pt);
-        var dpi = GetDpiForSystem();
-        var scale = dpi / 96.0;
-        _tooltipWindow.Left = pt.X / scale + 12;
-        _tooltipWindow.Top = pt.Y / scale - 40;
+        if (_tooltipTextBlock!.Text != _tooltipText)
+            _tooltipTextBlock.Text = _tooltipText;
 
         if (!_tooltipWindow.IsVisible)
+        {
+            // Use cursor X as icon center (mouse is over the icon),
+            // and position just above the taskbar edge.
+            var dpi = GetDpiForSystem();
+            var scale = dpi / 96.0;
+            var iconCenterX = _tooltipAnchor.X / scale;
+
+            // Measure tooltip width
+            _tooltipWindow.Left = -9999;
+            _tooltipWindow.Top = -9999;
             _tooltipWindow.Show();
+            _tooltipWindow.UpdateLayout();
+            var tipWidth = _tooltipWindow.ActualWidth;
+            var tipHeight = _tooltipWindow.ActualHeight;
+
+            var workArea = SystemParameters.WorkArea;
+            var taskbarEdge = GetTaskbarEdge();
+            double left, top;
+            const double gap = 8;
+
+            // Center horizontally on the icon
+            left = iconCenterX - tipWidth / 2;
+
+            // Position on the inner side of the taskbar
+            top = taskbarEdge switch
+            {
+                TaskbarEdge.Top => workArea.Top + gap,
+                TaskbarEdge.Left => _tooltipAnchor.Y / scale,
+                TaskbarEdge.Right => _tooltipAnchor.Y / scale,
+                _ => workArea.Bottom - tipHeight - gap // Bottom (most common)
+            };
+
+            // Clamp within screen
+            left = Math.Clamp(left, workArea.Left + gap, workArea.Right - tipWidth - gap);
+
+            _tooltipWindow.Left = left;
+            _tooltipWindow.Top = top;
+        }
     }
 
     private void HideTooltip()
     {
-        _tooltipHideTimer.Stop();
+        _tooltipPollTimer.Stop();
         _tooltipWindow?.Hide();
     }
 
@@ -319,7 +369,7 @@ public class TrayIconManager : IDisposable
 
     public void Dispose()
     {
-        _tooltipHideTimer.Stop();
+        _tooltipPollTimer.Stop();
         _tooltipWindow?.Close();
         _popoverWindow?.Close();
         _trayIcon?.Dispose();

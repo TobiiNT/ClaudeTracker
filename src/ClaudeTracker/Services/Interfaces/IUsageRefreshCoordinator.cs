@@ -1,11 +1,17 @@
 namespace ClaudeTracker.Services.Interfaces;
 
+/// <summary>Coordinates periodic usage data refresh.</summary>
 public interface IUsageRefreshCoordinator
 {
+    /// <summary>Starts the periodic refresh timer.</summary>
     void Start();
+    /// <summary>Stops the periodic refresh timer.</summary>
     void Stop();
+    /// <summary>Triggers an immediate out-of-cycle refresh.</summary>
     void RefreshNow();
+    /// <summary>Updates the refresh interval in seconds.</summary>
     void UpdateInterval(double seconds);
+    /// <summary>Whether the refresh timer is currently running.</summary>
     bool IsRunning { get; }
 
     event EventHandler? RefreshStarted;

@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace ClaudeTracker.Models;
 
+/// <summary>Usage data from the Claude AI API: session, weekly, and per-model breakdowns.</summary>
 public class ClaudeUsage
 {
     // Session data (5-hour rolling window)

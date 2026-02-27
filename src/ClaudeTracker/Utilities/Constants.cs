@@ -2,6 +2,7 @@ using System.IO;
 
 namespace ClaudeTracker.Utilities;
 
+/// <summary>Application-wide constants: API endpoints, intervals, thresholds, and paths.</summary>
 public static class Constants
 {
     public static class APIEndpoints
@@ -30,9 +31,9 @@ public static class Constants
 
     public static class GitHub
     {
-        public const string Owner = "hamed-elfayome";
-        public const string Repo = "Claude-Usage-Tracker";
-        public const string RepoUrl = "https://github.com/hamed-elfayome/Claude-Usage-Tracker";
+        public const string Owner = "TobiiNT";
+        public const string Repo = "ClaudeTracker";
+        public const string RepoUrl = "https://github.com/TobiiNT/ClaudeTracker";
     }
 
     public static class UITiming
@@ -73,5 +74,8 @@ public static class Constants
         Path.Combine(AppDataPath, "logs", "claudetracker-.log");
 
     public const string MutexName = "ClaudeTracker-SingleInstance";
-    public const string AppVersion = "1.0.0";
+
+    public static string AppVersion =>
+        System.Reflection.Assembly.GetExecutingAssembly()
+            .GetName().Version?.ToString(3) ?? "dev";
 }

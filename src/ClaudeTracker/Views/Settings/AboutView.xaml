@@ -18,6 +18,28 @@
                        HorizontalAlignment="Center" Margin="0,0,0,24"
                        Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
 
+            <!-- Update status -->
+            <StackPanel x:Name="UpdatePanel" HorizontalAlignment="Center" Margin="0,0,0,16"
+                        Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                    <materialDesign:PackIcon x:Name="UpdateIcon" Kind="Update" Width="18" Height="18"
+                                             VerticalAlignment="Center" Margin="0,0,6,0"
+                                             Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <TextBlock x:Name="UpdateStatusText" FontSize="13" VerticalAlignment="Center"
+                               Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+                    <ProgressBar x:Name="UpdateSpinner" IsIndeterminate="True"
+                                 Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                 Width="18" Height="18" Margin="8,0,0,0"
+                                 VerticalAlignment="Center" Visibility="Collapsed" />
+                </StackPanel>
+                <Button x:Name="CheckUpdateButton" Content="Check for Updates"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,4" Width="200" Visibility="Collapsed" />
+                <Button x:Name="ApplyUpdateButton" Content="Update &amp; Restart"
+                        Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                        Margin="0,4" Width="200" Visibility="Collapsed" />
+            </StackPanel>
+
             <!-- Actions -->
             <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
                 <Button x:Name="GitHubButton" Content="View on GitHub"

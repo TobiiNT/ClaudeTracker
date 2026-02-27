@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ClaudeTracker.Models;
 
+/// <summary>Anthropic Console API billing data: spend, credits, and formatted amounts.</summary>
 public class APIUsage
 {
     [JsonPropertyName("currentSpendCents")]
@@ -52,6 +53,7 @@ public class APIUsage
     }
 }
 
+/// <summary>An Anthropic Console organization with ID and display name.</summary>
 public class APIOrganization
 {
     [JsonPropertyName("id")]

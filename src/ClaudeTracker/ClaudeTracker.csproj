@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- ApplicationIcon set at runtime via SkiaSharp -->
+    <ApplicationIcon>Assets\app_icon.ico</ApplicationIcon>
     <AssemblyName>ClaudeTracker</AssemblyName>
     <RootNamespace>ClaudeTracker</RootNamespace>
     <Version>1.0.0</Version>
@@ -30,9 +30,18 @@
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="SkiaSharp" Version="3.116.1" />
     <PackageReference Include="SkiaSharp.Views.WPF" Version="3.116.1" />
+    <PackageReference Include="Velopack" Version="0.0.1298" />
   </ItemGroup>
 
-  <!-- Icon generated at runtime -->
+  <!-- Custom Main entry point for Velopack — App.xaml must be Page, not ApplicationDefinition -->
+  <ItemGroup>
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\app_icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Localization\Strings.resx">

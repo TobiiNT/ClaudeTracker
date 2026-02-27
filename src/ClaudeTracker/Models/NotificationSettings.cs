@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace ClaudeTracker.Models;
 
+/// <summary>Per-profile Windows toast notification threshold configuration.</summary>
 public class NotificationSettings
 {
     [JsonPropertyName("enabled")]

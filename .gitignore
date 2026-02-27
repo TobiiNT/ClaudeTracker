@@ -36,3 +36,7 @@ publish/
 
 ## Claude
 .claude/
+
+## MCP / env
+mcp.json
+.env.local

@@ -1,7 +1,9 @@
 namespace ClaudeTracker.Utilities;
 
+/// <summary>Human-friendly formatting helpers for time, percentages, tokens, and burn rate.</summary>
 public static class FormatterHelper
 {
+    /// <summary>Formats time until reset as a compact string (e.g., "2h 30m").</summary>
     public static string FormatTimeRemaining(DateTime resetTime)
     {
         var remaining = resetTime - DateTime.UtcNow;
@@ -31,6 +33,7 @@ public static class FormatterHelper
         return $"{(int)remaining.TotalSeconds}s";
     }
 
+    /// <summary>Formats an absolute reset time as a friendly date string.</summary>
     public static string FormatResetTime(DateTime resetTime)
     {
         var local = resetTime.ToLocalTime();
@@ -44,6 +47,7 @@ public static class FormatterHelper
         return local.ToString("ddd, MMM d 'at' h:mm tt");
     }
 
+    /// <summary>Formats a percentage, showing one decimal for values under 1%.</summary>
     public static string FormatPercentage(double percentage)
     {
         return percentage < 1 && percentage > 0
@@ -51,6 +55,7 @@ public static class FormatterHelper
             : $"{(int)Math.Round(percentage)}%";
     }
 
+    /// <summary>Formats a UTC timestamp as a relative "X ago" string.</summary>
     public static string FormatTimeAgo(DateTime utcTime)
     {
         var elapsed = DateTime.UtcNow - utcTime;
@@ -67,6 +72,7 @@ public static class FormatterHelper
         return utcTime.ToLocalTime().ToString("h:mm tt");
     }
 
+    /// <summary>Formats a token count with K/M suffixes (e.g., "500K", "1.0M").</summary>
     public static string FormatTokenCount(int tokens)
     {
         return tokens switch
@@ -76,4 +82,5 @@ public static class FormatterHelper
             _ => tokens.ToString()
         };
     }
+
 }

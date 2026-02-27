@@ -1,5 +1,6 @@
 namespace ClaudeTracker.Utilities;
 
+/// <summary>Generates whimsical profile names like "Quantum Llama" or "Ninja Narwhal".</summary>
 public static class FunnyNameGenerator
 {
     private static readonly string[] Names =
@@ -16,6 +17,7 @@ public static class FunnyNameGenerator
 
     private static readonly Random _random = new();
 
+    /// <summary>Returns a random unused name, or a numeric fallback if all names are taken.</summary>
     public static string GetRandomName(IEnumerable<string>? usedNames = null)
     {
         var excluded = usedNames?.ToHashSet() ?? [];
