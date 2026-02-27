@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- ApplicationIcon set at runtime via SkiaSharp -->
+    <ApplicationIcon>Assets\app_icon.ico</ApplicationIcon>
     <AssemblyName>ClaudeTracker</AssemblyName>
     <RootNamespace>ClaudeTracker</RootNamespace>
     <Version>1.0.0</Version>
@@ -39,7 +39,9 @@
     <Page Include="App.xaml" />
   </ItemGroup>
 
-  <!-- Icon generated at runtime -->
+  <ItemGroup>
+    <Content Include="Assets\app_icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Localization\Strings.resx">
