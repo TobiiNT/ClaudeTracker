@@ -1,8 +1,18 @@
-# ClaudeTracker
+<p align="center">
+  <h1 align="center">ClaudeTracker</h1>
+  <p align="center">Windows system tray app for real-time Claude AI usage monitoring</p>
+</p>
 
-A Windows system tray application that monitors your Claude AI usage limits in real-time. Get instant visibility into your session and weekly usage, overage costs, and receive alerts before hitting rate limits.
+<p align="center">
+  <a href="https://github.com/TobiiNT/ClaudeTracker/releases/latest"><img src="https://img.shields.io/github/v/release/TobiiNT/ClaudeTracker?style=flat-square" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/TobiiNT/ClaudeTracker?style=flat-square" alt="License"></a>
+  <img src="https://img.shields.io/badge/platform-Windows%2010%2B-blue?style=flat-square" alt="Platform">
+  <img src="https://img.shields.io/badge/.NET-8.0-purple?style=flat-square" alt=".NET">
+</p>
 
-Windows port of [Claude Usage Tracker](https://github.com/hamed-elfayome/Claude-Usage-Tracker) (macOS).
+---
+
+Get instant visibility into your Claude session and weekly usage, overage costs, and receive alerts before hitting rate limits. Windows port of [Claude Usage Tracker](https://github.com/hamed-elfayome/Claude-Usage-Tracker) (macOS).
 
 ## Features
 
@@ -14,31 +24,35 @@ Windows port of [Claude Usage Tracker](https://github.com/hamed-elfayome/Claude-
 - **API billing tracking** — Monitor console spend and prepaid credits
 - **Claude Code CLI sync** — Automatically reads OAuth tokens from Windows Credential Manager
 - **Auto-start sessions** — Detects 0% usage reset and starts a new session automatically
+- **Auto-update** — Built-in update system with delta packages via Velopack
+- **Global hotkey** — Toggle the dashboard with `Ctrl+Shift+C`
 - **Dark/Light theme** — Follows system theme or manual override
-- **DPI-aware** — Crisp icons at any display scaling (100%–200%)
-
-## Screenshots
-
-| Tray Icon | Popover Dashboard | Settings |
-|-----------|-------------------|----------|
-| System tray with live usage | Click tray icon for full dashboard | Configure accounts, appearance, alerts |
+- **DPI-aware** — Crisp icons at any display scaling (100%-200%)
 
 ## Installation
 
-### From Release
+### Installer (Recommended)
 
-1. Download the latest `.zip` from [Releases](https://github.com/hamed-elfayome/ClaudeTracker/releases)
+1. Download `Setup.exe` from the [latest release](https://github.com/TobiiNT/ClaudeTracker/releases/latest)
+2. Run the installer — it will create a Start Menu shortcut and handle updates automatically
+3. Future updates are applied in-app via **Settings > About > Check for Updates**
+
+### Portable
+
+1. Download the `ClaudeTracker-*-portable-win-x64.zip` from [Releases](https://github.com/TobiiNT/ClaudeTracker/releases/latest)
 2. Extract to any folder
 3. Run `ClaudeTracker.exe`
+
+> **Note:** The portable version does not support auto-updates.
 
 ### Build from Source
 
 **Requirements:**
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or later
-- Windows 10 (build 17763) or later
+- Windows 10 (build 19041) or later
 
 ```bash
-git clone https://github.com/hamed-elfayome/ClaudeTracker.git
+git clone https://github.com/TobiiNT/ClaudeTracker.git
 cd ClaudeTracker
 dotnet build
 dotnet run --project src/ClaudeTracker
@@ -48,19 +62,29 @@ dotnet run --project src/ClaudeTracker
 
 1. Launch ClaudeTracker — it appears in the system tray
 2. Right-click the tray icon > **Settings**
-3. Go to **Connect** tab
-4. Enter your Claude session key (`sk-ant-...`) and click **Test Connection**
-5. Select your organization and save
+3. Go to the **Connect** tab
+4. Choose one of the authentication methods below
 
-### Getting your session key
+### Authentication Methods
 
-1. Go to [claude.ai](https://claude.ai) and log in
-2. Open browser DevTools (`F12`) > **Application** > **Cookies**
-3. Copy the value of `sessionKey`
+| Method | How to configure |
+|--------|-----------------|
+| **Claude Code CLI** (easiest) | If you use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), ClaudeTracker automatically reads its OAuth token from Windows Credential Manager. No manual setup needed. |
+| **Claude.ai session** | In the Connect tab, paste your session token and click **Test Connection**. Select your organization and save. |
+| **API Console** | Enter your API console session token to track billing and prepaid credits. |
 
-### Claude Code CLI sync
+## Configuration
 
-If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed, ClaudeTracker can automatically read its OAuth token from Windows Credential Manager — no manual key entry needed.
+Settings are stored in `%APPDATA%\ClaudeTracker\settings.json`. Logs are written to `%APPDATA%\ClaudeTracker\logs\`.
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Refresh interval | 30s | How often usage is fetched (10-300s) |
+| Icon style | Battery | Tray icon visualization style |
+| Theme | System | Auto, Light, or Dark |
+| Notifications | Enabled | Alert at 75%, 90%, 95% |
+| Launch at login | Off | Start with Windows via Registry |
+| Auto-start session | Off | Auto-start when usage resets to 0% |
 
 ## Tech Stack
 
@@ -69,6 +93,7 @@ If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) instal
 - [Hardcodet.NotifyIcon.Wpf](https://github.com/hardcodet/wpf-notifyicon) — System tray integration
 - [SkiaSharp](https://github.com/mono/SkiaSharp) — DPI-aware tray icon rendering
 - [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) — MVVM pattern
+- [Velopack](https://velopack.io/) — Installer and auto-update
 - Microsoft.Extensions.DependencyInjection — DI container
 
 ## Project Structure
@@ -76,7 +101,7 @@ If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) instal
 ```
 src/ClaudeTracker/
 ├── Models/          Data models (usage, profiles, settings)
-├── Services/        API client, credentials, notifications, refresh
+├── Services/        API client, credentials, notifications, updates
 ├── ViewModels/      MVVM view models
 ├── Views/           WPF windows and user controls
 ├── TrayIcon/        Tray icon management and SkiaSharp rendering
@@ -85,19 +110,19 @@ src/ClaudeTracker/
 └── Localization/    Resource strings
 ```
 
-## Configuration
+## Contributing
 
-Settings are stored in `%APPDATA%\ClaudeTracker\settings.json`. Logs are written to `%APPDATA%\ClaudeTracker\logs\`.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| Refresh interval | 30s | How often usage is fetched (10–300s) |
-| Icon style | Battery | Tray icon visualization style |
-| Theme | System | Auto, Light, or Dark |
-| Notifications | Enabled | Alert at 75%, 90%, 95% |
-| Launch at login | Off | Start with Windows via Registry |
-| Auto-start session | Off | Auto-start when usage resets to 0% |
+## Security
+
+To report a vulnerability, please see [SECURITY.md](SECURITY.md).
+
+## Acknowledgments
+
+- [Claude Usage Tracker](https://github.com/hamed-elfayome/Claude-Usage-Tracker) by hamed-elfayome — the original macOS app this project is based on
+- Built with help from [Claude Code](https://claude.ai/claude-code)
 
 ## License
 
-MIT
+[MIT](LICENSE)
