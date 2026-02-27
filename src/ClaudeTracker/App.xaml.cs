@@ -24,7 +24,7 @@ public partial class App : Application
         _mutex = new Mutex(true, Utilities.Constants.MutexName, out bool createdNew);
         if (!createdNew)
         {
-            MessageBox.Show("ClaudeTracker is already running.", "ClaudeTracker",
+            MessageBox.Show("Claude Tracker is already running.", "Claude Tracker",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             Shutdown();
             return;
@@ -56,7 +56,7 @@ public partial class App : Application
 
         // Register global hotkey (Ctrl+Shift+C)
         _globalHotkeyService = new GlobalHotkeyService();
-        _globalHotkeyService.HotkeyPressed += (_, _) => _trayIconManager?.TogglePopover();
+        _globalHotkeyService.HotkeyPressed += (_, _) => _trayIconManager?.TogglePopover(fromHotkey: true);
         _globalHotkeyService.Register();
 
         // Listen for system theme changes

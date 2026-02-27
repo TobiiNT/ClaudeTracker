@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,7 @@ public partial class AboutView : UserControl
         LogsButton.Click += (_, _) => vm.OpenLogsCommand.Execute(null);
         CheckUpdateButton.Click += (_, _) => vm.CheckForUpdatesCommand.Execute(null);
         ApplyUpdateButton.Click += (_, _) => vm.ApplyUpdateCommand.Execute(null);
+        CreditsLink.Click += (_, _) => Process.Start(new ProcessStartInfo("https://github.com/hamed-elfayome/Claude-Usage-Tracker") { UseShellExecute = true });
 
         vm.PropertyChanged += OnViewModelPropertyChanged;
         UpdateUpdateUI();

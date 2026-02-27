@@ -11,6 +11,8 @@ public class NotificationService : INotificationService
     private readonly HashSet<string> _sentNotifications = new();
     private DateTime _lastNotificationTime = DateTime.MinValue;
 
+    public event EventHandler? NotificationClicked;
+
     public void CheckAndNotify(Profile profile, ClaudeUsage usage)
     {
         if (!profile.NotificationSettings.Enabled) return;
@@ -72,6 +74,7 @@ public class NotificationService : INotificationService
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var popup = new NotificationPopup(title, message, level);
+                popup.NotificationClicked += (_, _) => NotificationClicked?.Invoke(this, EventArgs.Empty);
                 popup.Show();
             });
 

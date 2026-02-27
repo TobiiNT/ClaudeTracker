@@ -28,7 +28,7 @@
             <Grid Margin="0,6,0,0">
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="Launch at login" FontSize="13" />
-                    <TextBlock Text="Automatically start ClaudeTracker when you log in to Windows"
+                    <TextBlock Text="Automatically start Claude Tracker when you log in to Windows"
                                FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <ToggleButton x:Name="LaunchToggle" HorizontalAlignment="Right" VerticalAlignment="Center"

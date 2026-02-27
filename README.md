@@ -1,13 +1,19 @@
 <p align="center">
-  <h1 align="center">ClaudeTracker</h1>
+  <h1 align="center">Claude Tracker</h1>
   <p align="center">Windows system tray app for real-time Claude AI usage monitoring</p>
 </p>
 
 <p align="center">
   <a href="https://github.com/TobiiNT/ClaudeTracker/releases/latest"><img src="https://img.shields.io/github/v/release/TobiiNT/ClaudeTracker?style=flat-square" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/TobiiNT/ClaudeTracker?style=flat-square" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%2B-blue?style=flat-square" alt="Platform">
   <img src="https://img.shields.io/badge/.NET-8.0-purple?style=flat-square" alt=".NET">
+</p>
+
+<p align="center">
+  <img src="docs/popover.png" width="280" alt="Popover dashboard" />
+  &nbsp;&nbsp;
+  <img src="docs/widget.png" width="280" alt="Floating widget" />
 </p>
 
 ---
@@ -17,6 +23,7 @@ Get instant visibility into your Claude session and weekly usage, overage costs,
 ## Features
 
 - **Real-time usage monitoring** — Session (5-hour) and weekly usage percentages, Opus/Sonnet breakdowns
+- **Floating widget** — Always-on-top compact widget with dock/undock, switchable from the popover
 - **5 tray icon styles** — Battery, Progress Bar, Percentage, Ring, Compact (Dot)
 - **Custom icon colors** — Status-based (green/orange/red), monochrome, or pick any color
 - **Multi-profile support** — Manage multiple Claude accounts with isolated credentials
@@ -60,7 +67,7 @@ dotnet run --project src/ClaudeTracker
 
 ## Setup
 
-1. Launch ClaudeTracker — it appears in the system tray
+1. Launch Claude Tracker — it appears in the system tray
 2. Right-click the tray icon > **Settings**
 3. Go to the **Connect** tab
 4. Choose one of the authentication methods below
@@ -69,7 +76,7 @@ dotnet run --project src/ClaudeTracker
 
 | Method | How to configure |
 |--------|-----------------|
-| **Claude Code CLI** (easiest) | If you use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), ClaudeTracker automatically reads its OAuth token from Windows Credential Manager. No manual setup needed. |
+| **Claude Code CLI** (easiest) | If you use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Claude Tracker automatically reads its OAuth token from Windows Credential Manager. No manual setup needed. |
 | **Claude.ai session** | In the Connect tab, paste your session token and click **Test Connection**. Select your organization and save. |
 | **API Console** | Enter your API console session token to track billing and prepaid credits. |
 

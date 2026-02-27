@@ -1,0 +1,94 @@
+<Window x:Class="ClaudeTracker.Views.FloatingUsageWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ResizeMode="NoResize"
+        SizeToContent="Height"
+        Width="280">
+
+    <Border Style="{StaticResource FloatingBorderStyle}" Padding="14,10,14,12">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Drag handle + close button -->
+            <Grid Grid.Row="0" Margin="0,0,0,8"
+                  MouseLeftButtonDown="DragHandle_MouseLeftButtonDown"
+                  MouseMove="DragHandle_MouseMove"
+                  MouseLeftButtonUp="DragHandle_MouseLeftButtonUp">
+                <Grid.Background>
+                    <SolidColorBrush Color="Transparent" />
+                </Grid.Background>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Robot" Width="14" Height="14"
+                                             Foreground="#888" Margin="0,0,5,0"
+                                             VerticalAlignment="Center" />
+                    <TextBlock Text="Claude Tracker" FontSize="11.5" FontWeight="Medium"
+                               Foreground="#888" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="SwitchToPopoverButton" VerticalAlignment="Center"
+                            Style="{StaticResource MaterialDesignIconButton}"
+                            Width="22" Height="22" Padding="0"
+                            ToolTip="Switch to popover">
+                        <materialDesign:PackIcon Kind="ArrowExpand" Width="13" Height="13" Foreground="#999" />
+                    </Button>
+                    <Button x:Name="DockButton" VerticalAlignment="Center"
+                            Style="{StaticResource MaterialDesignIconButton}"
+                            Width="22" Height="22" Padding="0"
+                            ToolTip="Lock position">
+                        <materialDesign:PackIcon x:Name="DockIcon" Kind="PinOutline"
+                                                 Width="13" Height="13" Foreground="#999" />
+                    </Button>
+                    <Button x:Name="CloseButton" VerticalAlignment="Center"
+                            Style="{StaticResource MaterialDesignIconButton}"
+                            Width="22" Height="22" Padding="0"
+                            ToolTip="Close widget">
+                        <materialDesign:PackIcon Kind="Close" Width="14" Height="14" Foreground="#999" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Session Usage -->
+            <StackPanel Grid.Row="1" Margin="0,0,0,8">
+                <Grid Margin="0,0,0,4">
+                    <TextBlock Text="Session" FontSize="12" FontWeight="Medium" Foreground="#666" />
+                    <TextBlock x:Name="SessionPercentText" HorizontalAlignment="Right"
+                               FontSize="16" FontWeight="Bold" Foreground="#333" />
+                </Grid>
+                <Border Background="#15000000" CornerRadius="3" Height="6" ClipToBounds="True">
+                    <Border x:Name="SessionProgressFill" Background="#4CAF50"
+                            CornerRadius="3" HorizontalAlignment="Left" Width="0" />
+                </Border>
+                <TextBlock x:Name="SessionResetText" FontSize="11" Margin="0,3,0,0" Foreground="#999" />
+            </StackPanel>
+
+            <!-- Weekly Usage -->
+            <StackPanel Grid.Row="2" Margin="0,0,0,6">
+                <Grid Margin="0,0,0,4">
+                    <TextBlock Text="Weekly" FontSize="12" FontWeight="Medium" Foreground="#666" />
+                    <TextBlock x:Name="WeeklyPercentText" HorizontalAlignment="Right"
+                               FontSize="14" FontWeight="SemiBold" Foreground="#444" />
+                </Grid>
+                <Border Background="#15000000" CornerRadius="3" Height="5" ClipToBounds="True">
+                    <Border x:Name="WeeklyProgressFill" Background="#4CAF50"
+                            CornerRadius="3" HorizontalAlignment="Left" Width="0" />
+                </Border>
+                <TextBlock x:Name="WeeklyResetText" FontSize="11" Margin="0,3,0,0" Foreground="#999" />
+            </StackPanel>
+
+            <!-- Last Updated -->
+            <TextBlock Grid.Row="3" x:Name="LastUpdatedText" FontSize="10"
+                       HorizontalAlignment="Center" Foreground="#BBB" Margin="0,2,0,0" />
+        </Grid>
+    </Border>
+</Window>

@@ -9,12 +9,12 @@
                                      HorizontalAlignment="Center" Margin="0,20,0,12"
                                      Foreground="{DynamicResource PrimaryHueMidBrush}" />
 
-            <TextBlock Text="ClaudeTracker" FontSize="24" FontWeight="Bold"
+            <TextBlock Text="Claude Tracker" FontSize="24" FontWeight="Bold"
                        HorizontalAlignment="Center" Margin="0,0,0,4" />
             <TextBlock x:Name="VersionText" FontSize="13"
                        HorizontalAlignment="Center" Margin="0,0,0,4"
                        Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
-            <TextBlock Text="Claude AI Usage Tracker for Windows" FontSize="13"
+            <TextBlock Text="Claude AI usage tracker for Windows" FontSize="13"
                        HorizontalAlignment="Center" Margin="0,0,0,24"
                        Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
 
@@ -51,9 +51,12 @@
             </StackPanel>
 
             <!-- Credits -->
-            <TextBlock Text="Based on Claude Usage Tracker by hamed-elfayome"
-                       FontSize="11" HorizontalAlignment="Center"
-                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+            <TextBlock FontSize="11" HorizontalAlignment="Center"
+                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
+                <Run Text="Based on " /><Hyperlink x:Name="CreditsLink"
+                    TextDecorations="None"
+                    Foreground="{DynamicResource PrimaryHueMidBrush}">Claude Usage Tracker by hamed-elfayome</Hyperlink>
+            </TextBlock>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

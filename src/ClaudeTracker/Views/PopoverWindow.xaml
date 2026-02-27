@@ -172,11 +172,17 @@
                         <materialDesign:PackIcon Kind="Robot" Width="16" Height="16"
                                                  Foreground="#888" Margin="0,0,6,0"
                                                  VerticalAlignment="Center" />
-                        <TextBlock Text="ClaudeTracker" FontSize="13" FontWeight="Medium"
+                        <TextBlock Text="Claude Tracker" FontSize="13" FontWeight="Medium"
                                    Foreground="#777" VerticalAlignment="Center" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="SwitchToWidgetButton"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                Width="28" Height="28" Padding="0"
+                                ToolTip="Switch to floating widget">
+                            <materialDesign:PackIcon Kind="WidgetsOutline" Width="17" Height="17" Foreground="#777" />
+                        </Button>
                         <Button x:Name="SettingsButton"
                                 Style="{StaticResource MaterialDesignIconButton}"
                                 Width="28" Height="28" Padding="0"

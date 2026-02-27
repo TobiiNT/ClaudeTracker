@@ -18,14 +18,16 @@ public class TrayIconManager : IDisposable
     private readonly IProfileService _profileService;
     private readonly IUsageRefreshCoordinator _refreshCoordinator;
     private readonly ISettingsService _settingsService;
+    private readonly INotificationService _notificationService;
     private readonly TrayIconRenderer _renderer;
     private TaskbarIcon? _trayIcon;
     private PopoverWindow? _popoverWindow;
+    private FloatingUsageWindow? _floatingWindow;
 
     // Custom tooltip (bypasses Hardcodet's broken DPI-scaled tooltip positioning)
     private Window? _tooltipWindow;
     private TextBlock? _tooltipTextBlock;
-    private string _tooltipText = "ClaudeTracker - Claude Usage Monitor";
+    private string _tooltipText = "Claude Tracker - Claude Usage Monitor";
     private POINT _tooltipAnchor;
     private readonly DispatcherTimer _tooltipPollTimer = new() { Interval = TimeSpan.FromMilliseconds(100) };
 
@@ -33,15 +35,24 @@ public class TrayIconManager : IDisposable
         IProfileService profileService,
         IUsageRefreshCoordinator refreshCoordinator,
         ISettingsService settingsService,
+        INotificationService notificationService,
         TrayIconRenderer renderer)
     {
         _profileService = profileService;
         _refreshCoordinator = refreshCoordinator;
         _settingsService = settingsService;
+        _notificationService = notificationService;
         _renderer = renderer;
+        _notificationService.NotificationClicked += (_, _) =>
+            Application.Current.Dispatcher.Invoke(() => ShowPopover());
         _tooltipPollTimer.Tick += (_, _) =>
         {
-            // Hide when cursor moves away from the icon area
+            // Hide when context menu is open or cursor moves away from the icon area
+            if (_trayIcon?.ContextMenu is { IsOpen: true })
+            {
+                HideTooltip();
+                return;
+            }
             GetCursorPos(out var now);
             var dx = Math.Abs(now.X - _tooltipAnchor.X);
             var dy = Math.Abs(now.Y - _tooltipAnchor.Y);
@@ -70,6 +81,10 @@ public class TrayIconManager : IDisposable
         _refreshCoordinator.RefreshCompleted += (_, _) => UpdateIcon();
 
         UpdateIcon();
+
+        // Restore floating widget if it was enabled
+        if (_settingsService.Settings.IsFloatingModeEnabled)
+            ShowFloatingWindow();
 
         LoggingService.Instance.Log("Tray icon initialized");
     }
@@ -104,7 +119,7 @@ public class TrayIconManager : IDisposable
 
                 _tooltipText = usage != null
                     ? $"Claude Usage: {FormatterHelper.FormatPercentage(percentage)} used\nResets: {FormatterHelper.FormatTimeRemaining(usage.SessionResetTime)}"
-                    : "ClaudeTracker - No usage data";
+                    : "Claude Tracker - No usage data";
             });
         }
         catch (Exception ex)
@@ -115,7 +130,7 @@ public class TrayIconManager : IDisposable
 
     private void OnTrayLeftClick(object sender, RoutedEventArgs e) => TogglePopover();
 
-    public void TogglePopover()
+    public void TogglePopover(bool fromHotkey = false)
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
@@ -125,11 +140,11 @@ public class TrayIconManager : IDisposable
                 return;
             }
 
-            ShowPopover();
+            ShowPopover(fromHotkey);
         });
     }
 
-    private void ShowPopover()
+    private void ShowPopover(bool fromHotkey = false)
     {
         if (_popoverWindow == null)
         {
@@ -138,30 +153,24 @@ public class TrayIconManager : IDisposable
             {
                 _popoverWindow.Hide();
             };
+            _popoverWindow.SwitchToWidgetRequested += (_, _) =>
+            {
+                ToggleFloatingMode(true);
+                UpdateFloatingMenuCheckmark(true);
+            };
         }
 
         // Position near tray icon — show first so layout/DPI are available
         _popoverWindow.Left = -9999;
         _popoverWindow.Top = -9999;
         _popoverWindow.Show();
-        PositionPopover();
+        PositionPopover(fromHotkey);
         _popoverWindow.Activate();
     }
 
-    private void PositionPopover()
+    private void PositionPopover(bool fromHotkey = false)
     {
         if (_popoverWindow == null || _trayIcon == null) return;
-
-        // Get cursor position in physical pixels
-        GetCursorPos(out var cursorPos);
-
-        // Get DPI scale factor (physical pixels per WPF unit)
-        var dpi = GetDpiForSystem();
-        var dpiScaleFactor = dpi / 96.0;
-
-        // Convert cursor from physical pixels to WPF logical units
-        var cursorX = cursorPos.X / dpiScaleFactor;
-        var cursorY = cursorPos.Y / dpiScaleFactor;
 
         var workArea = SystemParameters.WorkArea;
         var popoverWidth = Constants.WindowSizes.PopoverWidth;
@@ -175,27 +184,45 @@ public class TrayIconManager : IDisposable
         double left, top;
         const double gap = 4;
 
-        switch (taskbarEdge)
+        if (fromHotkey)
         {
-            case TaskbarEdge.Top:
-                left = cursorX - popoverWidth / 2;
-                top = workArea.Top + gap;
-                break;
+            // Hotkey: anchor to right side of work area, near the taskbar
+            left = workArea.Right - popoverWidth - gap;
+            top = taskbarEdge == TaskbarEdge.Top
+                ? workArea.Top + gap
+                : workArea.Bottom - popoverHeight - gap;
+        }
+        else
+        {
+            // Tray click: anchor near cursor
+            GetCursorPos(out var cursorPos);
+            var dpi = GetDpiForSystem();
+            var dpiScaleFactor = dpi / 96.0;
+            var cursorX = cursorPos.X / dpiScaleFactor;
+            var cursorY = cursorPos.Y / dpiScaleFactor;
 
-            case TaskbarEdge.Left:
-                left = workArea.Left + gap;
-                top = cursorY - popoverHeight / 2;
-                break;
+            switch (taskbarEdge)
+            {
+                case TaskbarEdge.Top:
+                    left = cursorX - popoverWidth / 2;
+                    top = workArea.Top + gap;
+                    break;
 
-            case TaskbarEdge.Right:
-                left = workArea.Right - popoverWidth - gap;
-                top = cursorY - popoverHeight / 2;
-                break;
+                case TaskbarEdge.Left:
+                    left = workArea.Left + gap;
+                    top = cursorY - popoverHeight / 2;
+                    break;
 
-            default: // Bottom (most common)
-                left = cursorX - popoverWidth / 2;
-                top = workArea.Bottom - popoverHeight - gap;
-                break;
+                case TaskbarEdge.Right:
+                    left = workArea.Right - popoverWidth - gap;
+                    top = cursorY - popoverHeight / 2;
+                    break;
+
+                default: // Bottom (most common)
+                    left = cursorX - popoverWidth / 2;
+                    top = workArea.Bottom - popoverHeight - gap;
+                    break;
+            }
         }
 
         // Clamp to work area
@@ -236,21 +263,37 @@ public class TrayIconManager : IDisposable
 
     private ContextMenu CreateContextMenu()
     {
-        var menu = new ContextMenu();
+        var menuStyle = (Style)Application.Current.FindResource("TrayContextMenuStyle");
+        var itemStyle = (Style)Application.Current.FindResource("TrayMenuItemStyle");
+        var sepStyle = (Style)Application.Current.FindResource("TrayMenuSeparatorStyle");
 
-        var refreshItem = new MenuItem { Header = "Refresh Now" };
+        var menu = new ContextMenu { Style = menuStyle };
+
+        var refreshItem = new MenuItem { Header = "Refresh Now", Style = itemStyle };
         refreshItem.Click += (_, _) => _refreshCoordinator.RefreshNow();
         menu.Items.Add(refreshItem);
 
-        menu.Items.Add(new Separator());
+        menu.Items.Add(new Separator { Style = sepStyle });
 
-        var settingsItem = new MenuItem { Header = "Settings..." };
+        var floatingItem = new MenuItem
+        {
+            Header = "Floating Widget",
+            IsCheckable = true,
+            IsChecked = _settingsService.Settings.IsFloatingModeEnabled,
+            Style = itemStyle
+        };
+        floatingItem.Click += (_, _) => ToggleFloatingMode(floatingItem.IsChecked);
+        menu.Items.Add(floatingItem);
+
+        menu.Items.Add(new Separator { Style = sepStyle });
+
+        var settingsItem = new MenuItem { Header = "Settings...", Style = itemStyle };
         settingsItem.Click += (_, _) => ShowSettings();
         menu.Items.Add(settingsItem);
 
-        menu.Items.Add(new Separator());
+        menu.Items.Add(new Separator { Style = sepStyle });
 
-        var quitItem = new MenuItem { Header = "Quit ClaudeTracker" };
+        var quitItem = new MenuItem { Header = "Quit Claude Tracker", Style = itemStyle };
         quitItem.Click += (_, _) => Application.Current.Shutdown();
         menu.Items.Add(quitItem);
 
@@ -262,12 +305,69 @@ public class TrayIconManager : IDisposable
         SettingsWindow.ShowInstance();
     }
 
+    #region Floating Widget
+
+    private void ToggleFloatingMode(bool enabled)
+    {
+        _settingsService.Settings.IsFloatingModeEnabled = enabled;
+        _settingsService.Save();
+
+        if (enabled)
+            ShowFloatingWindow();
+        else
+            HideFloatingWindow();
+    }
+
+    private void ShowFloatingWindow()
+    {
+        if (_floatingWindow == null)
+        {
+            _floatingWindow = new FloatingUsageWindow();
+            _floatingWindow.CloseRequested += (_, _) =>
+            {
+                ToggleFloatingMode(false);
+                UpdateFloatingMenuCheckmark(false);
+            };
+            _floatingWindow.SwitchToPopoverRequested += (_, _) =>
+            {
+                ToggleFloatingMode(false);
+                UpdateFloatingMenuCheckmark(false);
+                ShowPopover();
+            };
+        }
+
+        _floatingWindow.Show();
+        _floatingWindow.RestorePosition();
+    }
+
+    private void HideFloatingWindow()
+    {
+        _floatingWindow?.Hide();
+    }
+
+    private void UpdateFloatingMenuCheckmark(bool isChecked)
+    {
+        if (_trayIcon?.ContextMenu is not { } menu) return;
+        foreach (var item in menu.Items)
+        {
+            if (item is MenuItem { Header: "Floating Widget" } mi)
+            {
+                mi.IsChecked = isChecked;
+                break;
+            }
+        }
+    }
+
+    #endregion
+
     #region Custom Tooltip
 
     private void OnTrayMouseMove(object sender, RoutedEventArgs e)
     {
-        // Don't show tooltip when popover is visible
+        // Don't show tooltip when popover or context menu is visible
         if (_popoverWindow is { IsVisible: true })
+            return;
+        if (_trayIcon?.ContextMenu is { IsOpen: true })
             return;
 
         // Record anchor position on first show
@@ -371,6 +471,7 @@ public class TrayIconManager : IDisposable
     {
         _tooltipPollTimer.Stop();
         _tooltipWindow?.Close();
+        _floatingWindow?.Close();
         _popoverWindow?.Close();
         _trayIcon?.Dispose();
     }

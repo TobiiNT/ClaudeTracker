@@ -6,7 +6,8 @@
         SizeToContent="WidthAndHeight" MaxWidth="360"
         ResizeMode="NoResize">
     <Border x:Name="PopupBorder" CornerRadius="10" Padding="14,12"
-            Background="#2D2D2D" BorderThickness="1" BorderBrush="#3D3D3D">
+            Background="#2D2D2D" BorderThickness="1" BorderBrush="#3D3D3D"
+            Cursor="Hand" MouseLeftButtonDown="Body_MouseLeftButtonDown">
         <Border.Effect>
             <DropShadowEffect ShadowDepth="3" Opacity="0.4" BlurRadius="16" Direction="270" />
         </Border.Effect>
