@@ -37,6 +37,7 @@ public class SessionKeyValidationResult
     };
 }
 
+/// <summary>Validates and sanitizes Claude session keys (sk-ant-* format) with security checks.</summary>
 public partial class SessionKeyValidator
 {
     private const string RequiredPrefix = "sk-ant-";
@@ -46,6 +47,7 @@ public partial class SessionKeyValidator
     [GeneratedRegex(@"^[a-zA-Z0-9\-_]+$")]
     private static partial Regex AllowedCharsRegex();
 
+    /// <summary>Validates format, length, prefix, and security of a session key.</summary>
     public SessionKeyValidationResult Validate(string sessionKey)
     {
         var trimmed = sessionKey.Trim();
@@ -95,8 +97,10 @@ public partial class SessionKeyValidator
         return SessionKeyValidationResult.Success(trimmed);
     }
 
+    /// <summary>Returns true if the session key passes all validation checks.</summary>
     public bool IsValid(string sessionKey) => Validate(sessionKey).IsValid;
 
+    /// <summary>Strips whitespace and line breaks for safe storage.</summary>
     public string SanitizeForStorage(string sessionKey) =>
         sessionKey.Trim().Replace("\r\n", "").Replace("\n", "").Replace("\r", "");
 

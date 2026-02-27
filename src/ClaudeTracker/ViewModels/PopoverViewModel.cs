@@ -35,7 +35,6 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private bool _hasCredentials;
     [ObservableProperty] private UsageStatusLevel _sessionStatus = UsageStatusLevel.Safe;
     [ObservableProperty] private UsageStatusLevel _weeklyStatus = UsageStatusLevel.Safe;
-
     public ObservableCollection<Profile> Profiles { get; } = new();
 
     public PopoverViewModel(

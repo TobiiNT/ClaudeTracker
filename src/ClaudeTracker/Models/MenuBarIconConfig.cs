@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace ClaudeTracker.Models;
 
+/// <summary>Which usage metric to display in the tray icon.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum MenuBarMetricType
 {

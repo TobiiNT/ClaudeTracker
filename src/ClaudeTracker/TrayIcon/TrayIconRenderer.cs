@@ -8,6 +8,7 @@ using ClaudeTracker.Utilities;
 
 namespace ClaudeTracker.TrayIcon;
 
+/// <summary>Renders DPI-aware tray icons using SkiaSharp in multiple visual styles.</summary>
 public class TrayIconRenderer
 {
     private const int BaseSize = 16;

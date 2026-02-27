@@ -12,6 +12,7 @@ using System.Windows.Threading;
 
 namespace ClaudeTracker.TrayIcon;
 
+/// <summary>Manages the system tray icon, popover window, tooltip, and context menu.</summary>
 public class TrayIconManager : IDisposable
 {
     private readonly IProfileService _profileService;
@@ -112,15 +113,20 @@ public class TrayIconManager : IDisposable
         }
     }
 
-    private void OnTrayLeftClick(object sender, RoutedEventArgs e)
-    {
-        if (_popoverWindow != null && _popoverWindow.IsVisible)
-        {
-            _popoverWindow.Hide();
-            return;
-        }
+    private void OnTrayLeftClick(object sender, RoutedEventArgs e) => TogglePopover();
 
-        ShowPopover();
+    public void TogglePopover()
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            if (_popoverWindow != null && _popoverWindow.IsVisible)
+            {
+                _popoverWindow.Hide();
+                return;
+            }
+
+            ShowPopover();
+        });
     }
 
     private void ShowPopover()

@@ -63,4 +63,5 @@ public class FormatterHelperTests
         var result = FormatterHelper.FormatTimeRemaining(future);
         Assert.Contains("d", result);
     }
+
 }

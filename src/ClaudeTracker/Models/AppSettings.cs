@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace ClaudeTracker.Models;
 
+/// <summary>Root settings model persisted to settings.json in %APPDATA%/ClaudeTracker.</summary>
 public class AppSettings
 {
     [JsonPropertyName("profiles")]

@@ -111,7 +111,7 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     {
         if (e.Mode == Microsoft.Win32.PowerModes.Resume)
         {
-            LoggingService.Instance.Log("System resumed - refreshing usage data");
+            LoggingService.Instance.Log("System resumed from sleep");
             await Task.Delay(2000); // Brief delay after wake
             await RefreshAsync();
         }

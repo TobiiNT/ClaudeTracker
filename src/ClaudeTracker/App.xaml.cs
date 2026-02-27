@@ -14,6 +14,7 @@ public partial class App : Application
     private Mutex? _mutex;
     private IServiceProvider _services = null!;
     private TrayIconManager? _trayIconManager;
+    private GlobalHotkeyService? _globalHotkeyService;
 
     public static IServiceProvider Services { get; private set; } = null!;
 
@@ -32,8 +33,9 @@ public partial class App : Application
         base.OnStartup(e);
 
         // Configure DI
+        var useMock = Environment.GetCommandLineArgs().Contains("--mock", StringComparer.OrdinalIgnoreCase);
         var serviceCollection = new ServiceCollection();
-        ConfigureServices(serviceCollection);
+        ConfigureServices(serviceCollection, useMock);
         _services = serviceCollection.BuildServiceProvider();
         Services = _services;
 
@@ -48,6 +50,15 @@ public partial class App : Application
         var refreshCoordinator = _services.GetRequiredService<IUsageRefreshCoordinator>();
         refreshCoordinator.Start();
 
+        // Start background update check
+        var updateService = _services.GetRequiredService<IUpdateService>();
+        _ = updateService.StartAsync();
+
+        // Register global hotkey (Ctrl+Shift+C)
+        _globalHotkeyService = new GlobalHotkeyService();
+        _globalHotkeyService.HotkeyPressed += (_, _) => _trayIconManager?.TogglePopover();
+        _globalHotkeyService.Register();
+
         // Listen for system theme changes
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
 
@@ -58,6 +69,7 @@ public partial class App : Application
     {
         SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
 
+        _globalHotkeyService?.Dispose();
         _trayIconManager?.Dispose();
 
         if (_services is IDisposable disposable)
@@ -69,19 +81,23 @@ public partial class App : Application
         base.OnExit(e);
     }
 
-    private static void ConfigureServices(IServiceCollection services)
+    private static void ConfigureServices(IServiceCollection services, bool useMock = false)
     {
         // Core services
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<ICredentialService, CredentialService>();
         services.AddSingleton<IProfileService, ProfileService>();
-        services.AddSingleton<IClaudeApiService, ClaudeApiService>();
+        if (useMock)
+            services.AddSingleton<IClaudeApiService, MockClaudeApiService>();
+        else
+            services.AddSingleton<IClaudeApiService, ClaudeApiService>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<IUsageRefreshCoordinator, UsageRefreshCoordinator>();
         services.AddSingleton<ClaudeCodeSyncService>();
         services.AddSingleton<AutoStartSessionService>();
         services.AddSingleton<LaunchAtLoginService>();
         services.AddSingleton<LanguageService>();
+        services.AddSingleton<IUpdateService, UpdateService>();
 
         // Tray
         services.AddSingleton<TrayIconManager>();

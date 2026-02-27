@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace ClaudeTracker.Models;
 
+/// <summary>A user profile with independent credentials, usage data, and appearance settings.</summary>
 public class Profile
 {
     // Identity
@@ -84,6 +85,7 @@ public class Profile
     public bool HasUsageCredentials => HasClaudeAI || HasAPIConsole || !string.IsNullOrEmpty(CliCredentialsJSON);
 }
 
+/// <summary>Credential bundle for transferring authentication data to/from a profile.</summary>
 public class ProfileCredentials
 {
     public string? ClaudeSessionKey { get; set; }
