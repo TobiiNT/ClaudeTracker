@@ -77,7 +77,19 @@ public partial class FloatingUsageWindow : Window
     private void DragHandle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (!_isDocked && e.ButtonState == MouseButtonState.Pressed)
-            DragMove();
+        {
+            try
+            {
+                DragMove();
+            }
+            catch (InvalidOperationException)
+            {
+                // DragMove can throw if mouse button is released during the modal
+                // drag loop (common when VS debugger breaks mid-drag). Release
+                // capture to prevent the window from holding all mouse input.
+                ReleaseMouseCapture();
+            }
+        }
     }
 
     private void ToggleDocked()
