@@ -62,6 +62,11 @@ jobs:
       - name: Package portable ZIP
         run: Compress-Archive -Path ./publish-portable/* -DestinationPath ./ClaudeTracker-${{ github.ref_name }}-portable-win-x64.zip
 
+      - name: Create GitHub Release with auto-generated notes
+        run: gh release create ${{ github.ref_name }} --title "Claude Tracker ${{ github.ref_name }}" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Download previous releases (for delta packages)
         run: >
           vpk download github
@@ -86,6 +91,7 @@ jobs:
           --token ${{ secrets.GITHUB_TOKEN }}
           --outputDir ./releases
           --tag ${{ github.ref_name }}
+          --merge
 
       - name: Attach portable ZIP to release
         run: gh release upload ${{ github.ref_name }} ./ClaudeTracker-${{ github.ref_name }}-portable-win-x64.zip --clobber
