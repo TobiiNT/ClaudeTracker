@@ -21,7 +21,7 @@
             </Grid.RowDefinitions>
 
             <!-- Drag handle + close button -->
-            <Grid Grid.Row="0" Margin="0,0,0,8"
+            <Grid x:Name="DragHandle" Grid.Row="0" Margin="0,0,0,8"
                   MouseLeftButtonDown="DragHandle_MouseLeftButtonDown"
                   MouseMove="DragHandle_MouseMove"
                   MouseLeftButtonUp="DragHandle_MouseLeftButtonUp">

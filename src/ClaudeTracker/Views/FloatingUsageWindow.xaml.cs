@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using ClaudeTracker.Models;
+using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.ViewModels;
 
@@ -29,6 +30,10 @@ public partial class FloatingUsageWindow : Window
         CloseButton.Click += (_, _) => OnCloseRequested();
         SwitchToPopoverButton.Click += (_, _) => SwitchToPopoverRequested?.Invoke(this, EventArgs.Empty);
         DockButton.Click += (_, _) => ToggleDocked();
+
+        // Safety nets: cancel drag if focus is lost or window deactivates
+        Deactivated += (_, _) => CancelDrag();
+        DragHandle.LostMouseCapture += (_, _) => CancelDrag();
 
         _viewModel.PropertyChanged += (_, _) => UpdateUI();
         SizeChanged += (_, _) => UpdateProgressBars();
@@ -80,10 +85,9 @@ public partial class FloatingUsageWindow : Window
     {
         if (_isDocked) return;
 
-        // Manual drag — no DragMove(), no Win32 modal loop, no stuck capture.
         _isDragging = true;
         _dragOffset = e.GetPosition(this);
-        ((UIElement)sender).CaptureMouse();
+        DragHandle.CaptureMouse();
         e.Handled = true;
     }
 
@@ -91,19 +95,30 @@ public partial class FloatingUsageWindow : Window
     {
         if (!_isDragging) return;
 
-        // Position in screen coordinates via the drag handle element
-        var screenPos = ((UIElement)sender).PointToScreen(e.GetPosition((UIElement)sender));
+        // If mouse button was released without us noticing, cancel
+        if (e.LeftButton == MouseButtonState.Released)
+        {
+            CancelDrag();
+            return;
+        }
+
+        var screenPos = DragHandle.PointToScreen(e.GetPosition(DragHandle));
         Left = screenPos.X - _dragOffset.X;
         Top = screenPos.Y - _dragOffset.Y;
     }
 
     private void DragHandle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        if (!_isDragging) return;
-
-        _isDragging = false;
-        ((UIElement)sender).ReleaseMouseCapture();
+        CancelDrag();
         e.Handled = true;
+    }
+
+    private void CancelDrag([System.Runtime.CompilerServices.CallerMemberName] string? caller = null)
+    {
+        if (!_isDragging) return;
+        LoggingService.Instance.Log($"FloatingWidget: CancelDrag from {caller}, IsMouseCaptured={DragHandle.IsMouseCaptured}");
+        _isDragging = false;
+        DragHandle.ReleaseMouseCapture();
     }
 
     private void ToggleDocked()
