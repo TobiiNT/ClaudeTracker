@@ -1,0 +1,154 @@
+using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
+using MaterialDesignThemes.Wpf;
+using ClaudeTracker.Services;
+using ClaudeTracker.Services.Interfaces;
+using ClaudeTracker.ViewModels;
+using ClaudeTracker.TrayIcon;
+
+namespace ClaudeTracker;
+
+public partial class App : Application
+{
+    private Mutex? _mutex;
+    private IServiceProvider _services = null!;
+    private TrayIconManager? _trayIconManager;
+
+    public static IServiceProvider Services { get; private set; } = null!;
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        // Single-instance check
+        _mutex = new Mutex(true, Utilities.Constants.MutexName, out bool createdNew);
+        if (!createdNew)
+        {
+            MessageBox.Show("ClaudeTracker is already running.", "ClaudeTracker",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            Shutdown();
+            return;
+        }
+
+        base.OnStartup(e);
+
+        // Configure DI
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection);
+        _services = serviceCollection.BuildServiceProvider();
+        Services = _services;
+
+        // Initialize theme
+        InitializeTheme();
+
+        // Initialize tray icon
+        _trayIconManager = _services.GetRequiredService<TrayIconManager>();
+        _trayIconManager.Initialize();
+
+        // Start usage refresh
+        var refreshCoordinator = _services.GetRequiredService<IUsageRefreshCoordinator>();
+        refreshCoordinator.Start();
+
+        // Listen for system theme changes
+        SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
+
+        LoggingService.Instance.Log("ClaudeTracker started");
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
+
+        _trayIconManager?.Dispose();
+
+        if (_services is IDisposable disposable)
+            disposable.Dispose();
+
+        _mutex?.ReleaseMutex();
+        _mutex?.Dispose();
+
+        base.OnExit(e);
+    }
+
+    private static void ConfigureServices(IServiceCollection services)
+    {
+        // Core services
+        services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<ICredentialService, CredentialService>();
+        services.AddSingleton<IProfileService, ProfileService>();
+        services.AddSingleton<IClaudeApiService, ClaudeApiService>();
+        services.AddSingleton<INotificationService, NotificationService>();
+        services.AddSingleton<IUsageRefreshCoordinator, UsageRefreshCoordinator>();
+        services.AddSingleton<ClaudeCodeSyncService>();
+        services.AddSingleton<AutoStartSessionService>();
+        services.AddSingleton<LaunchAtLoginService>();
+        services.AddSingleton<LanguageService>();
+
+        // Tray
+        services.AddSingleton<TrayIconManager>();
+        services.AddSingleton<TrayIconRenderer>();
+
+        // ViewModels
+        services.AddSingleton<MainViewModel>();
+        services.AddSingleton<PopoverViewModel>();
+        services.AddTransient<SettingsViewModel>();
+        services.AddTransient<PersonalUsageViewModel>();
+        services.AddTransient<ApiBillingViewModel>();
+        services.AddTransient<CliAccountViewModel>();
+        services.AddTransient<AppearanceViewModel>();
+        services.AddTransient<GeneralSettingsViewModel>();
+        services.AddTransient<ProfilesViewModel>();
+
+        services.AddTransient<AboutViewModel>();
+
+        // HttpClient
+        services.AddHttpClient("Claude", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+        });
+    }
+
+    private void InitializeTheme()
+    {
+        var settingsService = _services.GetRequiredService<ISettingsService>();
+        ApplyTheme(settingsService.Settings.Theme);
+    }
+
+    public static void ApplyTheme(string theme)
+    {
+        bool isDark = theme == "dark" || (theme == "auto" && IsSystemDarkMode());
+
+        var paletteHelper = new PaletteHelper();
+        var mdTheme = paletteHelper.GetTheme();
+        mdTheme.SetBaseTheme(isDark ? BaseTheme.Dark : BaseTheme.Light);
+        paletteHelper.SetTheme(mdTheme);
+    }
+
+    private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+    {
+        if (e.Category == UserPreferenceCategory.General)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var settingsService = _services.GetRequiredService<ISettingsService>();
+                if (settingsService.Settings.Theme == "auto")
+                    InitializeTheme();
+            });
+        }
+    }
+
+    public static bool IsSystemDarkMode()
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            var value = key?.GetValue("AppsUseLightTheme");
+            return value is int intValue && intValue == 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}

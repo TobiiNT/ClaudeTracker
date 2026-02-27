@@ -1,0 +1,197 @@
+<Window x:Class="ClaudeTracker.Views.PopoverWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ResizeMode="NoResize"
+        SizeToContent="Height"
+        Width="330"
+        MaxHeight="560">
+
+    <Border Style="{StaticResource PopoverBorderStyle}" ClipToBounds="True">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- ═══ Content body ═══ -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                          Padding="16,10,16,6">
+                <StackPanel x:Name="UsageCardsPanel">
+
+                    <!-- No Credentials -->
+                    <Border x:Name="NoCredentialsPanel" Visibility="Collapsed"
+                            Style="{StaticResource UsageCardStyle}" Padding="20">
+                        <StackPanel HorizontalAlignment="Center">
+                            <materialDesign:PackIcon Kind="KeyVariant" Width="36" Height="36"
+                                                     HorizontalAlignment="Center" Margin="0,0,0,10"
+                                                     Foreground="#999" />
+                            <TextBlock Text="No credentials configured" TextAlignment="Center"
+                                       FontSize="15" FontWeight="SemiBold" Foreground="#555" />
+                            <TextBlock Text="Open Settings to get started" TextAlignment="Center"
+                                       FontSize="13" Margin="0,4,0,0" Foreground="#999" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Profile switcher (compact) -->
+                    <Grid Margin="0,4,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <ComboBox x:Name="ProfileCombo"
+                                      Style="{StaticResource MaterialDesignComboBox}"
+                                      FontSize="14" Height="30" Padding="4,2"
+                                      DisplayMemberPath="Name"
+                                      SelectedValuePath="Id"
+                                      BorderThickness="0"
+                                      Background="Transparent" />
+                            <StackPanel Orientation="Horizontal" Margin="4,2,0,0">
+                                <Ellipse x:Name="StatusDot" Width="7" Height="7" Margin="0,0,5,0" />
+                                <TextBlock x:Name="StatusText" FontSize="12" Foreground="#888" />
+                            </StackPanel>
+                        </StackPanel>
+                        <Button Grid.Column="1" x:Name="RefreshButton"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                Width="30" Height="30" Padding="0"
+                                VerticalAlignment="Top" Margin="0,1,0,0"
+                                ToolTip="Refresh">
+                            <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Foreground="#777" />
+                        </Button>
+                    </Grid>
+
+                    <!-- ── Session Usage (primary, larger) ── -->
+                    <Border x:Name="SessionCard" Style="{StaticResource UsageCardStyle}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <TextBlock Text="Session Usage" FontSize="13.5" FontWeight="Medium" Foreground="#666" />
+                                <TextBlock x:Name="SessionPercentText" HorizontalAlignment="Right"
+                                           FontSize="24" FontWeight="Bold" Foreground="#333" />
+                            </Grid>
+                            <Border Background="#15000000" CornerRadius="3" Height="7" ClipToBounds="True">
+                                <Border x:Name="SessionProgressFill" Background="#4CAF50"
+                                        CornerRadius="3" HorizontalAlignment="Left" Width="0" />
+                            </Border>
+                            <TextBlock x:Name="SessionResetText" FontSize="12" Margin="0,6,0,0" Foreground="#999" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ── Weekly Usage ── -->
+                    <Border x:Name="WeeklyCard" Style="{StaticResource UsageCardStyle}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="Weekly Usage" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                                <TextBlock x:Name="WeeklyPercentText" HorizontalAlignment="Right"
+                                           FontSize="17" FontWeight="SemiBold" Foreground="#444" />
+                            </Grid>
+                            <Border Background="#15000000" CornerRadius="3" Height="6" ClipToBounds="True">
+                                <Border x:Name="WeeklyProgressFill" Background="#4CAF50"
+                                        CornerRadius="3" HorizontalAlignment="Left" Width="0" />
+                            </Border>
+                            <TextBlock x:Name="WeeklyResetText" FontSize="12" Margin="0,5,0,0" Foreground="#999" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ── Model cards (side by side) ── -->
+                    <Grid x:Name="ModelCardsGrid" Margin="0,0,0,0" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Style="{StaticResource UsageCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="Opus" FontSize="12" FontWeight="Medium" Foreground="#888" />
+                                <TextBlock x:Name="OpusPercentText" FontSize="18" FontWeight="Bold"
+                                           Foreground="#444" Margin="0,2,0,4" />
+                                <Border Background="#15000000" CornerRadius="2" Height="5" ClipToBounds="True">
+                                    <Border x:Name="OpusProgressFill" Background="#7C4DFF"
+                                            CornerRadius="2" HorizontalAlignment="Left" Width="0" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="2" Style="{StaticResource UsageCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="Sonnet" FontSize="12" FontWeight="Medium" Foreground="#888" />
+                                <TextBlock x:Name="SonnetPercentText" FontSize="18" FontWeight="Bold"
+                                           Foreground="#444" Margin="0,2,0,4" />
+                                <Border Background="#15000000" CornerRadius="2" Height="5" ClipToBounds="True">
+                                    <Border x:Name="SonnetProgressFill" Background="#00BCD4"
+                                            CornerRadius="2" HorizontalAlignment="Left" Width="0" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- ── Cost/Overage ── -->
+                    <Border x:Name="CostCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
+                        <Grid>
+                            <TextBlock Text="Overage Cost" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                            <TextBlock x:Name="CostText" HorizontalAlignment="Right"
+                                       FontSize="16" FontWeight="SemiBold" Foreground="#444" />
+                        </Grid>
+                    </Border>
+
+                    <!-- ── API Credits ── -->
+                    <Border x:Name="ApiCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="API Credits" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                                <TextBlock x:Name="ApiPercentText" HorizontalAlignment="Right"
+                                           FontSize="17" FontWeight="SemiBold" Foreground="#444" />
+                            </Grid>
+                            <ProgressBar x:Name="ApiProgress" Style="{StaticResource UsageProgressBar}" />
+                            <Grid Margin="0,5,0,0">
+                                <TextBlock x:Name="ApiUsedText" FontSize="12" Foreground="#999" />
+                                <TextBlock x:Name="ApiRemainingText" HorizontalAlignment="Right"
+                                           FontSize="12" Foreground="#999" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Last Updated -->
+                    <TextBlock x:Name="LastUpdatedText" FontSize="11" HorizontalAlignment="Center"
+                               Margin="0,6,0,4" Foreground="#AAA" />
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ═══ Footer — Warp style: branding left, icon buttons right ═══ -->
+            <Border Grid.Row="2" Style="{StaticResource PopoverFooterStyle}">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Robot" Width="16" Height="16"
+                                                 Foreground="#888" Margin="0,0,6,0"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="ClaudeTracker" FontSize="13" FontWeight="Medium"
+                                   Foreground="#777" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="SettingsButton"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                Width="28" Height="28" Padding="0"
+                                ToolTip="Settings">
+                            <materialDesign:PackIcon Kind="CogOutline" Width="17" Height="17" Foreground="#777" />
+                        </Button>
+                        <Button x:Name="QuitButton"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                Width="28" Height="28" Padding="0"
+                                ToolTip="Quit">
+                            <materialDesign:PackIcon Kind="Power" Width="17" Height="17" Foreground="#999" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

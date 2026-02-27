@@ -1,0 +1,57 @@
+<Window x:Class="ClaudeTracker.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:settings="clr-namespace:ClaudeTracker.Views.Settings"
+        Title="ClaudeTracker Settings"
+        Width="720" Height="580"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="{DynamicResource MaterialDesign.Brush.Background}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" BorderThickness="0,0,0.5,0"
+                BorderBrush="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                Background="{DynamicResource MaterialDesign.Brush.Card.Background}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,8">
+                    <!-- Accounts Section -->
+                    <TextBlock Text="ACCOUNTS" Style="{StaticResource SectionHeader}" />
+
+                    <RadioButton x:Name="NavPersonal" Content="Connect"
+                                 Style="{StaticResource SidebarButton}" IsChecked="True"
+                                 GroupName="SettingsNav" />
+                    <RadioButton x:Name="NavProfiles" Content="Profiles"
+                                 Style="{StaticResource SidebarButton}"
+                                 GroupName="SettingsNav" />
+
+                    <!-- Preferences Section -->
+                    <TextBlock Text="PREFERENCES" Style="{StaticResource SectionHeader}" Margin="16,20,16,4" />
+
+                    <RadioButton x:Name="NavGeneral" Content="General"
+                                 Style="{StaticResource SidebarButton}"
+                                 GroupName="SettingsNav" />
+                    <RadioButton x:Name="NavAppearance" Content="Appearance"
+                                 Style="{StaticResource SidebarButton}"
+                                 GroupName="SettingsNav" />
+
+
+                    <!-- Other Section -->
+                    <TextBlock Text="OTHER" Style="{StaticResource SectionHeader}" Margin="16,20,16,4" />
+
+                    <RadioButton x:Name="NavAbout" Content="About"
+                                 Style="{StaticResource SidebarButton}"
+                                 GroupName="SettingsNav" />
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Content Area -->
+        <ContentControl Grid.Column="1" x:Name="ContentArea" Margin="0" />
+    </Grid>
+</Window>

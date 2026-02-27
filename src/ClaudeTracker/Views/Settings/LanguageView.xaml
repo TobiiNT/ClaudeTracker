@@ -1,0 +1,33 @@
+<UserControl x:Class="ClaudeTracker.Views.Settings.LanguageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
+        <StackPanel MaxWidth="480">
+            <TextBlock Text="Language" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="Choose your preferred language"
+                       FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                       Margin="0,0,0,20" />
+
+            <ItemsControl x:Name="LanguageList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton GroupName="Language"
+                                     Style="{StaticResource MaterialDesignChoiceChipOutlineRadioButton}"
+                                     Margin="0,4" Padding="16,8"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Left"
+                                     Tag="{Binding Code, Mode=OneWay}"
+                                     Click="Language_Click">
+                            <TextBlock Text="{Binding Name, Mode=OneWay}" FontSize="14" />
+                        </RadioButton>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="Changes take effect after restart."
+                       FontSize="11" Margin="0,16,0,0"
+                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

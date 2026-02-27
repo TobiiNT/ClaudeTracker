@@ -1,0 +1,37 @@
+<UserControl x:Class="ClaudeTracker.Views.Settings.AboutView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
+        <StackPanel MaxWidth="480" HorizontalAlignment="Center">
+            <!-- Logo area -->
+            <materialDesign:PackIcon Kind="Robot" Width="64" Height="64"
+                                     HorizontalAlignment="Center" Margin="0,20,0,12"
+                                     Foreground="{DynamicResource PrimaryHueMidBrush}" />
+
+            <TextBlock Text="ClaudeTracker" FontSize="24" FontWeight="Bold"
+                       HorizontalAlignment="Center" Margin="0,0,0,4" />
+            <TextBlock x:Name="VersionText" FontSize="13"
+                       HorizontalAlignment="Center" Margin="0,0,0,4"
+                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+            <TextBlock Text="Claude AI Usage Tracker for Windows" FontSize="13"
+                       HorizontalAlignment="Center" Margin="0,0,0,24"
+                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+
+            <!-- Actions -->
+            <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
+                <Button x:Name="GitHubButton" Content="View on GitHub"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,4" Width="200" />
+                <Button x:Name="LogsButton" Content="Open Logs Folder"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,4" Width="200" />
+            </StackPanel>
+
+            <!-- Credits -->
+            <TextBlock Text="Based on Claude Usage Tracker by hamed-elfayome"
+                       FontSize="11" HorizontalAlignment="Center"
+                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

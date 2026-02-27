@@ -1,0 +1,83 @@
+<UserControl x:Class="ClaudeTracker.Views.Settings.ProfilesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
+        <StackPanel MaxWidth="480">
+            <TextBlock Text="Profiles" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="Manage multiple Claude accounts"
+                       FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                       Margin="0,0,0,20" />
+
+            <!-- Create Profile -->
+            <Button x:Name="CreateButton"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Content="New Profile" Height="36" FontSize="12"
+                    HorizontalAlignment="Left" Margin="0,0,0,16">
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" Width="16" Height="16"
+                                                     VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="New Profile" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Profile List -->
+            <ItemsControl x:Name="ProfileList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource UsageCardStyle}" Padding="12" Margin="0,2"
+                                Loaded="ProfileRow_Loaded">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
+                                                   VerticalAlignment="Center" />
+                                        <Border x:Name="ActiveBadge" Visibility="Collapsed"
+                                                Background="#1B4CAF50" CornerRadius="4"
+                                                Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="Active" FontSize="10" FontWeight="SemiBold"
+                                                       Foreground="#4CAF50" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock FontSize="11"
+                                               Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="Created {0:d}">
+                                                <Binding Path="CreatedAt" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <Button Grid.Column="1" x:Name="ActivateButton" Content="Activate"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Tag="{Binding Id}"
+                                        Click="ActivateProfile_Click"
+                                        Height="30" FontSize="11" Margin="4,0" />
+
+                                <Button Grid.Column="2" x:Name="DeleteButton"
+                                        Style="{StaticResource MaterialDesignIconButton}"
+                                        Tag="{Binding Id}"
+                                        Click="DeleteProfile_Click"
+                                        Width="30" Height="30"
+                                        ToolTip="Delete profile">
+                                    <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" />
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter</value></resheader>
+
+  <!-- App -->
+  <data name="AppName" xml:space="preserve"><value>ClaudeTracker</value></data>
+  <data name="AppDescription" xml:space="preserve"><value>Claude AI Usage Tracker</value></data>
+
+  <!-- Common -->
+  <data name="OK" xml:space="preserve"><value>OK</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Quit" xml:space="preserve"><value>Quit</value></data>
+  <data name="Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="RefreshNow" xml:space="preserve"><value>Refresh Now</value></data>
+
+  <!-- Tray -->
+  <data name="TrayTooltip" xml:space="preserve"><value>ClaudeTracker - Claude Usage Monitor</value></data>
+  <data name="TrayQuit" xml:space="preserve"><value>Quit ClaudeTracker</value></data>
+
+  <!-- Usage -->
+  <data name="SessionUsage" xml:space="preserve"><value>Session Usage</value></data>
+  <data name="WeeklyUsage" xml:space="preserve"><value>Weekly Usage</value></data>
+  <data name="OpusUsage" xml:space="preserve"><value>Opus</value></data>
+  <data name="SonnetUsage" xml:space="preserve"><value>Sonnet</value></data>
+  <data name="OverageCost" xml:space="preserve"><value>Overage Cost</value></data>
+  <data name="APICredits" xml:space="preserve"><value>API Credits</value></data>
+  <data name="Resetting" xml:space="preserve"><value>Resetting...</value></data>
+  <data name="ResetsIn" xml:space="preserve"><value>Resets {0}</value></data>
+  <data name="NoCredentials" xml:space="preserve"><value>No credentials configured</value></data>
+  <data name="OpenSettingsHint" xml:space="preserve"><value>Open Settings to get started</value></data>
+
+  <!-- Settings Tabs -->
+  <data name="PersonalUsage" xml:space="preserve"><value>Personal Usage</value></data>
+  <data name="APIBilling" xml:space="preserve"><value>API Billing</value></data>
+  <data name="CLIAccount" xml:space="preserve"><value>CLI Account</value></data>
+  <data name="Appearance" xml:space="preserve"><value>Appearance</value></data>
+  <data name="General" xml:space="preserve"><value>General</value></data>
+  <data name="Profiles" xml:space="preserve"><value>Profiles</value></data>
+  <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="About" xml:space="preserve"><value>About</value></data>
+
+  <!-- Icon Styles -->
+  <data name="IconStyleBattery" xml:space="preserve"><value>Battery</value></data>
+  <data name="IconStyleProgressBar" xml:space="preserve"><value>Progress Bar</value></data>
+  <data name="IconStylePercentage" xml:space="preserve"><value>Percentage</value></data>
+  <data name="IconStyleRing" xml:space="preserve"><value>Ring</value></data>
+  <data name="IconStyleCompact" xml:space="preserve"><value>Compact</value></data>
+
+  <!-- Notifications -->
+  <data name="UsageAlert" xml:space="preserve"><value>Claude Usage Alert</value></data>
+  <data name="SessionAutoStarted" xml:space="preserve"><value>Session Auto-Started</value></data>
+  <data name="UsageAtPercent" xml:space="preserve"><value>Session usage at {0}% ({1}% remaining)</value></data>
+
+  <!-- Status -->
+  <data name="StatusSafe" xml:space="preserve"><value>Normal usage</value></data>
+  <data name="StatusModerate" xml:space="preserve"><value>Moderate usage</value></data>
+  <data name="StatusCritical" xml:space="preserve"><value>High usage</value></data>
+
+  <!-- Errors -->
+  <data name="ConnectionFailed" xml:space="preserve"><value>Connection failed</value></data>
+  <data name="InvalidSessionKey" xml:space="preserve"><value>Invalid session key</value></data>
+  <data name="Unauthorized" xml:space="preserve"><value>Unauthorized. Your session key may have expired.</value></data>
+  <data name="RateLimited" xml:space="preserve"><value>Rate limited. Please wait a few minutes.</value></data>
+  <data name="ServerError" xml:space="preserve"><value>Server error. Please try again later.</value></data>
+</root>
