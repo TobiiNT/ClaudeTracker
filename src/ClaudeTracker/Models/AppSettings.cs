@@ -31,4 +31,16 @@ public class AppSettings
 
     [JsonPropertyName("theme")]
     public string Theme { get; set; } = "auto";
+
+    [JsonPropertyName("isFloatingModeEnabled")]
+    public bool IsFloatingModeEnabled { get; set; }
+
+    [JsonPropertyName("floatingWindowLeft")]
+    public double? FloatingWindowLeft { get; set; }
+
+    [JsonPropertyName("floatingWindowTop")]
+    public double? FloatingWindowTop { get; set; }
+
+    [JsonPropertyName("isFloatingWidgetDocked")]
+    public bool IsFloatingWidgetDocked { get; set; }
 }

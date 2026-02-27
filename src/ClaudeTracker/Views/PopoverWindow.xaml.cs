@@ -10,6 +10,8 @@ public partial class PopoverWindow : Window
 {
     private readonly PopoverViewModel _viewModel;
 
+    public event EventHandler? SwitchToWidgetRequested;
+
     public PopoverWindow()
     {
         InitializeComponent();
@@ -18,6 +20,11 @@ public partial class PopoverWindow : Window
         DataContext = _viewModel;
 
         RefreshButton.Click += (_, _) => _viewModel.RefreshCommand.Execute(null);
+        SwitchToWidgetButton.Click += (_, _) =>
+        {
+            Hide();
+            SwitchToWidgetRequested?.Invoke(this, EventArgs.Empty);
+        };
         SettingsButton.Click += (_, _) =>
         {
             Hide();

@@ -50,6 +50,8 @@ public static class Constants
         public const double SettingsHeight = 580;
         public const double PopoverWidth = 340;
         public const double PopoverMaxHeight = 600;
+        public const double FloatingWidth = 280;
+        public const double FloatingHeight = 180;
     }
 
     public static class CredentialManager
@@ -72,6 +74,8 @@ public static class Constants
 
     public static string LogFilePath =>
         Path.Combine(AppDataPath, "logs", "claudetracker-.log");
+
+    public const string DisplayName = "Claude Tracker";
 
     public const string MutexName = "ClaudeTracker-SingleInstance";
 

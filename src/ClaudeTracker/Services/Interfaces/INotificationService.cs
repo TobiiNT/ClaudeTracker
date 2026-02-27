@@ -9,4 +9,6 @@ public interface INotificationService
     void CheckAndNotify(Profile profile, ClaudeUsage usage);
     /// <summary>Sends a Windows toast notification with the given title and message.</summary>
     void SendNotification(string title, string message);
+    /// <summary>Raised when the user clicks on a notification popup.</summary>
+    event EventHandler? NotificationClicked;
 }

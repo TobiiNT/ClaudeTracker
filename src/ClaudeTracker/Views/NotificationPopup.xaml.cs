@@ -88,6 +88,14 @@ public partial class NotificationPopup : Window
         BeginAnimation(TopProperty, slideAnim);
     }
 
+    public event EventHandler? NotificationClicked;
+
+    private void Body_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        NotificationClicked?.Invoke(this, EventArgs.Empty);
+        FadeOut();
+    }
+
     private void Close_Click(object sender, RoutedEventArgs e) => FadeOut();
 
     public enum NotificationLevel

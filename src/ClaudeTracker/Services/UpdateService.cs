@@ -71,7 +71,7 @@ public class UpdateService : IUpdateService, IDisposable
 
                 _notificationService.SendNotification(
                     "Update Available",
-                    $"ClaudeTracker v{AvailableVersion} is available. Open Settings > About to update.");
+                    $"Claude Tracker v{AvailableVersion} is available. Open Settings > About to update.");
             }
             else
             {

@@ -23,7 +23,7 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter</value></resheader>
 
   <!-- App -->
-  <data name="AppName" xml:space="preserve"><value>ClaudeTracker</value></data>
+  <data name="AppName" xml:space="preserve"><value>Claude Tracker</value></data>
   <data name="AppDescription" xml:space="preserve"><value>Claude AI Usage Tracker</value></data>
 
   <!-- Common -->
@@ -37,8 +37,8 @@
   <data name="RefreshNow" xml:space="preserve"><value>Refresh Now</value></data>
 
   <!-- Tray -->
-  <data name="TrayTooltip" xml:space="preserve"><value>ClaudeTracker - Claude Usage Monitor</value></data>
-  <data name="TrayQuit" xml:space="preserve"><value>Quit ClaudeTracker</value></data>
+  <data name="TrayTooltip" xml:space="preserve"><value>Claude Tracker - Claude Usage Monitor</value></data>
+  <data name="TrayQuit" xml:space="preserve"><value>Quit Claude Tracker</value></data>
 
   <!-- Usage -->
   <data name="SessionUsage" xml:space="preserve"><value>Session Usage</value></data>
