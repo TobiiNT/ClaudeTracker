@@ -40,4 +40,11 @@ public class LoggingService
         _logger.Debug("API Response: {Endpoint} -> {StatusCode}", endpoint, statusCode);
     public void LogAPIError(string endpoint, Exception error) =>
         _logger.Error(error, "API Error: {Endpoint}", endpoint);
+
+    public void LogFatal(string message, Exception ex) => _logger.Fatal(ex, message);
+
+    /// <summary>
+    /// Flush all pending log entries to disk. Call before process exit on crash.
+    /// </summary>
+    public void Flush() => (_logger as IDisposable)?.Dispose();
 }

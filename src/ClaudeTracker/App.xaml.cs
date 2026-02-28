@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using MaterialDesignThemes.Wpf;
@@ -20,6 +21,11 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        // Global exception handlers — log crashes before the process dies
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+
         // Single-instance check
         _mutex = new Mutex(true, Utilities.Constants.MutexName, out bool createdNew);
         if (!createdNew)
@@ -79,6 +85,33 @@ public partial class App : Application
         _mutex?.Dispose();
 
         base.OnExit(e);
+    }
+
+    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        LoggingService.Instance.LogFatal("Unhandled UI thread exception", e.Exception);
+        LoggingService.Instance.Flush();
+    }
+
+    private void OnAppDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        if (e.ExceptionObject is Exception ex)
+        {
+            LoggingService.Instance.LogFatal("Unhandled AppDomain exception (terminating: {IsTerminating})"
+                .Replace("{IsTerminating}", e.IsTerminating.ToString()), ex);
+        }
+        else
+        {
+            LoggingService.Instance.LogError($"Unhandled non-CLR exception: {e.ExceptionObject}");
+        }
+        LoggingService.Instance.Flush();
+    }
+
+    private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        LoggingService.Instance.LogFatal("Unobserved task exception", e.Exception);
+        LoggingService.Instance.Flush();
+        e.SetObserved(); // Prevent process termination from unobserved tasks
     }
 
     private static void ConfigureServices(IServiceCollection services, bool useMock = false)
