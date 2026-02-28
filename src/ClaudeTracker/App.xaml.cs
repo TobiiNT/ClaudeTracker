@@ -68,7 +68,7 @@ public partial class App : Application
         // Listen for system theme changes
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
 
-        LoggingService.Instance.Log("ClaudeTracker started");
+        LoggingService.Instance.Log($"ClaudeTracker started (v{Utilities.Constants.AppVersion})");
     }
 
     protected override void OnExit(ExitEventArgs e)

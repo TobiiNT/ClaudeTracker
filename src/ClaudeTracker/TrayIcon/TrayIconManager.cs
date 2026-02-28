@@ -115,7 +115,9 @@ public class TrayIconManager : IDisposable
 
             Application.Current.Dispatcher.Invoke(() =>
             {
+                var oldIcon = _trayIcon.Icon;
                 _trayIcon.Icon = icon;
+                oldIcon?.Dispose();
 
                 _tooltipText = usage != null
                     ? $"Claude Usage: {FormatterHelper.FormatPercentage(percentage)} used\nResets: {FormatterHelper.FormatTimeRemaining(usage.SessionResetTime)}"

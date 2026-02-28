@@ -41,6 +41,9 @@ jobs:
       - name: Test
         run: dotnet test --configuration Release --verbosity normal
 
+      - name: Clean build artifacts
+        run: dotnet clean --configuration Release
+
       - name: Publish (for Velopack installer)
         run: >
           dotnet publish src/ClaudeTracker/ClaudeTracker.csproj

@@ -55,11 +55,18 @@ public class TrayIconRenderer
         using var image = surface.Snapshot();
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);
         using var stream = new System.IO.MemoryStream(data.ToArray());
+        using var bitmap = new System.Drawing.Bitmap(stream);
 
-        var bitmap = new System.Drawing.Bitmap(stream);
         var hIcon = bitmap.GetHicon();
-        var icon = System.Drawing.Icon.FromHandle(hIcon);
-        return (System.Drawing.Icon)icon.Clone();
+        try
+        {
+            using var tempIcon = System.Drawing.Icon.FromHandle(hIcon);
+            return (System.Drawing.Icon)tempIcon.Clone();
+        }
+        finally
+        {
+            DestroyIcon(hIcon);
+        }
     }
 
     private void DrawBattery(SKCanvas canvas, int size, double percentage, SKColor fillColor, SKColor outlineColor)
@@ -301,4 +308,7 @@ public class TrayIconRenderer
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern uint GetDpiForSystem();
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool DestroyIcon(IntPtr hIcon);
 }

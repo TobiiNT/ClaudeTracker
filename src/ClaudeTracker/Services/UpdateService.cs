@@ -32,6 +32,12 @@ public class UpdateService : IUpdateService, IDisposable
             var source = new GithubSource(Constants.GitHub.RepoUrl, null, false);
             _updateManager = new UpdateManager(source);
             IsInstalled = _updateManager.IsInstalled;
+
+            if (IsInstalled)
+            {
+                var veloVer = _updateManager.CurrentVersion;
+                LoggingService.Instance.Log($"Velopack installed version: {veloVer}, Assembly version: {Constants.AppVersion}");
+            }
         }
         catch (Exception ex)
         {
