@@ -1,3 +1,4 @@
+using System.Windows;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.Utilities;
 using Velopack;
@@ -114,6 +115,14 @@ public class UpdateService : IUpdateService, IDisposable
 
             StatusText = "Restarting...";
             RaiseStateChanged();
+
+            // Release the single-instance mutex before Velopack restarts,
+            // otherwise the new process hits "already running" and exits.
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (Application.Current is App app)
+                    app.ReleaseSingleInstanceMutex();
+            });
 
             _updateManager.ApplyUpdatesAndRestart(_updateInfo.TargetFullRelease);
         }

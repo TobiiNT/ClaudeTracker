@@ -71,6 +71,14 @@ public partial class App : Application
         LoggingService.Instance.Log($"ClaudeTracker started (v{Utilities.Constants.AppVersion})");
     }
 
+    /// <summary>Release the single-instance mutex before Velopack restarts the app.</summary>
+    public void ReleaseSingleInstanceMutex()
+    {
+        _mutex?.ReleaseMutex();
+        _mutex?.Dispose();
+        _mutex = null;
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
         SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
@@ -81,8 +89,7 @@ public partial class App : Application
         if (_services is IDisposable disposable)
             disposable.Dispose();
 
-        _mutex?.ReleaseMutex();
-        _mutex?.Dispose();
+        ReleaseSingleInstanceMutex();
 
         base.OnExit(e);
     }
