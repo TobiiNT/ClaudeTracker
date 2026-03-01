@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ClaudeTracker.Models;
+using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 
 namespace ClaudeTracker.ViewModels;
@@ -20,6 +21,7 @@ public partial class ProfilesViewModel : ObservableObject
     {
         _profileService = profileService;
         _profileService.ProfilesChanged += (_, _) => RefreshList();
+        _profileService.ActiveProfileChanged += (_, _) => RefreshList();
         RefreshList();
     }
 
@@ -50,8 +52,11 @@ public partial class ProfilesViewModel : ObservableObject
 
     private void RefreshList()
     {
+        var source = _profileService.Profiles;
+        LoggingService.Instance.Log(
+            $"ProfilesVM.RefreshList: source={source.Count}, collection={Profiles.Count}");
         Profiles.Clear();
-        foreach (var p in _profileService.Profiles)
+        foreach (var p in source)
             Profiles.Add(p);
         OnPropertyChanged(nameof(ActiveProfileId));
     }

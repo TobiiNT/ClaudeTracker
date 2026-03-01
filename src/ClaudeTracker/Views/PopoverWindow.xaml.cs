@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
 using ClaudeTracker.Models;
+using ClaudeTracker.Services;
 using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views;
@@ -9,6 +10,7 @@ namespace ClaudeTracker.Views;
 public partial class PopoverWindow : Window
 {
     private readonly PopoverViewModel _viewModel;
+    private bool _suppressSelectionChanged;
 
     public event EventHandler? SwitchToWidgetRequested;
 
@@ -35,12 +37,22 @@ public partial class PopoverWindow : Window
         ProfileCombo.ItemsSource = _viewModel.Profiles;
         ProfileCombo.SelectionChanged += (_, _) =>
         {
-            if (ProfileCombo.SelectedValue is Guid id)
+            if (!_suppressSelectionChanged && ProfileCombo.SelectedValue is Guid id)
                 _viewModel.SwitchProfileCommand.Execute(id);
         };
 
         _viewModel.PropertyChanged += (_, _) => UpdateUI();
-        SizeChanged += (_, _) => UpdateProgressBars();
+        SizeChanged += (_, e) =>
+        {
+            UpdateProgressBars();
+            if (IsVisible && e.HeightChanged)
+            {
+                var workArea = SystemParameters.WorkArea;
+                var bottom = Top + e.PreviousSize.Height;
+                Top = bottom - ActualHeight;
+                Top = Math.Clamp(Top, workArea.Top + 4, workArea.Bottom - ActualHeight - 4);
+            }
+        };
         UpdateUI();
     }
 
@@ -48,13 +60,14 @@ public partial class PopoverWindow : Window
     {
         Dispatcher.Invoke(() =>
         {
+            _suppressSelectionChanged = true;
             ProfileCombo.SelectedValue =
                 App.Services.GetRequiredService<Services.Interfaces.IProfileService>().ActiveProfile?.Id;
+            _suppressSelectionChanged = false;
 
-            var hasCredentials = _viewModel.HasCredentials;
-            NoCredentialsPanel.Visibility = hasCredentials ? Visibility.Collapsed : Visibility.Visible;
-            SessionCard.Visibility = hasCredentials ? Visibility.Visible : Visibility.Collapsed;
-            WeeklyCard.Visibility = hasCredentials ? Visibility.Visible : Visibility.Collapsed;
+            NoCredentialsPanel.Visibility = _viewModel.HasCredentials ? Visibility.Collapsed : Visibility.Visible;
+            SessionCard.Visibility = _viewModel.HasClaudeUsage ? Visibility.Visible : Visibility.Collapsed;
+            WeeklyCard.Visibility = _viewModel.HasClaudeUsage ? Visibility.Visible : Visibility.Collapsed;
 
             // Session
             SessionPercentText.Text = _viewModel.SessionPercentageText;
