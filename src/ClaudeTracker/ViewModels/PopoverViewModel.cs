@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ClaudeTracker.Models;
+using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.Utilities;
 
@@ -33,6 +34,7 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private string _lastUpdatedText = "";
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private bool _hasCredentials;
+    [ObservableProperty] private bool _hasClaudeUsage;
     [ObservableProperty] private UsageStatusLevel _sessionStatus = UsageStatusLevel.Safe;
     [ObservableProperty] private UsageStatusLevel _weeklyStatus = UsageStatusLevel.Safe;
     public ObservableCollection<Profile> Profiles { get; } = new();
@@ -44,7 +46,7 @@ public partial class PopoverViewModel : ObservableObject
         _profileService = profileService;
         _refreshCoordinator = refreshCoordinator;
 
-        _profileService.ActiveProfileChanged += (_, _) => RefreshData();
+        _profileService.ActiveProfileChanged += (_, _) => { UpdateProfilesList(); RefreshData(); };
         _profileService.ProfilesChanged += (_, _) => UpdateProfilesList();
         _refreshCoordinator.RefreshStarted += (_, _) => IsRefreshing = true;
         _refreshCoordinator.RefreshCompleted += (_, _) =>
@@ -73,6 +75,7 @@ public partial class PopoverViewModel : ObservableObject
         HasCredentials = profile.HasUsageCredentials;
 
         var usage = profile.ClaudeUsage;
+        HasClaudeUsage = usage != null;
         if (usage != null)
         {
             var showRemaining = profile.IconConfig.ShowRemainingPercentage;
@@ -104,6 +107,18 @@ public partial class PopoverViewModel : ObservableObject
 
             LastUpdatedText = $"Updated {FormatterHelper.FormatTimeAgo(usage.LastUpdated)}";
         }
+        else
+        {
+            SessionPercentage = 0;
+            SessionPercentageText = "\u2014";
+            SessionResetText = "";
+            WeeklyPercentage = 0;
+            WeeklyPercentageText = "\u2014";
+            WeeklyResetText = "";
+            HasModelData = false;
+            HasCostData = false;
+            LastUpdatedText = "";
+        }
 
         var apiUsage = profile.ApiUsage;
         HasApiUsage = apiUsage != null;
@@ -117,8 +132,11 @@ public partial class PopoverViewModel : ObservableObject
 
     private void UpdateProfilesList()
     {
+        var source = _profileService.Profiles;
+        LoggingService.Instance.Log(
+            $"PopoverVM.UpdateProfilesList: source={source.Count}, collection={Profiles.Count}");
         Profiles.Clear();
-        foreach (var p in _profileService.Profiles)
+        foreach (var p in source)
             Profiles.Add(p);
     }
 }
