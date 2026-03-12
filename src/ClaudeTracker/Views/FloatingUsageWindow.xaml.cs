@@ -134,7 +134,7 @@ public partial class FloatingUsageWindow : Window
         DockIcon.Kind = _isDocked
             ? MaterialDesignThemes.Wpf.PackIconKind.Pin
             : MaterialDesignThemes.Wpf.PackIconKind.PinOutline;
-        DockButton.ToolTip = _isDocked ? "Unlock position" : "Lock position";
+        DockButton.ToolTip = _isDocked ? "Undock" : "Dock";
     }
 
     private void OnLocationChanged(object? sender, EventArgs e)
