@@ -54,7 +54,13 @@ public partial class PopoverViewModel : ObservableObject
             IsRefreshing = false;
             RefreshData();
         };
-        _refreshCoordinator.RefreshFailed += (_, _) => IsRefreshing = false;
+        _refreshCoordinator.RefreshFailed += (_, error) =>
+        {
+            IsRefreshing = false;
+            LastUpdatedText = error.Contains("Rate limited", StringComparison.OrdinalIgnoreCase)
+                ? "Rate limited — try again later"
+                : "Update failed";
+        };
 
         UpdateProfilesList();
         RefreshData();

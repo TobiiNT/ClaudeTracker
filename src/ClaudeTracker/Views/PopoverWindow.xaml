@@ -166,7 +166,7 @@
             </ScrollViewer>
 
             <!-- ═══ Footer — Warp style: branding left, icon buttons right ═══ -->
-            <Border Grid.Row="2" Style="{StaticResource PopoverFooterStyle}">
+            <Border Grid.Row="2" Style="{StaticResource PopoverFooterStyle}" MouseLeftButtonDown="Header_MouseLeftButtonDown">
                 <Grid>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="Robot" Width="16" Height="16"
@@ -176,12 +176,12 @@
                                    Foreground="#777" VerticalAlignment="Center" />
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Cursor="Arrow">
                         <Button x:Name="SwitchToWidgetButton"
                                 Style="{StaticResource MaterialDesignIconButton}"
                                 Width="28" Height="28" Padding="0"
                                 ToolTip="Switch to floating widget">
-                            <materialDesign:PackIcon Kind="WidgetsOutline" Width="17" Height="17" Foreground="#777" />
+                            <materialDesign:PackIcon Kind="OpenInNew" Width="17" Height="17" Foreground="#777" />
                         </Button>
                         <Button x:Name="SettingsButton"
                                 Style="{StaticResource MaterialDesignIconButton}"

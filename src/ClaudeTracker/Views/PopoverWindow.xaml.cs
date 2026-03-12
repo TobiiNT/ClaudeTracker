@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
 using ClaudeTracker.Models;
@@ -42,6 +43,7 @@ public partial class PopoverWindow : Window
         };
 
         _viewModel.PropertyChanged += (_, _) => UpdateUI();
+
         SizeChanged += (_, e) =>
         {
             UpdateProgressBars();
@@ -121,6 +123,12 @@ public partial class PopoverWindow : Window
         {
             fill.Width = parent.ActualWidth * Math.Clamp(percentage / 100.0, 0, 1);
         }
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ButtonState == MouseButtonState.Pressed)
+            DragMove();
     }
 
     private static SolidColorBrush GetStatusBrush(UsageStatusLevel status)

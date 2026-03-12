@@ -11,7 +11,10 @@
         SizeToContent="Height"
         Width="280">
 
-    <Border Style="{StaticResource FloatingBorderStyle}" Padding="14,10,14,12">
+    <Border Style="{StaticResource FloatingBorderStyle}" Padding="14,10,14,12" 
+            MouseLeftButtonDown="DragHandle_MouseLeftButtonDown"
+            MouseMove="DragHandle_MouseMove"
+            MouseLeftButtonUp="DragHandle_MouseLeftButtonUp">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -22,9 +25,7 @@
 
             <!-- Drag handle + close button -->
             <Grid x:Name="DragHandle" Grid.Row="0" Margin="0,0,0,8"
-                  MouseLeftButtonDown="DragHandle_MouseLeftButtonDown"
-                  MouseMove="DragHandle_MouseMove"
-                  MouseLeftButtonUp="DragHandle_MouseLeftButtonUp">
+                  Cursor="SizeAll">
                 <Grid.Background>
                     <SolidColorBrush Color="Transparent" />
                 </Grid.Background>
@@ -35,11 +36,11 @@
                     <TextBlock Text="Claude Tracker" FontSize="11.5" FontWeight="Medium"
                                Foreground="#888" VerticalAlignment="Center" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Cursor="Arrow">
                     <Button x:Name="SwitchToPopoverButton" VerticalAlignment="Center"
                             Style="{StaticResource MaterialDesignIconButton}"
                             Width="22" Height="22" Padding="0"
-                            ToolTip="Switch to popover">
+                            ToolTip="Extend">
                         <materialDesign:PackIcon Kind="ArrowExpand" Width="13" Height="13" Foreground="#999" />
                     </Button>
                     <Button x:Name="DockButton" VerticalAlignment="Center"
