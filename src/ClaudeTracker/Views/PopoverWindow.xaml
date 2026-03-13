@@ -75,11 +75,19 @@
                                 <TextBlock x:Name="SessionPercentText" HorizontalAlignment="Right"
                                            FontSize="24" FontWeight="Bold" Foreground="#333" />
                             </Grid>
-                            <Border Background="#15000000" CornerRadius="3" Height="7" ClipToBounds="True">
-                                <Border x:Name="SessionProgressFill" Background="#4CAF50"
-                                        CornerRadius="3" HorizontalAlignment="Left" Width="0" />
-                            </Border>
+                            <Grid Height="7">
+                                <Border Background="#15000000" CornerRadius="3" ClipToBounds="True">
+                                    <Border x:Name="SessionProgressFill" Background="#4CAF50"
+                                            CornerRadius="3" HorizontalAlignment="Left" Width="0" />
+                                </Border>
+                                <Border x:Name="SessionTimeMarker" Width="2" HorizontalAlignment="Left"
+                                        CornerRadius="1" Background="#80FFFFFF" Visibility="Collapsed" />
+                            </Grid>
                             <TextBlock x:Name="SessionResetText" FontSize="12" Margin="0,6,0,0" Foreground="#999" />
+                            <StackPanel x:Name="SessionPacePanel" Orientation="Horizontal" Margin="0,4,0,0" Visibility="Collapsed">
+                                <Ellipse x:Name="SessionPaceDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock x:Name="SessionPaceText" FontSize="11" VerticalAlignment="Center" />
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 
@@ -91,11 +99,19 @@
                                 <TextBlock x:Name="WeeklyPercentText" HorizontalAlignment="Right"
                                            FontSize="17" FontWeight="SemiBold" Foreground="#444" />
                             </Grid>
-                            <Border Background="#15000000" CornerRadius="3" Height="6" ClipToBounds="True">
-                                <Border x:Name="WeeklyProgressFill" Background="#4CAF50"
-                                        CornerRadius="3" HorizontalAlignment="Left" Width="0" />
-                            </Border>
+                            <Grid Height="6">
+                                <Border Background="#15000000" CornerRadius="3" ClipToBounds="True">
+                                    <Border x:Name="WeeklyProgressFill" Background="#4CAF50"
+                                            CornerRadius="3" HorizontalAlignment="Left" Width="0" />
+                                </Border>
+                                <Border x:Name="WeeklyTimeMarker" Width="2" HorizontalAlignment="Left"
+                                        CornerRadius="1" Background="#80FFFFFF" Visibility="Collapsed" />
+                            </Grid>
                             <TextBlock x:Name="WeeklyResetText" FontSize="12" Margin="0,5,0,0" Foreground="#999" />
+                            <StackPanel x:Name="WeeklyPacePanel" Orientation="Horizontal" Margin="0,4,0,0" Visibility="Collapsed">
+                                <Ellipse x:Name="WeeklyPaceDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock x:Name="WeeklyPaceText" FontSize="11" VerticalAlignment="Center" />
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 

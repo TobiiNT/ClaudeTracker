@@ -76,10 +76,36 @@ public partial class PopoverWindow : Window
             SessionResetText.Text = _viewModel.SessionResetText;
             SessionProgressFill.Background = GetStatusBrush(_viewModel.SessionStatus);
 
+            // Session pace
+            if (!string.IsNullOrEmpty(_viewModel.SessionPaceLabel))
+            {
+                SessionPacePanel.Visibility = Visibility.Visible;
+                SessionPaceDot.Fill = BrushFromHex(_viewModel.SessionPaceColorHex);
+                SessionPaceText.Text = _viewModel.SessionPaceLabel;
+                SessionPaceText.Foreground = BrushFromHex(_viewModel.SessionPaceColorHex);
+            }
+            else
+            {
+                SessionPacePanel.Visibility = Visibility.Collapsed;
+            }
+
             // Weekly
             WeeklyPercentText.Text = _viewModel.WeeklyPercentageText;
             WeeklyResetText.Text = _viewModel.WeeklyResetText;
             WeeklyProgressFill.Background = GetStatusBrush(_viewModel.WeeklyStatus);
+
+            // Weekly pace
+            if (!string.IsNullOrEmpty(_viewModel.WeeklyPaceLabel))
+            {
+                WeeklyPacePanel.Visibility = Visibility.Visible;
+                WeeklyPaceDot.Fill = BrushFromHex(_viewModel.WeeklyPaceColorHex);
+                WeeklyPaceText.Text = _viewModel.WeeklyPaceLabel;
+                WeeklyPaceText.Foreground = BrushFromHex(_viewModel.WeeklyPaceColorHex);
+            }
+            else
+            {
+                WeeklyPacePanel.Visibility = Visibility.Collapsed;
+            }
 
             // Model-specific
             OpusPercentText.Text = _viewModel.OpusPercentageText;
@@ -115,6 +141,9 @@ public partial class PopoverWindow : Window
         SetProgressWidth(WeeklyProgressFill, _viewModel.WeeklyPercentage);
         SetProgressWidth(OpusProgressFill, _viewModel.OpusPercentage);
         SetProgressWidth(SonnetProgressFill, _viewModel.SonnetPercentage);
+
+        SetTimeMarker(SessionTimeMarker, SessionProgressFill, _viewModel.SessionElapsedFraction);
+        SetTimeMarker(WeeklyTimeMarker, WeeklyProgressFill, _viewModel.WeeklyElapsedFraction);
     }
 
     private static void SetProgressWidth(FrameworkElement fill, double percentage)
@@ -129,6 +158,35 @@ public partial class PopoverWindow : Window
     {
         if (e.ButtonState == MouseButtonState.Pressed)
             DragMove();
+    }
+
+    private static void SetTimeMarker(FrameworkElement marker, FrameworkElement progressFill, double elapsedFraction)
+    {
+        if (elapsedFraction > 0.03 && elapsedFraction < 1.0
+            && progressFill.Parent is FrameworkElement parent
+            && parent.Parent is FrameworkElement grandParent
+            && grandParent.ActualWidth > 0)
+        {
+            marker.Visibility = Visibility.Visible;
+            marker.Margin = new Thickness(grandParent.ActualWidth * elapsedFraction - 1, 0, 0, 0);
+        }
+        else
+        {
+            marker.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private static SolidColorBrush BrushFromHex(string hex)
+    {
+        hex = hex.TrimStart('#');
+        if (hex.Length == 6 &&
+            byte.TryParse(hex[..2], System.Globalization.NumberStyles.HexNumber, null, out var r) &&
+            byte.TryParse(hex[2..4], System.Globalization.NumberStyles.HexNumber, null, out var g) &&
+            byte.TryParse(hex[4..6], System.Globalization.NumberStyles.HexNumber, null, out var b))
+        {
+            return new SolidColorBrush(Color.FromRgb(r, g, b));
+        }
+        return new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
     }
 
     private static SolidColorBrush GetStatusBrush(UsageStatusLevel status)

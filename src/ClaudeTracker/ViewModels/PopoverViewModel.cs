@@ -37,6 +37,17 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private bool _hasClaudeUsage;
     [ObservableProperty] private UsageStatusLevel _sessionStatus = UsageStatusLevel.Safe;
     [ObservableProperty] private UsageStatusLevel _weeklyStatus = UsageStatusLevel.Safe;
+
+    [ObservableProperty] private PaceStatus? _sessionPaceStatus;
+    [ObservableProperty] private string _sessionPaceLabel = "";
+    [ObservableProperty] private string _sessionPaceColorHex = "#4CAF50";
+    [ObservableProperty] private double _sessionElapsedFraction;
+
+    [ObservableProperty] private PaceStatus? _weeklyPaceStatus;
+    [ObservableProperty] private string _weeklyPaceLabel = "";
+    [ObservableProperty] private string _weeklyPaceColorHex = "#4CAF50";
+    [ObservableProperty] private double _weeklyElapsedFraction;
+
     public ObservableCollection<Profile> Profiles { get; } = new();
 
     public PopoverViewModel(
@@ -98,6 +109,33 @@ public partial class PopoverViewModel : ObservableObject
             WeeklyResetText = $"Resets {FormatterHelper.FormatTimeRemaining(usage.WeeklyResetTime)}";
             WeeklyStatus = UsageStatusCalculator.CalculateStatus(usage.WeeklyPercentage, showRemaining);
 
+            // Pace calculation
+            var sessionElapsed = PaceStatusCalculator.CalculateSessionElapsed(usage.SessionResetTime);
+            SessionElapsedFraction = sessionElapsed;
+            SessionPaceStatus = PaceStatusCalculator.Calculate(usage.EffectiveSessionPercentage, sessionElapsed);
+            if (SessionPaceStatus.HasValue)
+            {
+                SessionPaceLabel = FormatPaceLabel(SessionPaceStatus.Value);
+                SessionPaceColorHex = PaceStatusCalculator.GetColorHex(SessionPaceStatus.Value);
+            }
+            else
+            {
+                SessionPaceLabel = "";
+            }
+
+            var weeklyElapsed = PaceStatusCalculator.CalculateWeeklyElapsed(usage.WeeklyResetTime);
+            WeeklyElapsedFraction = weeklyElapsed;
+            WeeklyPaceStatus = PaceStatusCalculator.Calculate(usage.WeeklyPercentage, weeklyElapsed);
+            if (WeeklyPaceStatus.HasValue)
+            {
+                WeeklyPaceLabel = FormatPaceLabel(WeeklyPaceStatus.Value);
+                WeeklyPaceColorHex = PaceStatusCalculator.GetColorHex(WeeklyPaceStatus.Value);
+            }
+            else
+            {
+                WeeklyPaceLabel = "";
+            }
+
             OpusPercentage = usage.OpusWeeklyPercentage;
             OpusPercentageText = FormatterHelper.FormatPercentage(usage.OpusWeeklyPercentage);
 
@@ -124,6 +162,12 @@ public partial class PopoverViewModel : ObservableObject
             HasModelData = false;
             HasCostData = false;
             LastUpdatedText = "";
+            SessionPaceStatus = null;
+            SessionPaceLabel = "";
+            SessionElapsedFraction = 0;
+            WeeklyPaceStatus = null;
+            WeeklyPaceLabel = "";
+            WeeklyElapsedFraction = 0;
         }
 
         var apiUsage = profile.ApiUsage;
@@ -144,5 +188,19 @@ public partial class PopoverViewModel : ObservableObject
         Profiles.Clear();
         foreach (var p in source)
             Profiles.Add(p);
+    }
+
+    private static string FormatPaceLabel(PaceStatus pace)
+    {
+        return pace switch
+        {
+            PaceStatus.Comfortable => "Comfortable",
+            PaceStatus.OnTrack     => "On Track",
+            PaceStatus.Warming     => "Warming",
+            PaceStatus.Pressing    => "Pressing",
+            PaceStatus.Critical    => "Critical",
+            PaceStatus.Runaway     => "Runaway",
+            _                      => ""
+        };
     }
 }
