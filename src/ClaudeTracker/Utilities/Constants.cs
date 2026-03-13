@@ -66,6 +66,12 @@ public static class Constants
         public const string HaikuModel = "claude-haiku-4-5-20251001";
     }
 
+    public static class StatusAPI
+    {
+        public const string StatusUrl = "https://status.claude.com/api/v2/status.json";
+        public const double RefreshIntervalMinutes = 5.0;
+    }
+
     public static string AppDataPath =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ClaudeTracker");
 
