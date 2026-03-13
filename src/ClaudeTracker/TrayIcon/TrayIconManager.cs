@@ -100,7 +100,7 @@ public class TrayIconManager : IDisposable
             var iconConfig = profile?.IconConfig ?? MenuBarIconConfiguration.Default;
             var sessionConfig = iconConfig.GetConfig(MenuBarMetricType.Session);
 
-            var percentage = usage?.SessionPercentage ?? 0;
+            var percentage = usage?.EffectiveSessionPercentage ?? 0;
             var displayPercentage = UsageStatusCalculator.GetDisplayPercentage(
                 percentage, iconConfig.ShowRemainingPercentage);
             var status = UsageStatusCalculator.CalculateStatus(

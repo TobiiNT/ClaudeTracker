@@ -17,7 +17,7 @@ public class NotificationService : INotificationService
     {
         if (!profile.NotificationSettings.Enabled) return;
 
-        var percentage = usage.SessionPercentage;
+        var percentage = usage.EffectiveSessionPercentage;
         var profileKey = profile.Id.ToString();
 
         if (percentage >= Constants.NotificationThresholds.Critical

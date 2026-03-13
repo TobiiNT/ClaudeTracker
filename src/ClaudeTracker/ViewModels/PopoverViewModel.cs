@@ -86,11 +86,11 @@ public partial class PopoverViewModel : ObservableObject
         {
             var showRemaining = profile.IconConfig.ShowRemainingPercentage;
 
-            SessionPercentage = usage.SessionPercentage;
+            SessionPercentage = usage.EffectiveSessionPercentage;
             SessionPercentageText = FormatterHelper.FormatPercentage(
-                UsageStatusCalculator.GetDisplayPercentage(usage.SessionPercentage, showRemaining));
+                UsageStatusCalculator.GetDisplayPercentage(usage.EffectiveSessionPercentage, showRemaining));
             SessionResetText = $"Resets {FormatterHelper.FormatTimeRemaining(usage.SessionResetTime)}";
-            SessionStatus = UsageStatusCalculator.CalculateStatus(usage.SessionPercentage, showRemaining);
+            SessionStatus = UsageStatusCalculator.CalculateStatus(usage.EffectiveSessionPercentage, showRemaining);
 
             WeeklyPercentage = usage.WeeklyPercentage;
             WeeklyPercentageText = FormatterHelper.FormatPercentage(
