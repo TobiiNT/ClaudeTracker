@@ -48,6 +48,10 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private string _weeklyPaceColorHex = "#4CAF50";
     [ObservableProperty] private double _weeklyElapsedFraction;
 
+    [ObservableProperty] private string _claudeStatusDescription = "";
+    [ObservableProperty] private string _claudeStatusColorHex = "#9E9E9E";
+    [ObservableProperty] private bool _showClaudeStatus;
+
     public ObservableCollection<Profile> Profiles { get; } = new();
 
     public PopoverViewModel(
@@ -169,6 +173,12 @@ public partial class PopoverViewModel : ObservableObject
             WeeklyPaceLabel = "";
             WeeklyElapsedFraction = 0;
         }
+
+        // Claude system status
+        var status = _refreshCoordinator.CurrentStatus;
+        ClaudeStatusDescription = status.Description;
+        ClaudeStatusColorHex = ClaudeStatus.GetColorHex(status.Indicator);
+        ShowClaudeStatus = status.Indicator != StatusIndicator.None;
 
         var apiUsage = profile.ApiUsage;
         HasApiUsage = apiUsage != null;

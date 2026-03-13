@@ -65,6 +65,11 @@ public partial class App : Application
         _globalHotkeyService.HotkeyPressed += (_, _) => _trayIconManager?.TogglePopover(fromHotkey: true);
         _globalHotkeyService.Register();
 
+        // Start network monitor
+        var networkMonitor = _services.GetRequiredService<INetworkMonitorService>();
+        networkMonitor.NetworkRestored += (_, _) => refreshCoordinator.RefreshNow();
+        networkMonitor.Start();
+
         // Listen for system theme changes
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
 
@@ -138,6 +143,8 @@ public partial class App : Application
         services.AddSingleton<LaunchAtLoginService>();
         services.AddSingleton<LanguageService>();
         services.AddSingleton<IUpdateService, UpdateService>();
+        services.AddSingleton<IClaudeStatusService, ClaudeStatusService>();
+        services.AddSingleton<INetworkMonitorService, NetworkMonitorService>();
 
         // Tray
         services.AddSingleton<TrayIconManager>();

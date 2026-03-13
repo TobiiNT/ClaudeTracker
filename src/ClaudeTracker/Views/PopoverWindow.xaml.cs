@@ -67,6 +67,19 @@ public partial class PopoverWindow : Window
                 App.Services.GetRequiredService<Services.Interfaces.IProfileService>().ActiveProfile?.Id;
             _suppressSelectionChanged = false;
 
+            // Claude system status
+            if (_viewModel.ShowClaudeStatus)
+            {
+                ClaudeStatusPanel.Visibility = Visibility.Visible;
+                ClaudeStatusDot.Fill = BrushFromHex(_viewModel.ClaudeStatusColorHex);
+                ClaudeStatusText.Text = _viewModel.ClaudeStatusDescription;
+                ClaudeStatusText.Foreground = BrushFromHex(_viewModel.ClaudeStatusColorHex);
+            }
+            else
+            {
+                ClaudeStatusPanel.Visibility = Visibility.Collapsed;
+            }
+
             NoCredentialsPanel.Visibility = _viewModel.HasCredentials ? Visibility.Collapsed : Visibility.Visible;
             SessionCard.Visibility = _viewModel.HasClaudeUsage ? Visibility.Visible : Visibility.Collapsed;
             WeeklyCard.Visibility = _viewModel.HasClaudeUsage ? Visibility.Visible : Visibility.Collapsed;

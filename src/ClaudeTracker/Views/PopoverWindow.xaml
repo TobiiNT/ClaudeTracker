@@ -67,6 +67,15 @@
                         </Button>
                     </Grid>
 
+                    <!-- Claude Status Indicator (shown only during issues) -->
+                    <Border x:Name="ClaudeStatusPanel" Visibility="Collapsed"
+                            Background="#10FF9800" CornerRadius="6" Padding="8,5" Margin="0,0,0,6">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse x:Name="ClaudeStatusDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock x:Name="ClaudeStatusText" FontSize="12" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
                     <!-- ── Session Usage (primary, larger) ── -->
                     <Border x:Name="SessionCard" Style="{StaticResource UsageCardStyle}">
                         <StackPanel>
