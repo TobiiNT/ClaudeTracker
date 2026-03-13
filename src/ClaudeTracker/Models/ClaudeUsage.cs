@@ -70,7 +70,11 @@ public class ClaudeUsage
     public bool HasSonnetData { get; set; }
 
     [JsonIgnore]
-    public double RemainingPercentage => Math.Max(0, 100 - SessionPercentage);
+    public double EffectiveSessionPercentage =>
+        SessionResetTime < DateTime.UtcNow ? 0.0 : SessionPercentage;
+
+    [JsonIgnore]
+    public double RemainingPercentage => Math.Max(0, 100 - EffectiveSessionPercentage);
 
     public static ClaudeUsage Empty => new()
     {
