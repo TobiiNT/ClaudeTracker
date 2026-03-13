@@ -11,10 +11,8 @@
         SizeToContent="Height"
         Width="280">
 
-    <Border Style="{StaticResource FloatingBorderStyle}" Padding="14,10,14,12" 
-            MouseLeftButtonDown="DragHandle_MouseLeftButtonDown"
-            MouseMove="DragHandle_MouseMove"
-            MouseLeftButtonUp="DragHandle_MouseLeftButtonUp">
+    <Border Style="{StaticResource FloatingBorderStyle}" Padding="14,10,14,12"
+            MouseLeftButtonDown="DragHandle_MouseLeftButtonDown">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
