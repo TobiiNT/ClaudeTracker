@@ -25,19 +25,19 @@
 
             <!-- Star Rating -->
             <StackPanel x:Name="StarPanel" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-                <Button x:Name="Star1" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0">
+                <Button x:Name="Star1" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0" MinHeight="40" MinWidth="40">
                     <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
                 </Button>
-                <Button x:Name="Star2" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0">
+                <Button x:Name="Star2" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0" MinHeight="40" MinWidth="40">
                     <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
                 </Button>
-                <Button x:Name="Star3" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0">
+                <Button x:Name="Star3" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0" MinHeight="40" MinWidth="40">
                     <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
                 </Button>
-                <Button x:Name="Star4" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0">
+                <Button x:Name="Star4" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0" MinHeight="40" MinWidth="40">
                     <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
                 </Button>
-                <Button x:Name="Star5" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0">
+                <Button x:Name="Star5" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0" MinHeight="40" MinWidth="40">
                     <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
                 </Button>
             </StackPanel>
