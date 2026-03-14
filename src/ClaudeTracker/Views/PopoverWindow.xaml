@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:localization="clr-namespace:ClaudeTracker.Localization"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -32,7 +33,7 @@
                             <materialDesign:PackIcon Kind="KeyVariant" Width="36" Height="36"
                                                      HorizontalAlignment="Center" Margin="0,0,0,10"
                                                      Foreground="#999" />
-                            <TextBlock Text="No credentials configured" TextAlignment="Center"
+                            <TextBlock Text="{x:Static localization:Strings.NoCredentials}" TextAlignment="Center"
                                        FontSize="15" FontWeight="SemiBold" Foreground="#555" />
                             <TextBlock Text="Open Settings to get started" TextAlignment="Center"
                                        FontSize="13" Margin="0,4,0,0" Foreground="#999" />
@@ -80,7 +81,7 @@
                     <Border x:Name="SessionCard" Style="{StaticResource UsageCardStyle}">
                         <StackPanel>
                             <Grid Margin="0,0,0,8">
-                                <TextBlock Text="Session Usage" FontSize="13.5" FontWeight="Medium" Foreground="#666" />
+                                <TextBlock Text="{x:Static localization:Strings.SessionUsage}" FontSize="13.5" FontWeight="Medium" Foreground="#666" />
                                 <TextBlock x:Name="SessionPercentText" HorizontalAlignment="Right"
                                            FontSize="24" FontWeight="Bold" Foreground="#333" />
                             </Grid>
@@ -104,7 +105,7 @@
                     <Border x:Name="WeeklyCard" Style="{StaticResource UsageCardStyle}">
                         <StackPanel>
                             <Grid Margin="0,0,0,6">
-                                <TextBlock Text="Weekly Usage" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                                <TextBlock Text="{x:Static localization:Strings.WeeklyUsage}" FontSize="13" FontWeight="Medium" Foreground="#666" />
                                 <TextBlock x:Name="WeeklyPercentText" HorizontalAlignment="Right"
                                            FontSize="17" FontWeight="SemiBold" Foreground="#444" />
                             </Grid>
@@ -160,7 +161,7 @@
                     <!-- ── Cost/Overage ── -->
                     <Border x:Name="CostCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
                         <Grid>
-                            <TextBlock Text="Overage Cost" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                            <TextBlock Text="{x:Static localization:Strings.OverageCost}" FontSize="13" FontWeight="Medium" Foreground="#666" />
                             <TextBlock x:Name="CostText" HorizontalAlignment="Right"
                                        FontSize="16" FontWeight="SemiBold" Foreground="#444" />
                         </Grid>
@@ -170,7 +171,7 @@
                     <Border x:Name="ApiCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
                         <StackPanel>
                             <Grid Margin="0,0,0,6">
-                                <TextBlock Text="API Credits" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                                <TextBlock Text="{x:Static localization:Strings.APICredits}" FontSize="13" FontWeight="Medium" Foreground="#666" />
                                 <TextBlock x:Name="ApiPercentText" HorizontalAlignment="Right"
                                            FontSize="17" FontWeight="SemiBold" Foreground="#444" />
                             </Grid>

@@ -52,6 +52,26 @@
   <data name="NoCredentials" xml:space="preserve"><value>No credentials configured</value></data>
   <data name="OpenSettingsHint" xml:space="preserve"><value>Open Settings to get started</value></data>
 
+  <!-- General Settings -->
+  <data name="RefreshInterval" xml:space="preserve"><value>Refresh Interval</value></data>
+  <data name="Startup" xml:space="preserve"><value>Startup</value></data>
+  <data name="Notifications" xml:space="preserve"><value>Notifications</value></data>
+  <data name="TimeAndDisplay" xml:space="preserve"><value>Time &amp; Display</value></data>
+  <data name="ResetTimeFormat" xml:space="preserve"><value>Reset time format</value></data>
+  <data name="TimeFormat" xml:space="preserve"><value>Time format</value></data>
+  <data name="RemainingTime" xml:space="preserve"><value>Remaining Time</value></data>
+  <data name="ResetTime" xml:space="preserve"><value>Reset Time</value></data>
+  <data name="Both" xml:space="preserve"><value>Both</value></data>
+  <data name="LaunchAtLogin" xml:space="preserve"><value>Launch at login</value></data>
+  <data name="AutoStartSession" xml:space="preserve"><value>Auto-start session when at 0%</value></data>
+  <data name="CheckOverageLimit" xml:space="preserve"><value>Check overage spend limit</value></data>
+  <data name="EnableNotifications" xml:space="preserve"><value>Enable notifications</value></data>
+  <data name="AlertAt75" xml:space="preserve"><value>Alert at 75% usage</value></data>
+  <data name="AlertAt90" xml:space="preserve"><value>Alert at 90% usage</value></data>
+  <data name="AlertAt95" xml:space="preserve"><value>Alert at 95% usage</value></data>
+  <data name="SaveChanges" xml:space="preserve"><value>Save Changes</value></data>
+  <data name="SendTestAlert" xml:space="preserve"><value>Send Test Alert</value></data>
+
   <!-- Settings Tabs -->
   <data name="PersonalUsage" xml:space="preserve"><value>Personal Usage</value></data>
   <data name="APIBilling" xml:space="preserve"><value>API Billing</value></data>
