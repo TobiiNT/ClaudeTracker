@@ -197,7 +197,7 @@ public partial class FloatingUsageWindow : Window
             }
             else
             {
-                StatusDot.Fill = GetStatusBrush(_viewModel.SessionStatus);
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)); // green = connected
                 LastUpdatedText.Text = _viewModel.LastUpdatedText;
             }
 
