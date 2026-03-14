@@ -99,14 +99,17 @@
                                 <Border x:Name="SessionTimeMarker" Width="2" HorizontalAlignment="Left"
                                         CornerRadius="1" Background="#80FFFFFF" Visibility="Collapsed" />
                             </Grid>
-                            <TextBlock x:Name="SessionResetText" FontSize="12" Margin="0,6,0,0" Foreground="#999" />
-                            <StackPanel x:Name="SessionPacePanel" Orientation="Horizontal" Margin="0,4,0,0"
-                                        Visibility="Collapsed" Background="Transparent" Cursor="Help">
-                                <Ellipse x:Name="SessionPaceDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
-                                <TextBlock x:Name="SessionPaceText" FontSize="11" VerticalAlignment="Center" />
-                                <TextBlock x:Name="SessionEstimateText" FontSize="11" Margin="8,0,0,0"
-                                           VerticalAlignment="Center" Foreground="#999" />
-                            </StackPanel>
+                            <Grid Margin="0,6,0,0">
+                                <TextBlock x:Name="SessionResetText" FontSize="12" Foreground="#999" VerticalAlignment="Center" />
+                                <StackPanel x:Name="SessionPacePanel" Orientation="Horizontal"
+                                            HorizontalAlignment="Right" Visibility="Collapsed"
+                                            Background="Transparent" Cursor="Help">
+                                    <Ellipse x:Name="SessionPaceDot" Width="7" Height="7" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="SessionPaceText" FontSize="11" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="SessionEstimateText" FontSize="11" Margin="6,0,0,0"
+                                               VerticalAlignment="Center" Foreground="#999" />
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </Border>
 
@@ -126,14 +129,17 @@
                                 <Border x:Name="WeeklyTimeMarker" Width="2" HorizontalAlignment="Left"
                                         CornerRadius="1" Background="#80FFFFFF" Visibility="Collapsed" />
                             </Grid>
-                            <TextBlock x:Name="WeeklyResetText" FontSize="12" Margin="0,5,0,0" Foreground="#999" />
-                            <StackPanel x:Name="WeeklyPacePanel" Orientation="Horizontal" Margin="0,4,0,0"
-                                        Visibility="Collapsed" Background="Transparent" Cursor="Help">
-                                <Ellipse x:Name="WeeklyPaceDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
-                                <TextBlock x:Name="WeeklyPaceText" FontSize="11" VerticalAlignment="Center" />
-                                <TextBlock x:Name="WeeklyEstimateText" FontSize="11" Margin="8,0,0,0"
-                                           VerticalAlignment="Center" Foreground="#999" />
-                            </StackPanel>
+                            <Grid Margin="0,5,0,0">
+                                <TextBlock x:Name="WeeklyResetText" FontSize="12" Foreground="#999" VerticalAlignment="Center" />
+                                <StackPanel x:Name="WeeklyPacePanel" Orientation="Horizontal"
+                                            HorizontalAlignment="Right" Visibility="Collapsed"
+                                            Background="Transparent" Cursor="Help">
+                                    <Ellipse x:Name="WeeklyPaceDot" Width="7" Height="7" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="WeeklyPaceText" FontSize="11" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="WeeklyEstimateText" FontSize="11" Margin="6,0,0,0"
+                                               VerticalAlignment="Center" Foreground="#999" />
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </Border>
 
