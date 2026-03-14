@@ -209,7 +209,8 @@ public partial class PopoverViewModel : ObservableObject
         var status = _refreshCoordinator.CurrentStatus;
         ClaudeStatusDescription = status.Description;
         ClaudeStatusColorHex = ClaudeStatus.GetColorHex(status.Indicator);
-        ShowClaudeStatus = status.Indicator != StatusIndicator.None;
+        ShowClaudeStatus = status.Indicator != StatusIndicator.None
+                          && status.Indicator != StatusIndicator.Unknown;
 
         var apiUsage = profile.ApiUsage;
         HasApiUsage = apiUsage != null;
