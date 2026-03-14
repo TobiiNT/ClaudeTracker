@@ -36,6 +36,13 @@ public static class Constants
         public const string RepoUrl = "https://github.com/TobiiNT/ClaudeTracker";
     }
 
+    public static class Feedback
+    {
+        public const string EndpointUrl = ""; // Set when backend is ready
+        public const double PromptAfterDays = 7.0;
+        public const double RemindIntervalDays = 14.0;
+    }
+
     public static class UITiming
     {
         public const double PopoverCloseDelayMs = 150;

@@ -1,0 +1,97 @@
+using System.Windows;
+using System.Windows.Controls;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.DependencyInjection;
+using ClaudeTracker.Services;
+using ClaudeTracker.Services.Interfaces;
+using Constants = ClaudeTracker.Utilities.Constants;
+
+namespace ClaudeTracker.Views;
+
+public partial class FeedbackPromptWindow : Window
+{
+    private int _rating;
+    private readonly Button[] _stars;
+
+    public FeedbackPromptWindow()
+    {
+        InitializeComponent();
+        _stars = new[] { Star1, Star2, Star3, Star4, Star5 };
+
+        for (int i = 0; i < _stars.Length; i++)
+        {
+            var starIndex = i + 1;
+            _stars[i].Click += (_, _) => SetRating(starIndex);
+        }
+
+        SubmitButton.Click += (_, _) =>
+        {
+            var settings = App.Services.GetRequiredService<ISettingsService>();
+            settings.Settings.FeedbackRating = _rating;
+            settings.Settings.HasSentFeedback = true;
+            settings.Save();
+
+            // If endpoint is configured, attempt to send
+            if (!string.IsNullOrEmpty(Constants.Feedback.EndpointUrl))
+            {
+                _ = SendFeedbackAsync(_rating, CommentBox.Text);
+            }
+
+            Close();
+        };
+
+        RemindButton.Click += (_, _) =>
+        {
+            var settings = App.Services.GetRequiredService<ISettingsService>();
+            settings.Settings.LastFeedbackPromptDate = DateTime.UtcNow;
+            settings.Save();
+            Close();
+        };
+
+        DontAskButton.Click += (_, _) =>
+        {
+            var settings = App.Services.GetRequiredService<ISettingsService>();
+            settings.Settings.FeedbackPromptDismissedForever = true;
+            settings.Save();
+            Close();
+        };
+    }
+
+    private void SetRating(int rating)
+    {
+        _rating = rating;
+        SubmitButton.IsEnabled = true;
+
+        for (int i = 0; i < _stars.Length; i++)
+        {
+            var icon = (PackIcon)_stars[i].Content;
+            icon.Kind = i < rating ? PackIconKind.Star : PackIconKind.StarOutline;
+        }
+    }
+
+    private static async Task SendFeedbackAsync(int rating, string comment)
+    {
+        try
+        {
+            using var client = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+            var payload = new { rating, comment, version = Constants.AppVersion };
+            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            await client.PostAsync(Constants.Feedback.EndpointUrl, content);
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.LogError("Failed to send feedback", ex);
+        }
+    }
+
+    public static bool ShouldShow(Models.AppSettings settings)
+    {
+        if (settings.HasSentFeedback || settings.FeedbackPromptDismissedForever) return false;
+        if (settings.FirstLaunchDate == null) return false;
+        if ((DateTime.UtcNow - settings.FirstLaunchDate.Value).TotalDays < Constants.Feedback.PromptAfterDays) return false;
+        if (settings.LastFeedbackPromptDate.HasValue &&
+            (DateTime.UtcNow - settings.LastFeedbackPromptDate.Value).TotalDays < Constants.Feedback.RemindIntervalDays) return false;
+        return true;
+    }
+}

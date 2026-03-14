@@ -83,9 +83,14 @@ public partial class App : Application
         {
             Dispatcher.Invoke(() =>
             {
-                if (Views.GitHubStarPromptWindow.ShouldShow(settingsService.Settings))
+                var appSettings = settingsService.Settings;
+                if (Views.GitHubStarPromptWindow.ShouldShow(appSettings))
                 {
                     new Views.GitHubStarPromptWindow().Show();
+                }
+                else if (Views.FeedbackPromptWindow.ShouldShow(appSettings))
+                {
+                    new Views.FeedbackPromptWindow().Show();
                 }
             });
         });

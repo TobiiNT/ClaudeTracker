@@ -1,0 +1,67 @@
+<Window x:Class="ClaudeTracker.Views.FeedbackPromptWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" Topmost="True"
+        Width="420" SizeToContent="Height">
+    <Border CornerRadius="12" Padding="28,24"
+            Background="{DynamicResource MaterialDesign.Brush.Background}"
+            BorderBrush="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+            BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" Opacity="0.3" ShadowDepth="4" />
+        </Border.Effect>
+        <StackPanel>
+            <materialDesign:PackIcon Kind="MessageTextOutline" Width="36" Height="36"
+                                     Foreground="#2196F3" HorizontalAlignment="Center" Margin="0,0,0,12" />
+            <TextBlock Text="How's your experience?" FontSize="18" FontWeight="Bold"
+                       HorizontalAlignment="Center" Margin="0,0,0,8" />
+            <TextBlock TextWrapping="Wrap" TextAlignment="Center" FontSize="13" Margin="0,0,0,16"
+                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
+                Your feedback helps us improve Claude Tracker. Tap a star to rate.
+            </TextBlock>
+
+            <!-- Star Rating -->
+            <StackPanel x:Name="StarPanel" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+                <Button x:Name="Star1" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0">
+                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
+                </Button>
+                <Button x:Name="Star2" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0">
+                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
+                </Button>
+                <Button x:Name="Star3" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0">
+                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
+                </Button>
+                <Button x:Name="Star4" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0">
+                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
+                </Button>
+                <Button x:Name="Star5" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0">
+                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
+                </Button>
+            </StackPanel>
+
+            <!-- Optional Comment -->
+            <TextBox x:Name="CommentBox"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     materialDesign:HintAssist.Hint="Any comments? (optional)"
+                     AcceptsReturn="True" TextWrapping="Wrap"
+                     MaxHeight="80" FontSize="12" Margin="0,0,0,16" />
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                <Button x:Name="SubmitButton" Content="Submit Feedback"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Height="36" FontSize="13" Margin="0,0,8,0" IsEnabled="False" />
+                <Button x:Name="RemindButton" Content="Not Now"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Height="36" FontSize="13" />
+            </StackPanel>
+            <Button x:Name="DontAskButton" Content="Don't Ask Again"
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    HorizontalAlignment="Center" FontSize="12"
+                    Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+        </StackPanel>
+    </Border>
+</Window>

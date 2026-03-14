@@ -53,6 +53,18 @@ public class AppSettings
     [JsonPropertyName("starPromptDismissedForever")]
     public bool StarPromptDismissedForever { get; set; }
 
+    [JsonPropertyName("hasSentFeedback")]
+    public bool HasSentFeedback { get; set; }
+
+    [JsonPropertyName("lastFeedbackPromptDate")]
+    public DateTime? LastFeedbackPromptDate { get; set; }
+
+    [JsonPropertyName("feedbackPromptDismissedForever")]
+    public bool FeedbackPromptDismissedForever { get; set; }
+
+    [JsonPropertyName("feedbackRating")]
+    public int? FeedbackRating { get; set; }
+
     [JsonPropertyName("popoverTimeDisplay")]
     public string PopoverTimeDisplay { get; set; } = "remainingTime";
 
