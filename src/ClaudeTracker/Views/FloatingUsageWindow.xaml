@@ -107,9 +107,11 @@
                 </Grid>
             </StackPanel>
 
-            <!-- Last Updated -->
-            <TextBlock Grid.Row="3" x:Name="LastUpdatedText" FontSize="10"
-                       HorizontalAlignment="Center" Foreground="#BBB" Margin="0,2,0,0" />
+            <!-- Status -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
+                <Ellipse x:Name="StatusDot" Width="6" Height="6" Margin="0,0,4,0" VerticalAlignment="Center" />
+                <TextBlock x:Name="LastUpdatedText" FontSize="10" Foreground="#BBB" VerticalAlignment="Center" />
+            </StackPanel>
         </Grid>
     </Border>
 </Window>

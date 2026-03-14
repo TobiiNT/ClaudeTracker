@@ -174,7 +174,27 @@ public partial class FloatingUsageWindow : Window
                 _viewModel.WeeklyPaceLabel, _viewModel.WeeklyPaceColorHex,
                 _viewModel.WeeklyEstimateText, _viewModel.WeeklyPaceTooltip);
 
-            LastUpdatedText.Text = _viewModel.LastUpdatedText;
+            // Status line
+            if (_viewModel.IsRefreshing)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
+                LastUpdatedText.Text = "Refreshing...";
+            }
+            else if (!_viewModel.HasCredentials)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
+                LastUpdatedText.Text = "No account connected";
+            }
+            else if (!_viewModel.HasClaudeUsage)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+                LastUpdatedText.Text = "Waiting for data...";
+            }
+            else
+            {
+                StatusDot.Fill = GetStatusBrush(_viewModel.SessionStatus);
+                LastUpdatedText.Text = _viewModel.LastUpdatedText;
+            }
 
             UpdateProgressBars();
         });
