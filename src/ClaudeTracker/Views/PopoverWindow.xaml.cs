@@ -160,8 +160,10 @@ public partial class PopoverWindow : Window
         SetProgressWidth(OpusProgressFill, _viewModel.OpusPercentage);
         SetProgressWidth(SonnetProgressFill, _viewModel.SonnetPercentage);
 
-        SetTimeMarker(SessionTimeMarker, SessionProgressFill, _viewModel.SessionElapsedFraction);
-        SetTimeMarker(WeeklyTimeMarker, WeeklyProgressFill, _viewModel.WeeklyElapsedFraction);
+        SetTimeMarker(SessionTimeMarker, SessionProgressFill,
+            _viewModel.SessionElapsedFraction, _viewModel.SessionPaceColorHex);
+        SetTimeMarker(WeeklyTimeMarker, WeeklyProgressFill,
+            _viewModel.WeeklyElapsedFraction, _viewModel.WeeklyPaceColorHex);
     }
 
     private static void SetProgressWidth(FrameworkElement fill, double percentage)
@@ -178,7 +180,8 @@ public partial class PopoverWindow : Window
             DragMove();
     }
 
-    private static void SetTimeMarker(FrameworkElement marker, FrameworkElement progressFill, double elapsedFraction)
+    private static void SetTimeMarker(FrameworkElement marker, FrameworkElement progressFill,
+        double elapsedFraction, string paceColorHex)
     {
         if (elapsedFraction > 0.03 && elapsedFraction < 1.0
             && progressFill.Parent is FrameworkElement parent
@@ -187,6 +190,15 @@ public partial class PopoverWindow : Window
         {
             marker.Visibility = Visibility.Visible;
             marker.Margin = new Thickness(grandParent.ActualWidth * elapsedFraction - 1, 0, 0, 0);
+
+            if (marker is System.Windows.Controls.Border border)
+            {
+                var color = BrushFromHex(paceColorHex);
+                color.Opacity = 0.85;
+                border.Background = color;
+                var pct = (int)(elapsedFraction * 100);
+                border.ToolTip = $"Time elapsed: {pct}% of window\nUsage should ideally be at or below this point";
+            }
         }
         else
         {

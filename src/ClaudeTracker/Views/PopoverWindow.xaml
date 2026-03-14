@@ -97,7 +97,7 @@
                                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                                 </Border>
                                 <Border x:Name="SessionTimeMarker" Width="2" HorizontalAlignment="Left"
-                                        CornerRadius="1" Background="#80FFFFFF" Visibility="Collapsed" />
+                                        CornerRadius="1" Visibility="Collapsed" />
                             </Grid>
                             <Grid Margin="0,6,0,0">
                                 <TextBlock x:Name="SessionResetText" FontSize="12" Foreground="#999" VerticalAlignment="Center" />
@@ -127,7 +127,7 @@
                                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                                 </Border>
                                 <Border x:Name="WeeklyTimeMarker" Width="2" HorizontalAlignment="Left"
-                                        CornerRadius="1" Background="#80FFFFFF" Visibility="Collapsed" />
+                                        CornerRadius="1" Visibility="Collapsed" />
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <TextBlock x:Name="WeeklyResetText" FontSize="12" Foreground="#999" VerticalAlignment="Center" />
