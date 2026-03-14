@@ -16,6 +16,7 @@
   <img src="docs/widget.png" width="280" alt="Floating widget" />
 </p>
 
+### [⬇️ Download Latest Release (v1.2.0)](https://github.com/TobiiNT/ClaudeTracker/releases/latest)
 ---
 
 Get instant visibility into your Claude session and weekly usage, overage costs, and receive alerts before hitting rate limits. Windows port of [Claude Usage Tracker](https://github.com/hamed-elfayome/Claude-Usage-Tracker) (macOS).
