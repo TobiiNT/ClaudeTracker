@@ -70,4 +70,33 @@ public class AppSettings
 
     [JsonPropertyName("timeFormatPreference")]
     public TimeFormatPreference TimeFormatPreference { get; set; } = TimeFormatPreference.System;
+
+    // ── Hooks Integration ──
+
+    [JsonPropertyName("hooksEnabled")]
+    public bool HooksEnabled { get; set; }
+
+    [JsonPropertyName("hookPermissionPopupsEnabled")]
+    public bool HookPermissionPopupsEnabled { get; set; } = true;
+
+    [JsonPropertyName("hookElicitationPopupsEnabled")]
+    public bool HookElicitationPopupsEnabled { get; set; } = true;
+
+    [JsonPropertyName("hookActivityFeedEnabled")]
+    public bool HookActivityFeedEnabled { get; set; } = true;
+
+    [JsonPropertyName("hookMaxFeedEntries")]
+    public int HookMaxFeedEntries { get; set; } = 10;
+
+    [JsonPropertyName("hookNotificationPreferences")]
+    public Dictionary<string, bool> HookNotificationPreferences { get; set; } = new()
+    {
+        ["stop"] = true,
+        ["toolError"] = true,
+        ["permission"] = true,
+        ["idle"] = true,
+        ["configChange"] = false,
+        ["sessionLifecycle"] = false,
+        ["subagent"] = false
+    };
 }

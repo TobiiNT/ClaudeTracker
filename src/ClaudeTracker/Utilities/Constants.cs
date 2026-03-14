@@ -1,4 +1,5 @@
 using System.IO;
+using System.Collections.Generic;
 
 namespace ClaudeTracker.Utilities;
 
@@ -85,6 +86,50 @@ public static class Constants
     {
         public const string StatusUrl = "https://status.claude.com/api/v2/status.json";
         public const double RefreshIntervalMinutes = 5.0;
+    }
+
+    public static class Hooks
+    {
+        public static string PipeName => $"ClaudeTracker-Hooks-{Environment.UserName}";
+        public const int MaxConcurrentConnections = 10;
+        public const int MaxMessageSize = 5 * 1024 * 1024; // 5 MB
+        public const int ConnectionTimeoutMs = 3000;
+        public const int ResponseTimeoutMs = 310_000; // Above Claude's 300s permission timeout
+        public const int StaleSessionMinutes = 15;
+        public const int DefaultMaxActivityEntries = 200;
+        public const int DefaultMaxFeedEntries = 10;
+
+        public static string ClaudeSettingsPath =>
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude", "settings.json");
+
+        public static readonly string[] AllEvents =
+        {
+            "PreToolUse", "PostToolUse", "PostToolUseFailure",
+            "PermissionRequest", "Notification", "Stop",
+            "SessionStart", "SessionEnd", "UserPromptSubmit",
+            "SubagentStart", "SubagentStop",
+            "PreCompact", "PostCompact",
+            "WorktreeCreate", "WorktreeRemove",
+            "InstructionsLoaded", "ConfigChange",
+            "Elicitation", "ElicitationResult",
+            "TeammateIdle", "TaskCompleted"
+        };
+
+        public static readonly HashSet<string> AsyncEvents = new()
+        {
+            "PostToolUse", "PostToolUseFailure",
+            "SessionStart", "SessionEnd",
+            "SubagentStart", "InstructionsLoaded",
+            "PreCompact", "PostCompact",
+            "WorktreeRemove", "ElicitationResult"
+        };
+
+        public static readonly HashSet<string> InteractiveEvents = new()
+        {
+            "PermissionRequest", "PreToolUse",
+            "Elicitation", "UserPromptSubmit",
+            "Stop", "SubagentStop", "ConfigChange"
+        };
     }
 
     public static string AppDataPath =>
