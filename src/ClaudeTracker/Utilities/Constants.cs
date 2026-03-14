@@ -39,10 +39,10 @@ public static class Constants
     public static class Feedback
     {
         // Google Forms integration — fill in after creating your form
-        public const string GoogleFormId = ""; // e.g. "1FAIpQLSe..."
-        public const string EntryRating = "";  // e.g. "entry.123456789"
-        public const string EntryComment = ""; // e.g. "entry.987654321"
-        public const string EntryVersion = ""; // e.g. "entry.111222333"
+        public const string GoogleFormId = "1FAIpQLScq3wQ3hgs6JnrlgRuZergFbhrBEk2j81wBGJb4OC9S-gAEjA";
+        public const string EntryRating = "entry.351097210";
+        public const string EntryComment = "entry.2038771915";
+        public const string EntryVersion = "entry.752645992";
 
         public static bool IsConfigured => !string.IsNullOrEmpty(GoogleFormId);
         public static string SubmitUrl => $"https://docs.google.com/forms/d/e/{GoogleFormId}/formResponse";
