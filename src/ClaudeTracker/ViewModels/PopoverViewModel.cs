@@ -139,8 +139,11 @@ public partial class PopoverViewModel : ObservableObject
                 SessionPaceColorHex = PaceStatusCalculator.GetColorHex(SessionPaceStatus.Value);
                 sessionEta = PaceStatusCalculator.EstimateTimeToLimit(
                     usage.EffectiveSessionPercentage, sessionElapsed, usage.SessionResetTime);
-                SessionEstimateText = FormatEstimate(sessionEta);
-                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta, isWeekly: false);
+                var sessionWillExceed = PaceStatusCalculator.WillExceedBeforeReset(sessionEta, usage.SessionResetTime);
+                SessionEstimateText = ShouldShowEstimateInline(SessionPaceStatus.Value, sessionWillExceed)
+                    ? FormatEstimate(sessionEta) : "";
+                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta,
+                    usage.SessionResetTime, isWeekly: false);
             }
             else
             {
@@ -161,8 +164,11 @@ public partial class PopoverViewModel : ObservableObject
                 // Weekly runout cannot be before session runout
                 if (weeklyEta.HasValue && sessionEta.HasValue && weeklyEta.Value < sessionEta.Value)
                     weeklyEta = sessionEta;
-                WeeklyEstimateText = FormatEstimate(weeklyEta);
-                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value, weeklyEta, isWeekly: true);
+                var weeklyWillExceed = PaceStatusCalculator.WillExceedBeforeReset(weeklyEta, usage.WeeklyResetTime);
+                WeeklyEstimateText = ShouldShowEstimateInline(WeeklyPaceStatus.Value, weeklyWillExceed)
+                    ? FormatEstimate(weeklyEta) : "";
+                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value, weeklyEta,
+                    usage.WeeklyResetTime, isWeekly: true);
             }
             else
             {
@@ -256,7 +262,14 @@ public partial class PopoverViewModel : ObservableObject
         };
     }
 
-    private static string FormatPaceTooltip(PaceStatus pace, TimeSpan? eta, bool isWeekly = false)
+    /// <summary>Only show the ETA inline for paces that will actually hit the limit.</summary>
+    private static bool ShouldShowEstimateInline(PaceStatus pace, bool willExceed)
+    {
+        // Show inline estimate only for urgent paces that will exceed before reset
+        return willExceed && pace >= PaceStatus.Pressing;
+    }
+
+    private static string FormatPaceTooltip(PaceStatus pace, TimeSpan? eta, DateTime resetTime, bool isWeekly = false)
     {
         var description = pace switch
         {
@@ -271,9 +284,14 @@ public partial class PopoverViewModel : ObservableObject
 
         if (eta.HasValue)
         {
-            var rounded = RoundTimeSpanTo15Min(eta.Value);
-            var absoluteText = FormatRunoutAbsolute(rounded, isWeekly);
-            return $"{description}\nEst. 100% in ~{FormatTimeSpan(rounded)} (~{absoluteText})";
+            var willExceed = PaceStatusCalculator.WillExceedBeforeReset(eta, resetTime);
+            if (willExceed)
+            {
+                var rounded = RoundTimeSpanTo15Min(eta.Value);
+                var absoluteText = FormatRunoutAbsolute(rounded, isWeekly);
+                return $"{description}\nEst. 100% in ~{FormatTimeSpan(rounded)} (~{absoluteText})";
+            }
+            return $"{description}\nWon't hit limit before reset";
         }
 
         return description;

@@ -144,7 +144,7 @@ public partial class PopoverWindow : Window
 
             // Status
             StatusDot.Fill = GetStatusBrush(_viewModel.SessionStatus);
-            StatusText.Text = _viewModel.IsRefreshing ? "Refreshing..." : _viewModel.SessionResetText;
+            StatusText.Text = _viewModel.IsRefreshing ? "Refreshing..." : _viewModel.LastUpdatedText;
 
             LastUpdatedText.Text = _viewModel.LastUpdatedText;
 
