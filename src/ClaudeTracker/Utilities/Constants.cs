@@ -14,7 +14,7 @@ public static class Constants
 
     public static class RefreshIntervals
     {
-        public const double DefaultSeconds = 30;
+        public const double DefaultSeconds = 60;
         public const double MinSeconds = 10;
         public const double MaxSeconds = 300;
     }
