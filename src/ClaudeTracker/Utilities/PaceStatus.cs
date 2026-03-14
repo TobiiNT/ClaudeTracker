@@ -62,20 +62,22 @@ public static class PaceStatusCalculator
     /// Estimates how long until usage hits 100% at the current burn rate.
     /// Returns null if usage is 0, data is insufficient, or limit won't be reached before reset.
     /// </summary>
+    /// <summary>
+    /// Estimates how long until usage hits 100% at the current burn rate.
+    /// Always returns a value when there's enough data (usage > 0, elapsed >= 3%).
+    /// The caller can compare with the reset time to decide if it will actually be reached.
+    /// </summary>
     public static TimeSpan? EstimateTimeToLimit(double usedPercentage, double elapsedFraction, DateTime resetTime)
     {
         if (elapsedFraction < 0.03 || elapsedFraction >= 1.0 || usedPercentage <= 0)
             return null;
 
-        var totalWindowSeconds = (resetTime - resetTime).TotalSeconds; // placeholder
-        // Reconstruct elapsed time from fraction and reset time
         var remaining = resetTime - DateTime.UtcNow;
         if (remaining.TotalSeconds <= 0) return null;
 
         var totalWindowSec = remaining.TotalSeconds / (1.0 - elapsedFraction);
         var elapsedSec = totalWindowSec * elapsedFraction;
 
-        // burn rate = usedPercentage / elapsedSec  (% per second)
         var burnRate = usedPercentage / elapsedSec;
         if (burnRate <= 0) return null;
 
@@ -83,12 +85,15 @@ public static class PaceStatusCalculator
         if (percentRemaining <= 0) return TimeSpan.Zero;
 
         var secondsToLimit = percentRemaining / burnRate;
-
-        // If limit time is beyond reset time, won't hit the limit
-        if (secondsToLimit > remaining.TotalSeconds)
-            return null;
-
         return TimeSpan.FromSeconds(secondsToLimit);
+    }
+
+    /// <summary>Whether the estimated time to limit exceeds the remaining window time.</summary>
+    public static bool WillExceedBeforeReset(TimeSpan? eta, DateTime resetTime)
+    {
+        if (!eta.HasValue) return false;
+        var remaining = resetTime - DateTime.UtcNow;
+        return eta.Value.TotalSeconds <= remaining.TotalSeconds;
     }
 
     /// <summary>Returns the Material Design hex color for a pace status.</summary>

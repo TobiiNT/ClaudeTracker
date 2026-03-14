@@ -138,8 +138,8 @@ public partial class PopoverViewModel : ObservableObject
                 SessionPaceColorHex = PaceStatusCalculator.GetColorHex(SessionPaceStatus.Value);
                 var sessionEta = PaceStatusCalculator.EstimateTimeToLimit(
                     usage.EffectiveSessionPercentage, sessionElapsed, usage.SessionResetTime);
-                SessionEstimateText = FormatEstimate(sessionEta, use24Hour);
-                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta, use24Hour);
+                SessionEstimateText = FormatEstimate(sessionEta);
+                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta);
             }
             else
             {
@@ -157,8 +157,8 @@ public partial class PopoverViewModel : ObservableObject
                 WeeklyPaceColorHex = PaceStatusCalculator.GetColorHex(WeeklyPaceStatus.Value);
                 var weeklyEta = PaceStatusCalculator.EstimateTimeToLimit(
                     usage.WeeklyPercentage, weeklyElapsed, usage.WeeklyResetTime);
-                WeeklyEstimateText = FormatEstimate(weeklyEta, use24Hour, isWeekly: true);
-                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value, weeklyEta, use24Hour, isWeekly: true);
+                WeeklyEstimateText = FormatEstimate(weeklyEta);
+                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value, weeklyEta);
             }
             else
             {
@@ -251,7 +251,7 @@ public partial class PopoverViewModel : ObservableObject
         };
     }
 
-    private static string FormatPaceTooltip(PaceStatus pace, TimeSpan? eta, bool use24Hour = false, bool isWeekly = false)
+    private static string FormatPaceTooltip(PaceStatus pace, TimeSpan? eta)
     {
         var description = pace switch
         {
@@ -265,42 +265,15 @@ public partial class PopoverViewModel : ObservableObject
         };
 
         if (eta.HasValue)
-        {
-            var absoluteText = FormatRunoutAbsolute(eta.Value, use24Hour, isWeekly);
-            return $"{description}\nEst. limit in ~{FormatTimeSpan(eta.Value)} ({absoluteText})";
-        }
-
-        if (pace <= PaceStatus.OnTrack)
-            return $"{description}\nWon't hit limit before reset";
+            return $"{description}\nEst. 100% in ~{FormatTimeSpan(eta.Value)}";
 
         return description;
     }
 
-    private static string FormatEstimate(TimeSpan? eta, bool use24Hour = false, bool isWeekly = false)
+    private static string FormatEstimate(TimeSpan? eta)
     {
         if (!eta.HasValue) return "";
-        var absoluteText = FormatRunoutAbsolute(eta.Value, use24Hour, isWeekly);
-        return $"~{FormatTimeSpan(eta.Value)} to limit ({absoluteText})";
-    }
-
-    /// <summary>
-    /// Session: "today 3:45 PM" or "tomorrow 15:00"
-    /// Weekly: "Wed, Mar 18" or "Thu, Mar 19"
-    /// </summary>
-    private static string FormatRunoutAbsolute(TimeSpan eta, bool use24Hour, bool isWeekly)
-    {
-        var runoutTime = DateTime.Now.Add(eta);
-
-        if (isWeekly)
-        {
-            return runoutTime.Date == DateTime.Now.Date
-                ? "today"
-                : runoutTime.ToString("ddd, MMM d");
-        }
-
-        var timeFormat = use24Hour ? "H:mm" : "h:mm tt";
-        var datePrefix = runoutTime.Date == DateTime.Now.Date ? "today" : "tomorrow";
-        return $"{datePrefix} {runoutTime.ToString(timeFormat)}";
+        return $"~{FormatTimeSpan(eta.Value)} to limit";
     }
 
     private static string FormatTimeSpan(TimeSpan ts)

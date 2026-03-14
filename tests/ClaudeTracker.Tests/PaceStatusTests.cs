@@ -75,12 +75,15 @@ public class PaceStatusTests
     }
 
     [Fact]
-    public void EstimateTimeToLimit_ComfortablePace_ReturnsNull()
+    public void EstimateTimeToLimit_ComfortablePace_ReturnsLargeEta()
     {
-        // 10% used in 50% of window → won't hit 100% before reset
+        // 10% used in 50% of window → projected 20% → ETA well beyond reset
         var resetTime = DateTime.UtcNow.AddHours(2.5); // 50% remaining of 5h window
         var eta = PaceStatusCalculator.EstimateTimeToLimit(10.0, 0.5, resetTime);
-        Assert.Null(eta); // won't hit limit before reset
+        Assert.NotNull(eta);
+        // 90% remaining at rate of 10%/2.5h = 4%/h → 90/4 = 22.5h — way beyond reset
+        Assert.True(eta!.Value.TotalHours > 20);
+        Assert.False(PaceStatusCalculator.WillExceedBeforeReset(eta, resetTime));
     }
 
     [Fact]
