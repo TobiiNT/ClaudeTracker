@@ -202,9 +202,8 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Last Updated -->
-                    <TextBlock x:Name="LastUpdatedText" FontSize="11" HorizontalAlignment="Center"
-                               Margin="0,6,0,4" Foreground="#AAA" />
+                    <!-- Last Updated (hidden — shown in status line above) -->
+                    <TextBlock x:Name="LastUpdatedText" Visibility="Collapsed" />
 
                 </StackPanel>
             </ScrollViewer>
