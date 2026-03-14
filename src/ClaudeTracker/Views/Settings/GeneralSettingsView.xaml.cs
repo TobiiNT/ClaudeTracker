@@ -82,6 +82,19 @@ public partial class GeneralSettingsView : UserControl
             if (TimeFormatCombo.SelectedValue is string v) _vm.TimeFormatPreference = v;
         };
 
+        // Sound toggle
+        SoundToggle.IsChecked = _vm.SoundEnabled;
+        SoundToggle.Checked += (_, _) => { _vm.SoundEnabled = true; SoundPickerPanel.Visibility = Visibility.Visible; };
+        SoundToggle.Unchecked += (_, _) => { _vm.SoundEnabled = false; SoundPickerPanel.Visibility = Visibility.Collapsed; };
+        SoundPickerPanel.Visibility = _vm.SoundEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        SoundCombo.ItemsSource = new[] { "Default", "Hand", "Asterisk", "Question", "Beep", "None" };
+        SoundCombo.SelectedItem = _vm.SoundName;
+        SoundCombo.SelectionChanged += (_, _) =>
+        {
+            if (SoundCombo.SelectedItem is string v) _vm.SoundName = v;
+        };
+
         TestAlertButton.Click += (_, _) =>
         {
             var notificationService = App.Services.GetRequiredService<INotificationService>();

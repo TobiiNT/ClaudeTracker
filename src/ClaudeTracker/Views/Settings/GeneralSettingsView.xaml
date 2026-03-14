@@ -93,6 +93,18 @@
                 </Grid>
             </StackPanel>
 
+            <!-- Notification Sound -->
+            <Grid Margin="16,10,0,0">
+                <TextBlock Text="Notification sound" VerticalAlignment="Center" FontSize="12" />
+                <ToggleButton x:Name="SoundToggle" HorizontalAlignment="Right"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+            <Grid x:Name="SoundPickerPanel" Margin="16,8,0,0">
+                <TextBlock Text="Sound" VerticalAlignment="Center" FontSize="12" />
+                <ComboBox x:Name="SoundCombo" HorizontalAlignment="Right" Width="140"
+                          Style="{StaticResource MaterialDesignComboBox}" FontSize="12" />
+            </Grid>
+
             <!-- Test Alert -->
             <Button x:Name="TestAlertButton" Content="{x:Static localization:Strings.SendTestAlert}"
                     Style="{StaticResource MaterialDesignOutlinedButton}"

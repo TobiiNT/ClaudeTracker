@@ -109,12 +109,35 @@ public class NotificationService : INotificationService
                 popup.Show();
             });
 
+            PlayNotificationSound();
             LoggingService.Instance.Log($"Notification sent: {title}");
         }
         catch (Exception ex)
         {
             LoggingService.Instance.LogError("Failed to send notification", ex);
         }
+    }
+
+    private static void PlayNotificationSound()
+    {
+        try
+        {
+            var profileService = App.Services.GetService(typeof(Interfaces.IProfileService)) as Interfaces.IProfileService;
+            var profile = profileService?.ActiveProfile;
+            if (profile?.NotificationSettings.SoundEnabled != true) return;
+
+            var sound = profile.NotificationSettings.SoundName switch
+            {
+                "Hand" => System.Media.SystemSounds.Hand,
+                "Asterisk" => System.Media.SystemSounds.Asterisk,
+                "Question" => System.Media.SystemSounds.Question,
+                "Beep" => System.Media.SystemSounds.Beep,
+                "None" => (System.Media.SystemSound?)null,
+                _ => System.Media.SystemSounds.Exclamation
+            };
+            sound?.Play();
+        }
+        catch { /* ignore sound failures */ }
     }
 
     // Keep the two-parameter overload for interface compatibility
