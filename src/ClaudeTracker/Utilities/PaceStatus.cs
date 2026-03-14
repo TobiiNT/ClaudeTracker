@@ -60,10 +60,6 @@ public static class PaceStatusCalculator
 
     /// <summary>
     /// Estimates how long until usage hits 100% at the current burn rate.
-    /// Returns null if usage is 0, data is insufficient, or limit won't be reached before reset.
-    /// </summary>
-    /// <summary>
-    /// Estimates how long until usage hits 100% at the current burn rate.
     /// Always returns a value when there's enough data (usage > 0, elapsed >= 3%).
     /// The caller can compare with the reset time to decide if it will actually be reached.
     /// </summary>

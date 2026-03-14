@@ -23,7 +23,7 @@ public partial class SetupWizardWindow : Window
         _cliSyncService = App.Services.GetRequiredService<ClaudeCodeSyncService>();
 
         SkipButton.Click += (_, _) => CompleteWizard();
-        NextButton.Click += async (_, _) => await OnNextClicked();
+        NextButton.Click += (_, _) => OnNextClicked();
 
         // CLI auto-detect
         AutoDetectButton.Click += async (_, _) => await OnAutoDetect();
@@ -38,7 +38,7 @@ public partial class SetupWizardWindow : Window
         ConnectButton.Click += async (_, _) => await OnManualConnect();
     }
 
-    private async Task OnNextClicked()
+    private void OnNextClicked()
     {
         switch (_currentStep)
         {

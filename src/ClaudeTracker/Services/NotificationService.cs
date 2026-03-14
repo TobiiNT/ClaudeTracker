@@ -8,9 +8,15 @@ namespace ClaudeTracker.Services;
 
 public class NotificationService : INotificationService
 {
+    private readonly IProfileService _profileService;
     private readonly HashSet<string> _sentNotifications = new();
     private readonly HashSet<string> _sentExpiryNotifications = new();
     private DateTime _lastNotificationTime = DateTime.MinValue;
+
+    public NotificationService(IProfileService profileService)
+    {
+        _profileService = profileService;
+    }
 
     public event EventHandler? NotificationClicked;
 
@@ -118,12 +124,11 @@ public class NotificationService : INotificationService
         }
     }
 
-    private static void PlayNotificationSound()
+    private void PlayNotificationSound()
     {
         try
         {
-            var profileService = App.Services.GetService(typeof(Interfaces.IProfileService)) as Interfaces.IProfileService;
-            var profile = profileService?.ActiveProfile;
+            var profile = _profileService.ActiveProfile;
             if (profile?.NotificationSettings.SoundEnabled != true) return;
 
             var sound = profile.NotificationSettings.SoundName switch
