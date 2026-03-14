@@ -109,9 +109,11 @@ public class TrayIconManager : IDisposable
             var isDark = App.IsSystemDarkMode();
 
             var customColor = iconConfig.UseCustomColor ? iconConfig.CustomColorHex : null;
+            var metricPrefix = iconConfig.ShowIconNames ? "S:" : null;
             var icon = _renderer.RenderIcon(
                 displayPercentage, status, style,
-                iconConfig.MonochromeMode, isDark, customColor);
+                iconConfig.MonochromeMode, isDark, customColor,
+                iconConfig.ShowIconNames, metricPrefix);
 
             Application.Current.Dispatcher.Invoke(() =>
             {
