@@ -38,7 +38,15 @@ public static class Constants
 
     public static class Feedback
     {
-        public const string EndpointUrl = ""; // Set when backend is ready
+        // Google Forms integration — fill in after creating your form
+        public const string GoogleFormId = ""; // e.g. "1FAIpQLSe..."
+        public const string EntryRating = "";  // e.g. "entry.123456789"
+        public const string EntryComment = ""; // e.g. "entry.987654321"
+        public const string EntryVersion = ""; // e.g. "entry.111222333"
+
+        public static bool IsConfigured => !string.IsNullOrEmpty(GoogleFormId);
+        public static string SubmitUrl => $"https://docs.google.com/forms/d/e/{GoogleFormId}/formResponse";
+
         public const double PromptAfterDays = 7.0;
         public const double RemindIntervalDays = 14.0;
     }

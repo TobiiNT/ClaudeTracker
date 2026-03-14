@@ -31,11 +31,8 @@ public partial class FeedbackPromptWindow : Window
             settings.Settings.HasSentFeedback = true;
             settings.Save();
 
-            // If endpoint is configured, attempt to send
-            if (!string.IsNullOrEmpty(Constants.Feedback.EndpointUrl))
-            {
+            if (Constants.Feedback.IsConfigured)
                 _ = SendFeedbackAsync(_rating, CommentBox.Text);
-            }
 
             Close();
         };
@@ -77,10 +74,16 @@ public partial class FeedbackPromptWindow : Window
                 as System.Net.Http.IHttpClientFactory;
             using var client = factory?.CreateClient("Claude") ?? new System.Net.Http.HttpClient();
             client.Timeout = TimeSpan.FromSeconds(10);
-            var payload = new { rating, comment, version = Constants.AppVersion };
-            var json = System.Text.Json.JsonSerializer.Serialize(payload);
-            var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            await client.PostAsync(Constants.Feedback.EndpointUrl, content);
+
+            // Google Forms expects URL-encoded form data
+            var formData = new Dictionary<string, string>
+            {
+                [Constants.Feedback.EntryRating] = rating.ToString(),
+                [Constants.Feedback.EntryComment] = comment ?? "",
+                [Constants.Feedback.EntryVersion] = Constants.AppVersion
+            };
+            var content = new System.Net.Http.FormUrlEncodedContent(formData);
+            await client.PostAsync(Constants.Feedback.SubmitUrl, content);
         }
         catch (Exception ex)
         {
