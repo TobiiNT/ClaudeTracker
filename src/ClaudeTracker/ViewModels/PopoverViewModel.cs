@@ -42,11 +42,13 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private PaceStatus? _sessionPaceStatus;
     [ObservableProperty] private string _sessionPaceLabel = "";
     [ObservableProperty] private string _sessionPaceColorHex = "#4CAF50";
+    [ObservableProperty] private string _sessionPaceTooltip = "";
     [ObservableProperty] private double _sessionElapsedFraction;
 
     [ObservableProperty] private PaceStatus? _weeklyPaceStatus;
     [ObservableProperty] private string _weeklyPaceLabel = "";
     [ObservableProperty] private string _weeklyPaceColorHex = "#4CAF50";
+    [ObservableProperty] private string _weeklyPaceTooltip = "";
     [ObservableProperty] private double _weeklyElapsedFraction;
 
     [ObservableProperty] private string _claudeStatusDescription = "";
@@ -132,10 +134,12 @@ public partial class PopoverViewModel : ObservableObject
             {
                 SessionPaceLabel = FormatPaceLabel(SessionPaceStatus.Value);
                 SessionPaceColorHex = PaceStatusCalculator.GetColorHex(SessionPaceStatus.Value);
+                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value);
             }
             else
             {
                 SessionPaceLabel = "";
+                SessionPaceTooltip = "";
             }
 
             var weeklyElapsed = PaceStatusCalculator.CalculateWeeklyElapsed(usage.WeeklyResetTime);
@@ -145,10 +149,12 @@ public partial class PopoverViewModel : ObservableObject
             {
                 WeeklyPaceLabel = FormatPaceLabel(WeeklyPaceStatus.Value);
                 WeeklyPaceColorHex = PaceStatusCalculator.GetColorHex(WeeklyPaceStatus.Value);
+                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value);
             }
             else
             {
                 WeeklyPaceLabel = "";
+                WeeklyPaceTooltip = "";
             }
 
             OpusPercentage = usage.OpusWeeklyPercentage;
@@ -231,6 +237,20 @@ public partial class PopoverViewModel : ObservableObject
             PaceStatus.Pressing    => "Pressing",
             PaceStatus.Critical    => "Critical",
             PaceStatus.Runaway     => "Runaway",
+            _                      => ""
+        };
+    }
+
+    private static string FormatPaceTooltip(PaceStatus pace)
+    {
+        return pace switch
+        {
+            PaceStatus.Comfortable => "Well under budget — you have plenty of usage left",
+            PaceStatus.OnTrack     => "Sustainable pace — on track to stay within limits",
+            PaceStatus.Warming     => "Starting to push it — usage is picking up",
+            PaceStatus.Pressing    => "Likely to hit the limit at this pace",
+            PaceStatus.Critical    => "On track to exceed your usage limit",
+            PaceStatus.Runaway     => "Burning through usage much faster than the reset window",
             _                      => ""
         };
     }

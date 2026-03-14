@@ -96,6 +96,7 @@ public partial class PopoverWindow : Window
                 SessionPaceDot.Fill = BrushFromHex(_viewModel.SessionPaceColorHex);
                 SessionPaceText.Text = _viewModel.SessionPaceLabel;
                 SessionPaceText.Foreground = BrushFromHex(_viewModel.SessionPaceColorHex);
+                SessionPacePanel.ToolTip = _viewModel.SessionPaceTooltip;
             }
             else
             {
@@ -114,6 +115,7 @@ public partial class PopoverWindow : Window
                 WeeklyPaceDot.Fill = BrushFromHex(_viewModel.WeeklyPaceColorHex);
                 WeeklyPaceText.Text = _viewModel.WeeklyPaceLabel;
                 WeeklyPaceText.Foreground = BrushFromHex(_viewModel.WeeklyPaceColorHex);
+                WeeklyPacePanel.ToolTip = _viewModel.WeeklyPaceTooltip;
             }
             else
             {
