@@ -270,8 +270,9 @@ public partial class PopoverViewModel : ObservableObject
 
         if (eta.HasValue)
         {
-            var absoluteText = FormatRunoutAbsolute(eta.Value, isWeekly);
-            return $"{description}\nEst. 100% in ~{FormatTimeSpan(eta.Value)} ({absoluteText})";
+            var rounded = RoundTimeSpanTo15Min(eta.Value);
+            var absoluteText = FormatRunoutAbsolute(rounded, isWeekly);
+            return $"{description}\nEst. 100% in ~{FormatTimeSpan(rounded)} (~{absoluteText})";
         }
 
         return description;
@@ -284,18 +285,28 @@ public partial class PopoverViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Session: 24h rounded to 15min — "15:45" or "tomorrow 08:30"
+    /// Rounds a TimeSpan to the nearest 15 minutes.
+    /// E.g. 3h 22m → 3h 15m, 3h 38m → 3h 45m
+    /// </summary>
+    private static TimeSpan RoundTimeSpanTo15Min(TimeSpan ts)
+    {
+        var totalMinutes = ts.TotalMinutes;
+        var rounded = Math.Round(totalMinutes / 15.0) * 15;
+        return TimeSpan.FromMinutes(Math.Max(15, rounded));
+    }
+
+    /// <summary>
+    /// Session: 24h format — "15:45" or "tomorrow 08:30"
     /// Weekly same day: hours like session — "15:45"
     /// Weekly different day: day of week — "Friday" or "Next Tuesday"
     /// </summary>
-    private static string FormatRunoutAbsolute(TimeSpan eta, bool isWeekly)
+    private static string FormatRunoutAbsolute(TimeSpan roundedEta, bool isWeekly)
     {
         var now = DateTime.Now;
-        var runoutTime = RoundTo15Min(now.Add(eta));
+        var runoutTime = now.Add(roundedEta);
 
         if (!isWeekly)
         {
-            // Session: 24h format, rounded to 15min
             if (runoutTime.Date == now.Date)
                 return runoutTime.ToString("H:mm");
             return $"tomorrow {runoutTime.ToString("H:mm")}";
@@ -307,20 +318,8 @@ public partial class PopoverViewModel : ObservableObject
 
         // Weekly: different day → show day of week
         var daysAway = (runoutTime.Date - now.Date).Days;
-        var dow = runoutTime.ToString("dddd"); // e.g. "Tuesday"
-
-        // If within this week (1-6 days), just "Friday"
-        // If next week (7+ days), "Next Tuesday"
+        var dow = runoutTime.ToString("dddd");
         return daysAway >= 7 ? $"Next {dow}" : dow;
-    }
-
-    private static DateTime RoundTo15Min(DateTime dt)
-    {
-        var minutes = dt.Minute;
-        var rounded = (int)(Math.Round(minutes / 15.0) * 15);
-        if (rounded == 60)
-            return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0).AddHours(1);
-        return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, rounded, 0);
     }
 
     private static string FormatTimeSpan(TimeSpan ts)
