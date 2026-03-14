@@ -94,7 +94,8 @@
                                         CornerRadius="1" Background="#80FFFFFF" Visibility="Collapsed" />
                             </Grid>
                             <TextBlock x:Name="SessionResetText" FontSize="12" Margin="0,6,0,0" Foreground="#999" />
-                            <StackPanel x:Name="SessionPacePanel" Orientation="Horizontal" Margin="0,4,0,0" Visibility="Collapsed">
+                            <StackPanel x:Name="SessionPacePanel" Orientation="Horizontal" Margin="0,4,0,0"
+                                        Visibility="Collapsed" Background="Transparent" Cursor="Help">
                                 <Ellipse x:Name="SessionPaceDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
                                 <TextBlock x:Name="SessionPaceText" FontSize="11" VerticalAlignment="Center" />
                             </StackPanel>
@@ -118,7 +119,8 @@
                                         CornerRadius="1" Background="#80FFFFFF" Visibility="Collapsed" />
                             </Grid>
                             <TextBlock x:Name="WeeklyResetText" FontSize="12" Margin="0,5,0,0" Foreground="#999" />
-                            <StackPanel x:Name="WeeklyPacePanel" Orientation="Horizontal" Margin="0,4,0,0" Visibility="Collapsed">
+                            <StackPanel x:Name="WeeklyPacePanel" Orientation="Horizontal" Margin="0,4,0,0"
+                                        Visibility="Collapsed" Background="Transparent" Cursor="Help">
                                 <Ellipse x:Name="WeeklyPaceDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
                                 <TextBlock x:Name="WeeklyPaceText" FontSize="11" VerticalAlignment="Center" />
                             </StackPanel>
