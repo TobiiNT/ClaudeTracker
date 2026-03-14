@@ -163,10 +163,16 @@ public partial class FloatingUsageWindow : Window
             SessionPercentText.Text = _viewModel.SessionPercentageText;
             SessionResetText.Text = _viewModel.SessionResetText;
             SessionProgressFill.Background = GetStatusBrush(_viewModel.SessionStatus);
+            UpdatePacePanel(SessionPacePanel, SessionPaceDot, SessionPaceText, SessionEstimateText,
+                _viewModel.SessionPaceLabel, _viewModel.SessionPaceColorHex,
+                _viewModel.SessionEstimateText, _viewModel.SessionPaceTooltip);
 
             WeeklyPercentText.Text = _viewModel.WeeklyPercentageText;
             WeeklyResetText.Text = _viewModel.WeeklyResetText;
             WeeklyProgressFill.Background = GetStatusBrush(_viewModel.WeeklyStatus);
+            UpdatePacePanel(WeeklyPacePanel, WeeklyPaceDot, WeeklyPaceText, WeeklyEstimateText,
+                _viewModel.WeeklyPaceLabel, _viewModel.WeeklyPaceColorHex,
+                _viewModel.WeeklyEstimateText, _viewModel.WeeklyPaceTooltip);
 
             LastUpdatedText.Text = _viewModel.LastUpdatedText;
 
@@ -186,6 +192,41 @@ public partial class FloatingUsageWindow : Window
         {
             fill.Width = parent.ActualWidth * Math.Clamp(percentage / 100.0, 0, 1);
         }
+    }
+
+    private static void UpdatePacePanel(
+        System.Windows.Controls.StackPanel panel,
+        System.Windows.Shapes.Ellipse dot,
+        System.Windows.Controls.TextBlock paceText,
+        System.Windows.Controls.TextBlock estimateText,
+        string label, string colorHex, string estimate, string tooltip)
+    {
+        if (!string.IsNullOrEmpty(label))
+        {
+            panel.Visibility = Visibility.Visible;
+            dot.Fill = BrushFromHex(colorHex);
+            paceText.Text = label;
+            paceText.Foreground = BrushFromHex(colorHex);
+            estimateText.Text = estimate;
+            panel.ToolTip = tooltip;
+        }
+        else
+        {
+            panel.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private static SolidColorBrush BrushFromHex(string hex)
+    {
+        hex = hex.TrimStart('#');
+        if (hex.Length == 6 &&
+            byte.TryParse(hex[..2], System.Globalization.NumberStyles.HexNumber, null, out var r) &&
+            byte.TryParse(hex[2..4], System.Globalization.NumberStyles.HexNumber, null, out var g) &&
+            byte.TryParse(hex[4..6], System.Globalization.NumberStyles.HexNumber, null, out var b))
+        {
+            return new SolidColorBrush(Color.FromRgb(r, g, b));
+        }
+        return new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
     }
 
     private static SolidColorBrush GetStatusBrush(UsageStatusLevel status)

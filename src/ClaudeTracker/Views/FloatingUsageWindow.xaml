@@ -71,6 +71,13 @@
                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                 </Border>
                 <TextBlock x:Name="SessionResetText" FontSize="11" Margin="0,3,0,0" Foreground="#999" />
+                <StackPanel x:Name="SessionPacePanel" Orientation="Horizontal" Margin="0,2,0,0"
+                            Visibility="Collapsed" Background="Transparent" Cursor="Help">
+                    <Ellipse x:Name="SessionPaceDot" Width="6" Height="6" Margin="0,0,4,0" VerticalAlignment="Center" />
+                    <TextBlock x:Name="SessionPaceText" FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock x:Name="SessionEstimateText" FontSize="10" Margin="6,0,0,0"
+                               VerticalAlignment="Center" Foreground="#999" />
+                </StackPanel>
             </StackPanel>
 
             <!-- Weekly Usage -->
@@ -85,6 +92,13 @@
                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                 </Border>
                 <TextBlock x:Name="WeeklyResetText" FontSize="11" Margin="0,3,0,0" Foreground="#999" />
+                <StackPanel x:Name="WeeklyPacePanel" Orientation="Horizontal" Margin="0,2,0,0"
+                            Visibility="Collapsed" Background="Transparent" Cursor="Help">
+                    <Ellipse x:Name="WeeklyPaceDot" Width="6" Height="6" Margin="0,0,4,0" VerticalAlignment="Center" />
+                    <TextBlock x:Name="WeeklyPaceText" FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock x:Name="WeeklyEstimateText" FontSize="10" Margin="6,0,0,0"
+                               VerticalAlignment="Center" Foreground="#999" />
+                </StackPanel>
             </StackPanel>
 
             <!-- Last Updated -->
