@@ -15,7 +15,7 @@
 
         <!-- Content -->
         <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    MaxWidth="400" Margin="24">
+                    MaxWidth="400" Margin="24,16,24,8">
 
             <!-- Step 1: Welcome -->
             <StackPanel x:Name="Step1" HorizontalAlignment="Center">
@@ -117,7 +117,7 @@
 
         <!-- Navigation buttons -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
-                    Margin="24,12">
+                    Margin="24,8,24,16">
             <Button x:Name="SkipButton" Content="Skip" Margin="0,0,8,0"
                     Style="{StaticResource MaterialDesignFlatButton}" />
             <Button x:Name="NextButton" Content="Get Started"
