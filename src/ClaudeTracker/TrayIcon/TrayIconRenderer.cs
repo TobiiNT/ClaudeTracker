@@ -19,7 +19,9 @@ public class TrayIconRenderer
         MenuBarIconStyle style,
         bool monochrome = false,
         bool isDarkMode = false,
-        string? customColorHex = null)
+        string? customColorHex = null,
+        bool showIconNames = false,
+        string? metricPrefix = null)
     {
         var dpiScale = GetDpiScale();
         var size = (int)(BaseSize * dpiScale);
@@ -42,7 +44,8 @@ public class TrayIconRenderer
                 DrawProgressBar(canvas, size, percentage, statusColor, foreground);
                 break;
             case MenuBarIconStyle.Percentage:
-                DrawPercentage(canvas, size, percentage, statusColor, foreground);
+                DrawPercentage(canvas, size, percentage, statusColor, foreground,
+                    showIconNames ? metricPrefix : null);
                 break;
             case MenuBarIconStyle.Ring:
                 DrawRing(canvas, size, percentage, statusColor, foreground);
@@ -144,11 +147,13 @@ public class TrayIconRenderer
         }
     }
 
-    private void DrawPercentage(SKCanvas canvas, int size, double percentage, SKColor fillColor, SKColor outlineColor)
+    private void DrawPercentage(SKCanvas canvas, int size, double percentage, SKColor fillColor, SKColor outlineColor,
+        string? prefix = null)
     {
-        var text = $"{(int)Math.Round(percentage)}";
+        var text = prefix != null ? $"{prefix}{(int)Math.Round(percentage)}" : $"{(int)Math.Round(percentage)}";
         using var typeface = SKTypeface.FromFamilyName("Segoe UI", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
-        using var font = new SKFont(typeface, size * 0.65f);
+        var fontSize = prefix != null ? size * 0.50f : size * 0.65f;
+        using var font = new SKFont(typeface, fontSize);
         using var paint = new SKPaint
         {
             Color = fillColor,

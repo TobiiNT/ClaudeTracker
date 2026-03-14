@@ -28,7 +28,12 @@ public partial class FloatingUsageWindow : Window
         SwitchToPopoverButton.Click += (_, _) => SwitchToPopoverRequested?.Invoke(this, EventArgs.Empty);
         DockButton.Click += (_, _) => ToggleDocked();
 
-        _viewModel.PropertyChanged += (_, _) => UpdateUI();
+        var uiDebounce = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(16)
+        };
+        uiDebounce.Tick += (_, _) => { uiDebounce.Stop(); UpdateUI(); };
+        _viewModel.PropertyChanged += (_, _) => { uiDebounce.Stop(); uiDebounce.Start(); };
         SizeChanged += (_, _) => UpdateProgressBars();
         LocationChanged += OnLocationChanged;
 
@@ -124,12 +129,38 @@ public partial class FloatingUsageWindow : Window
             SessionPercentText.Text = _viewModel.SessionPercentageText;
             SessionResetText.Text = _viewModel.SessionResetText;
             SessionProgressFill.Background = GetStatusBrush(_viewModel.SessionStatus);
+            UpdatePacePanel(SessionPacePanel, SessionPaceDot, SessionPaceText, SessionEstimateText,
+                _viewModel.SessionPaceLabel, _viewModel.SessionPaceColorHex,
+                _viewModel.SessionEstimateText, _viewModel.SessionPaceTooltip);
 
             WeeklyPercentText.Text = _viewModel.WeeklyPercentageText;
             WeeklyResetText.Text = _viewModel.WeeklyResetText;
             WeeklyProgressFill.Background = GetStatusBrush(_viewModel.WeeklyStatus);
+            UpdatePacePanel(WeeklyPacePanel, WeeklyPaceDot, WeeklyPaceText, WeeklyEstimateText,
+                _viewModel.WeeklyPaceLabel, _viewModel.WeeklyPaceColorHex,
+                _viewModel.WeeklyEstimateText, _viewModel.WeeklyPaceTooltip);
 
-            LastUpdatedText.Text = _viewModel.LastUpdatedText;
+            // Status line
+            if (_viewModel.IsRefreshing)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
+                LastUpdatedText.Text = "Refreshing...";
+            }
+            else if (!_viewModel.HasCredentials)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
+                LastUpdatedText.Text = "No account connected";
+            }
+            else if (!_viewModel.HasClaudeUsage)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+                LastUpdatedText.Text = "Waiting for data...";
+            }
+            else
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)); // green = connected
+                LastUpdatedText.Text = _viewModel.LastUpdatedText;
+            }
 
             UpdateProgressBars();
         });
@@ -149,14 +180,28 @@ public partial class FloatingUsageWindow : Window
         }
     }
 
-    private static SolidColorBrush GetStatusBrush(UsageStatusLevel status)
+    private static void UpdatePacePanel(
+        System.Windows.Controls.StackPanel panel,
+        System.Windows.Shapes.Ellipse dot,
+        System.Windows.Controls.TextBlock paceText,
+        System.Windows.Controls.TextBlock estimateText,
+        string label, string colorHex, string estimate, string tooltip)
     {
-        return status switch
+        if (!string.IsNullOrEmpty(label))
         {
-            UsageStatusLevel.Safe => new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)),
-            UsageStatusLevel.Moderate => new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00)),
-            UsageStatusLevel.Critical => new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36)),
-            _ => new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50))
-        };
+            panel.Visibility = Visibility.Visible;
+            dot.Fill = BrushFromHex(colorHex);
+            paceText.Text = label;
+            paceText.Foreground = BrushFromHex(colorHex);
+            estimateText.Text = estimate;
+            panel.ToolTip = tooltip;
+        }
+        else
+        {
+            panel.Visibility = Visibility.Collapsed;
+        }
     }
+
+    private static SolidColorBrush BrushFromHex(string hex) => Utilities.BrushHelper.FromHex(hex);
+    private static SolidColorBrush GetStatusBrush(UsageStatusLevel status) => Utilities.BrushHelper.GetStatusBrush(status);
 }

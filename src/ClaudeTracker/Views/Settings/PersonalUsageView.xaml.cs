@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
+using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views.Settings;
@@ -17,6 +18,55 @@ public partial class PersonalUsageView : UserControl
         _vm = App.Services.GetRequiredService<PersonalUsageViewModel>();
         _apiVm = App.Services.GetRequiredService<ApiBillingViewModel>();
         DataContext = _vm;
+
+        // --- Browser sign-in (WebView2) ---
+        if (BrowserSignInWindow.IsWebView2Available())
+        {
+            BrowserSignInCard.Visibility = Visibility.Visible;
+            BrowserApiSignInCard.Visibility = Visibility.Visible;
+        }
+
+        BrowserSignInButton.Click += async (_, _) =>
+        {
+            var window = new BrowserSignInWindow("https://claude.ai/login", "claude.ai");
+            window.Owner = Window.GetWindow(this);
+            window.Show();
+            var result = await window.ResultTask;
+            if (result.HasValue)
+            {
+                SessionKeyInput.Text = result.Value.sessionKey;
+                _vm.SessionKey = result.Value.sessionKey;
+
+                var profile = App.Services.GetRequiredService<IProfileService>().ActiveProfile;
+                if (profile != null && result.Value.expiry.HasValue)
+                    profile.ClaudeSessionKeyExpiry = result.Value.expiry;
+
+                LoadingBar.Visibility = Visibility.Visible;
+                await _vm.TestConnectionCommand.ExecuteAsync(null);
+                LoadingBar.Visibility = Visibility.Collapsed;
+            }
+        };
+
+        BrowserApiSignInButton.Click += async (_, _) =>
+        {
+            var window = new BrowserSignInWindow("https://console.anthropic.com/login", "platform.claude.com");
+            window.Owner = Window.GetWindow(this);
+            window.Show();
+            var result = await window.ResultTask;
+            if (result.HasValue)
+            {
+                ApiKeyInput.Text = result.Value.sessionKey;
+                _apiVm.ApiKey = result.Value.sessionKey;
+
+                var profile = App.Services.GetRequiredService<IProfileService>().ActiveProfile;
+                if (profile != null && result.Value.expiry.HasValue)
+                    profile.ApiSessionKeyExpiry = result.Value.expiry;
+
+                ApiLoadingBar.Visibility = Visibility.Visible;
+                await _apiVm.TestConnectionCommand.ExecuteAsync(null);
+                ApiLoadingBar.Visibility = Visibility.Collapsed;
+            }
+        };
 
         // --- Claude.ai connection ---
         AutoDetectButton.Click += async (_, _) =>

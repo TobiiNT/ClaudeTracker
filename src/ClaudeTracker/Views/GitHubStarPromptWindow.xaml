@@ -1,0 +1,39 @@
+<Window x:Class="ClaudeTracker.Views.GitHubStarPromptWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" Topmost="True"
+        Width="400" SizeToContent="Height">
+    <Border CornerRadius="12" Padding="28,24"
+            Background="{DynamicResource MaterialDesign.Brush.Background}"
+            BorderBrush="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+            BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" Opacity="0.3" ShadowDepth="4" />
+        </Border.Effect>
+        <StackPanel>
+            <materialDesign:PackIcon Kind="StarOutline" Width="40" Height="40"
+                                     Foreground="#FFC107" HorizontalAlignment="Center" Margin="0,0,0,12" />
+            <TextBlock Text="Enjoying Claude Tracker?" FontSize="18" FontWeight="Bold"
+                       HorizontalAlignment="Center" Margin="0,0,0,8" />
+            <TextBlock TextWrapping="Wrap" TextAlignment="Center" FontSize="13" Margin="0,0,0,20"
+                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
+                If you find this useful, a GitHub star helps others discover it and keeps development going.
+            </TextBlock>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                <Button x:Name="StarButton" Content="Star on GitHub"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Height="36" FontSize="13" Margin="0,0,8,0" />
+                <Button x:Name="RemindButton" Content="Remind Me Later"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Height="36" FontSize="13" />
+            </StackPanel>
+            <Button x:Name="DontAskButton" Content="Don't Ask Again"
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    HorizontalAlignment="Center" FontSize="12"
+                    Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+        </StackPanel>
+    </Border>
+</Window>

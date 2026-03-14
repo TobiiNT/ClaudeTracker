@@ -68,7 +68,17 @@
                     <Border x:Name="SessionProgressFill" Background="#4CAF50"
                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                 </Border>
-                <TextBlock x:Name="SessionResetText" FontSize="11" Margin="0,3,0,0" Foreground="#999" />
+                <Grid Margin="0,3,0,0">
+                    <TextBlock x:Name="SessionResetText" FontSize="11" Foreground="#999" VerticalAlignment="Center" />
+                    <StackPanel x:Name="SessionPacePanel" Orientation="Horizontal"
+                                HorizontalAlignment="Right" Visibility="Collapsed"
+                                Background="Transparent" Cursor="Help">
+                        <TextBlock x:Name="SessionEstimateText" FontSize="10"
+                                   VerticalAlignment="Center" Foreground="#999" Margin="0,0,4,0" />
+                        <TextBlock x:Name="SessionPaceText" FontSize="10" VerticalAlignment="Center" Margin="0,0,3,0" />
+                        <Ellipse x:Name="SessionPaceDot" Width="6" Height="6" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
             </StackPanel>
 
             <!-- Weekly Usage -->
@@ -82,12 +92,24 @@
                     <Border x:Name="WeeklyProgressFill" Background="#4CAF50"
                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                 </Border>
-                <TextBlock x:Name="WeeklyResetText" FontSize="11" Margin="0,3,0,0" Foreground="#999" />
+                <Grid Margin="0,3,0,0">
+                    <TextBlock x:Name="WeeklyResetText" FontSize="11" Foreground="#999" VerticalAlignment="Center" />
+                    <StackPanel x:Name="WeeklyPacePanel" Orientation="Horizontal"
+                                HorizontalAlignment="Right" Visibility="Collapsed"
+                                Background="Transparent" Cursor="Help">
+                        <TextBlock x:Name="WeeklyEstimateText" FontSize="10"
+                                   VerticalAlignment="Center" Foreground="#999" Margin="0,0,4,0" />
+                        <TextBlock x:Name="WeeklyPaceText" FontSize="10" VerticalAlignment="Center" Margin="0,0,3,0" />
+                        <Ellipse x:Name="WeeklyPaceDot" Width="6" Height="6" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
             </StackPanel>
 
-            <!-- Last Updated -->
-            <TextBlock Grid.Row="3" x:Name="LastUpdatedText" FontSize="10"
-                       HorizontalAlignment="Center" Foreground="#BBB" Margin="0,2,0,0" />
+            <!-- Status -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
+                <Ellipse x:Name="StatusDot" Width="6" Height="6" Margin="0,0,4,0" VerticalAlignment="Center" />
+                <TextBlock x:Name="LastUpdatedText" FontSize="10" Foreground="#BBB" VerticalAlignment="Center" />
+            </StackPanel>
         </Grid>
     </Border>
 </Window>

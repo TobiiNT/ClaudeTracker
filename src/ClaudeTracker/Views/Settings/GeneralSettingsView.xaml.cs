@@ -54,6 +54,47 @@ public partial class GeneralSettingsView : UserControl
         Threshold95Toggle.Checked += (_, _) => _vm.Threshold95 = true;
         Threshold95Toggle.Unchecked += (_, _) => _vm.Threshold95 = false;
 
+        // Time display combo
+        TimeDisplayCombo.ItemsSource = new[] {
+            new { Display = "Remaining Time", Value = Models.PopoverTimeDisplay.RemainingTime },
+            new { Display = "Reset Time", Value = Models.PopoverTimeDisplay.ResetTime },
+            new { Display = "Both", Value = Models.PopoverTimeDisplay.Both }
+        };
+        TimeDisplayCombo.DisplayMemberPath = "Display";
+        TimeDisplayCombo.SelectedValuePath = "Value";
+        TimeDisplayCombo.SelectedValue = _vm.PopoverTimeDisplay;
+        TimeDisplayCombo.SelectionChanged += (_, _) =>
+        {
+            if (TimeDisplayCombo.SelectedValue is Models.PopoverTimeDisplay v) _vm.PopoverTimeDisplay = v;
+        };
+
+        // Time format combo
+        TimeFormatCombo.ItemsSource = new[] {
+            new { Display = "System Default", Value = Models.TimeFormatPreference.System },
+            new { Display = "12-Hour (3:59 PM)", Value = Models.TimeFormatPreference.TwelveHour },
+            new { Display = "24-Hour (15:59)", Value = Models.TimeFormatPreference.TwentyFourHour }
+        };
+        TimeFormatCombo.DisplayMemberPath = "Display";
+        TimeFormatCombo.SelectedValuePath = "Value";
+        TimeFormatCombo.SelectedValue = _vm.TimeFormatPreference;
+        TimeFormatCombo.SelectionChanged += (_, _) =>
+        {
+            if (TimeFormatCombo.SelectedValue is Models.TimeFormatPreference v) _vm.TimeFormatPreference = v;
+        };
+
+        // Sound toggle
+        SoundToggle.IsChecked = _vm.SoundEnabled;
+        SoundToggle.Checked += (_, _) => { _vm.SoundEnabled = true; SoundPickerPanel.Visibility = Visibility.Visible; };
+        SoundToggle.Unchecked += (_, _) => { _vm.SoundEnabled = false; SoundPickerPanel.Visibility = Visibility.Collapsed; };
+        SoundPickerPanel.Visibility = _vm.SoundEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        SoundCombo.ItemsSource = new[] { "Default", "Hand", "Asterisk", "Question", "Beep", "None" };
+        SoundCombo.SelectedItem = _vm.SoundName;
+        SoundCombo.SelectionChanged += (_, _) =>
+        {
+            if (SoundCombo.SelectedItem is string v) _vm.SoundName = v;
+        };
+
         TestAlertButton.Click += (_, _) =>
         {
             var notificationService = App.Services.GetRequiredService<INotificationService>();

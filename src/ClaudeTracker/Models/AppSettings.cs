@@ -43,4 +43,31 @@ public class AppSettings
 
     [JsonPropertyName("isFloatingWidgetDocked")]
     public bool IsFloatingWidgetDocked { get; set; }
+
+    [JsonPropertyName("hasStarredGitHub")]
+    public bool HasStarredGitHub { get; set; }
+
+    [JsonPropertyName("lastStarPromptDate")]
+    public DateTime? LastStarPromptDate { get; set; }
+
+    [JsonPropertyName("starPromptDismissedForever")]
+    public bool StarPromptDismissedForever { get; set; }
+
+    [JsonPropertyName("hasSentFeedback")]
+    public bool HasSentFeedback { get; set; }
+
+    [JsonPropertyName("lastFeedbackPromptDate")]
+    public DateTime? LastFeedbackPromptDate { get; set; }
+
+    [JsonPropertyName("feedbackPromptDismissedForever")]
+    public bool FeedbackPromptDismissedForever { get; set; }
+
+    [JsonPropertyName("feedbackRating")]
+    public int? FeedbackRating { get; set; }
+
+    [JsonPropertyName("popoverTimeDisplay")]
+    public PopoverTimeDisplay PopoverTimeDisplay { get; set; } = PopoverTimeDisplay.RemainingTime;
+
+    [JsonPropertyName("timeFormatPreference")]
+    public TimeFormatPreference TimeFormatPreference { get; set; } = TimeFormatPreference.System;
 }

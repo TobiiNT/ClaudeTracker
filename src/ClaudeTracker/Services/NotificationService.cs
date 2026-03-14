@@ -8,8 +8,15 @@ namespace ClaudeTracker.Services;
 
 public class NotificationService : INotificationService
 {
+    private readonly IProfileService _profileService;
     private readonly HashSet<string> _sentNotifications = new();
+    private readonly HashSet<string> _sentExpiryNotifications = new();
     private DateTime _lastNotificationTime = DateTime.MinValue;
+
+    public NotificationService(IProfileService profileService)
+    {
+        _profileService = profileService;
+    }
 
     public event EventHandler? NotificationClicked;
 
@@ -17,7 +24,7 @@ public class NotificationService : INotificationService
     {
         if (!profile.NotificationSettings.Enabled) return;
 
-        var percentage = usage.SessionPercentage;
+        var percentage = usage.EffectiveSessionPercentage;
         var profileKey = profile.Id.ToString();
 
         if (percentage >= Constants.NotificationThresholds.Critical
@@ -41,6 +48,36 @@ public class NotificationService : INotificationService
         {
             _sentNotifications.RemoveWhere(k => k.StartsWith(profileKey));
         }
+    }
+
+    public void CheckKeyExpiry(Profile profile)
+    {
+        CheckSingleKeyExpiry(profile, "claude", profile.ClaudeSessionKeyExpiry);
+        CheckSingleKeyExpiry(profile, "api", profile.ApiSessionKeyExpiry);
+    }
+
+    private void CheckSingleKeyExpiry(Profile profile, string keyType, DateTime? expiry)
+    {
+        if (!expiry.HasValue) return;
+
+        var remaining = expiry.Value - DateTime.UtcNow;
+        if (remaining.TotalHours > 24) return;
+
+        var expiryKey = $"{profile.Id}_expiry_{keyType}";
+        if (_sentExpiryNotifications.Contains(expiryKey)) return;
+
+        var title = $"Session Key Expiring — {profile.Name}";
+        var message = remaining.TotalHours > 0
+            ? $"Your {keyType} session key expires in {(int)remaining.TotalHours}h {remaining.Minutes}m. Re-authenticate to avoid interruption."
+            : $"Your {keyType} session key has expired. Re-authenticate to continue tracking.";
+
+        SendNotification(title, message, NotificationPopup.NotificationLevel.Warning);
+        _sentExpiryNotifications.Add(expiryKey);
+    }
+
+    public void ResetExpiryNotifications(Guid profileId, string keyType)
+    {
+        _sentExpiryNotifications.Remove($"{profileId}_expiry_{keyType}");
     }
 
     private void SendThresholdNotification(string profileKey, int threshold, double percentage, string profileName)
@@ -78,12 +115,34 @@ public class NotificationService : INotificationService
                 popup.Show();
             });
 
+            PlayNotificationSound();
             LoggingService.Instance.Log($"Notification sent: {title}");
         }
         catch (Exception ex)
         {
             LoggingService.Instance.LogError("Failed to send notification", ex);
         }
+    }
+
+    private void PlayNotificationSound()
+    {
+        try
+        {
+            var profile = _profileService.ActiveProfile;
+            if (profile?.NotificationSettings.SoundEnabled != true) return;
+
+            var sound = profile.NotificationSettings.SoundName switch
+            {
+                "Hand" => System.Media.SystemSounds.Hand,
+                "Asterisk" => System.Media.SystemSounds.Asterisk,
+                "Question" => System.Media.SystemSounds.Question,
+                "Beep" => System.Media.SystemSounds.Beep,
+                "None" => (System.Media.SystemSound?)null,
+                _ => System.Media.SystemSounds.Exclamation
+            };
+            sound?.Play();
+        }
+        catch { /* ignore sound failures */ }
     }
 
     // Keep the two-parameter overload for interface compatibility

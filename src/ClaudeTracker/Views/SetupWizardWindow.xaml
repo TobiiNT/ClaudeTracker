@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Welcome to Claude Tracker"
-        Width="500" Height="400"
+        Width="500" SizeToContent="Height" MinHeight="400" MaxHeight="600"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="{DynamicResource MaterialDesign.Brush.Background}">
@@ -15,7 +15,7 @@
 
         <!-- Content -->
         <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    MaxWidth="380" Margin="24">
+                    MaxWidth="400" Margin="24,16,24,8">
 
             <!-- Step 1: Welcome -->
             <StackPanel x:Name="Step1" HorizontalAlignment="Center">
@@ -30,22 +30,76 @@
                            Margin="0,0,0,24" />
             </StackPanel>
 
-            <!-- Step 2: Session Key -->
+            <!-- Step 2: Connect -->
             <StackPanel x:Name="Step2" Visibility="Collapsed">
                 <TextBlock Text="Connect Your Account" FontSize="18" FontWeight="Bold"
-                           Margin="0,0,0,8" />
-                <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,16"
-                           Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                    Enter your Claude.ai session key to get started.
-                    You can find this in your browser's DevTools.
-                </TextBlock>
-                <TextBox x:Name="WizardKeyInput"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         materialDesign:HintAssist.Hint="sk-ant-..."
-                         FontFamily="Consolas" FontSize="12" Margin="0,0,0,8" />
-                <TextBlock x:Name="WizardStatus" FontSize="12" Margin="0,0,0,8" />
+                           Margin="0,0,0,12" />
+
+                <!-- Option A: CLI Auto-Detect -->
+                <Border Style="{StaticResource UsageCardStyle}" Padding="14" Margin="0,0,0,8">
+                    <Grid>
+                        <StackPanel Margin="0,0,90,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <materialDesign:PackIcon Kind="Console" Width="16" Height="16"
+                                                         Foreground="#7C4DFF" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Claude Code CLI" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="Auto-detect from Claude Code (recommended)"
+                                       FontSize="11" Foreground="#999" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button x:Name="AutoDetectButton" Content="Detect"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Height="32" FontSize="12" />
+                    </Grid>
+                </Border>
+
+                <!-- Option B: Browser Sign-In -->
+                <Border x:Name="BrowserCard" Style="{StaticResource UsageCardStyle}" Padding="14" Margin="0,0,0,8"
+                        Visibility="Collapsed">
+                    <Grid>
+                        <StackPanel Margin="0,0,90,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <materialDesign:PackIcon Kind="Web" Width="16" Height="16"
+                                                         Foreground="#2196F3" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Browser Sign-In" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="Sign in directly in an embedded browser"
+                                       FontSize="11" Foreground="#999" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button x:Name="BrowserSignInButton" Content="Sign In"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Height="32" FontSize="12" />
+                    </Grid>
+                </Border>
+
+                <!-- Option C: Manual Session Key -->
+                <Border Style="{StaticResource UsageCardStyle}" Padding="14">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <materialDesign:PackIcon Kind="KeyVariant" Width="16" Height="16"
+                                                     Foreground="#FF9800" Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Session Key" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Paste your session key from browser DevTools"
+                                   FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,0,0,8" />
+                        <Grid>
+                            <TextBox x:Name="WizardKeyInput"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     materialDesign:HintAssist.Hint="sk-ant-..."
+                                     FontFamily="Consolas" FontSize="11" Margin="0,0,80,0" />
+                            <Button x:Name="ConnectButton" Content="Connect"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Height="32" FontSize="12" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock x:Name="WizardStatus" FontSize="12" Margin="0,8,0,0" />
                 <ProgressBar x:Name="WizardProgress" IsIndeterminate="True" Visibility="Collapsed"
-                             Style="{StaticResource MaterialDesignLinearProgressBar}" />
+                             Style="{StaticResource MaterialDesignLinearProgressBar}" Margin="0,4,0,0" />
             </StackPanel>
 
             <!-- Step 3: Done -->
@@ -63,7 +117,7 @@
 
         <!-- Navigation buttons -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
-                    Margin="24,12">
+                    Margin="24,8,24,16">
             <Button x:Name="SkipButton" Content="Skip" Margin="0,0,8,0"
                     Style="{StaticResource MaterialDesignFlatButton}" />
             <Button x:Name="NextButton" Content="Get Started"

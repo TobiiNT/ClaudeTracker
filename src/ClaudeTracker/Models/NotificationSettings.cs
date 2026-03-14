@@ -16,4 +16,10 @@ public class NotificationSettings
 
     [JsonPropertyName("threshold95Enabled")]
     public bool Threshold95Enabled { get; set; } = true;
+
+    [JsonPropertyName("soundEnabled")]
+    public bool SoundEnabled { get; set; } = true;
+
+    [JsonPropertyName("soundName")]
+    public string SoundName { get; set; } = "Default";
 }

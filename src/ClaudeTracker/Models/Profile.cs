@@ -28,6 +28,12 @@ public class Profile
     [JsonPropertyName("cliCredentialsJSON")]
     public string? CliCredentialsJSON { get; set; }
 
+    [JsonPropertyName("claudeSessionKeyExpiry")]
+    public DateTime? ClaudeSessionKeyExpiry { get; set; }
+
+    [JsonPropertyName("apiSessionKeyExpiry")]
+    public DateTime? ApiSessionKeyExpiry { get; set; }
+
     // CLI Account Sync Metadata
     [JsonPropertyName("hasCliAccount")]
     public bool HasCliAccount { get; set; }
@@ -48,7 +54,7 @@ public class Profile
 
     // Behavior Settings (Per-Profile)
     [JsonPropertyName("refreshInterval")]
-    public double RefreshInterval { get; set; } = 30.0;
+    public double RefreshInterval { get; set; } = 60.0;
 
     [JsonPropertyName("autoStartSessionEnabled")]
     public bool AutoStartSessionEnabled { get; set; }

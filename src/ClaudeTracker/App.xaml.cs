@@ -45,6 +45,14 @@ public partial class App : Application
         _services = serviceCollection.BuildServiceProvider();
         Services = _services;
 
+        // Show setup wizard on first launch
+        var settingsService = _services.GetRequiredService<ISettingsService>();
+        if (!settingsService.Settings.HasCompletedSetup)
+        {
+            var wizard = new Views.SetupWizardWindow();
+            wizard.ShowDialog();
+        }
+
         // Initialize theme
         InitializeTheme();
 
@@ -64,6 +72,28 @@ public partial class App : Application
         _globalHotkeyService = new GlobalHotkeyService();
         _globalHotkeyService.HotkeyPressed += (_, _) => _trayIconManager?.TogglePopover(fromHotkey: true);
         _globalHotkeyService.Register();
+
+        // Start network monitor
+        var networkMonitor = _services.GetRequiredService<INetworkMonitorService>();
+        networkMonitor.NetworkRestored += (_, _) => refreshCoordinator.RefreshNow();
+        networkMonitor.Start();
+
+        // Engagement prompts (delayed to not block startup)
+        _ = Task.Delay(5000).ContinueWith(_ =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var appSettings = settingsService.Settings;
+                if (Views.GitHubStarPromptWindow.ShouldShow(appSettings))
+                {
+                    new Views.GitHubStarPromptWindow().Show();
+                }
+                else if (Views.FeedbackPromptWindow.ShouldShow(appSettings))
+                {
+                    new Views.FeedbackPromptWindow().Show();
+                }
+            });
+        });
 
         // Listen for system theme changes
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
@@ -138,6 +168,8 @@ public partial class App : Application
         services.AddSingleton<LaunchAtLoginService>();
         services.AddSingleton<LanguageService>();
         services.AddSingleton<IUpdateService, UpdateService>();
+        services.AddSingleton<IClaudeStatusService, ClaudeStatusService>();
+        services.AddSingleton<INetworkMonitorService, NetworkMonitorService>();
 
         // Tray
         services.AddSingleton<TrayIconManager>();

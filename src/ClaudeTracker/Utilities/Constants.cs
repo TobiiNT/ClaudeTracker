@@ -14,7 +14,7 @@ public static class Constants
 
     public static class RefreshIntervals
     {
-        public const double DefaultSeconds = 30;
+        public const double DefaultSeconds = 60;
         public const double MinSeconds = 10;
         public const double MaxSeconds = 300;
     }
@@ -34,6 +34,21 @@ public static class Constants
         public const string Owner = "TobiiNT";
         public const string Repo = "ClaudeTracker";
         public const string RepoUrl = "https://github.com/TobiiNT/ClaudeTracker";
+    }
+
+    public static class Feedback
+    {
+        // Google Forms integration — fill in after creating your form
+        public const string GoogleFormId = "1FAIpQLScq3wQ3hgs6JnrlgRuZergFbhrBEk2j81wBGJb4OC9S-gAEjA";
+        public const string EntryRating = "entry.351097210";
+        public const string EntryComment = "entry.2038771915";
+        public const string EntryVersion = "entry.752645992";
+
+        public static bool IsConfigured => !string.IsNullOrEmpty(GoogleFormId);
+        public static string SubmitUrl => $"https://docs.google.com/forms/d/e/{GoogleFormId}/formResponse";
+
+        public const double PromptAfterDays = 7.0;
+        public const double RemindIntervalDays = 14.0;
     }
 
     public static class UITiming
@@ -64,6 +79,12 @@ public static class Constants
     {
         public const double CheckIntervalMinutes = 5.0;
         public const string HaikuModel = "claude-haiku-4-5-20251001";
+    }
+
+    public static class StatusAPI
+    {
+        public const string StatusUrl = "https://status.claude.com/api/v2/status.json";
+        public const double RefreshIntervalMinutes = 5.0;
     }
 
     public static string AppDataPath =>

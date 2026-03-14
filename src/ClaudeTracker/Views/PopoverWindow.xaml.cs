@@ -42,7 +42,13 @@ public partial class PopoverWindow : Window
                 _viewModel.SwitchProfileCommand.Execute(id);
         };
 
-        _viewModel.PropertyChanged += (_, _) => UpdateUI();
+        // Debounce: batch rapid property changes into one UI update
+        var uiDebounce = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(16) // ~1 frame at 60fps
+        };
+        uiDebounce.Tick += (_, _) => { uiDebounce.Stop(); UpdateUI(); };
+        _viewModel.PropertyChanged += (_, _) => { uiDebounce.Stop(); uiDebounce.Start(); };
 
         SizeChanged += (_, e) =>
         {
@@ -67,6 +73,20 @@ public partial class PopoverWindow : Window
                 App.Services.GetRequiredService<Services.Interfaces.IProfileService>().ActiveProfile?.Id;
             _suppressSelectionChanged = false;
 
+            // Claude system status
+            if (_viewModel.ShowClaudeStatus)
+            {
+                ClaudeStatusPanel.Visibility = Visibility.Visible;
+                ClaudeStatusDot.Fill = BrushFromHex(_viewModel.ClaudeStatusColorHex);
+                ClaudeStatusText.Text = _viewModel.ClaudeStatusDescription;
+                ClaudeStatusText.Foreground = BrushFromHex(_viewModel.ClaudeStatusColorHex);
+                ClaudeStatusTooltip.Text = $"{_viewModel.ClaudeStatusDescription}\nClick to view details on status.claude.com";
+            }
+            else
+            {
+                ClaudeStatusPanel.Visibility = Visibility.Collapsed;
+            }
+
             NoCredentialsPanel.Visibility = _viewModel.HasCredentials ? Visibility.Collapsed : Visibility.Visible;
             SessionCard.Visibility = _viewModel.HasClaudeUsage ? Visibility.Visible : Visibility.Collapsed;
             WeeklyCard.Visibility = _viewModel.HasClaudeUsage ? Visibility.Visible : Visibility.Collapsed;
@@ -76,10 +96,40 @@ public partial class PopoverWindow : Window
             SessionResetText.Text = _viewModel.SessionResetText;
             SessionProgressFill.Background = GetStatusBrush(_viewModel.SessionStatus);
 
+            // Session pace
+            if (!string.IsNullOrEmpty(_viewModel.SessionPaceLabel))
+            {
+                SessionPacePanel.Visibility = Visibility.Visible;
+                SessionPaceDot.Fill = BrushFromHex(_viewModel.SessionPaceColorHex);
+                SessionPaceText.Text = _viewModel.SessionPaceLabel;
+                SessionPaceText.Foreground = BrushFromHex(_viewModel.SessionPaceColorHex);
+                SessionEstimateText.Text = _viewModel.SessionEstimateText;
+                SessionPacePanel.ToolTip = _viewModel.SessionPaceTooltip;
+            }
+            else
+            {
+                SessionPacePanel.Visibility = Visibility.Collapsed;
+            }
+
             // Weekly
             WeeklyPercentText.Text = _viewModel.WeeklyPercentageText;
             WeeklyResetText.Text = _viewModel.WeeklyResetText;
             WeeklyProgressFill.Background = GetStatusBrush(_viewModel.WeeklyStatus);
+
+            // Weekly pace
+            if (!string.IsNullOrEmpty(_viewModel.WeeklyPaceLabel))
+            {
+                WeeklyPacePanel.Visibility = Visibility.Visible;
+                WeeklyPaceDot.Fill = BrushFromHex(_viewModel.WeeklyPaceColorHex);
+                WeeklyPaceText.Text = _viewModel.WeeklyPaceLabel;
+                WeeklyPaceText.Foreground = BrushFromHex(_viewModel.WeeklyPaceColorHex);
+                WeeklyEstimateText.Text = _viewModel.WeeklyEstimateText;
+                WeeklyPacePanel.ToolTip = _viewModel.WeeklyPaceTooltip;
+            }
+            else
+            {
+                WeeklyPacePanel.Visibility = Visibility.Collapsed;
+            }
 
             // Model-specific
             OpusPercentText.Text = _viewModel.OpusPercentageText;
@@ -98,9 +148,27 @@ public partial class PopoverWindow : Window
             ApiUsedText.Text = $"Used: {_viewModel.ApiUsedText}";
             ApiRemainingText.Text = $"Remaining: {_viewModel.ApiRemainingText}";
 
-            // Status
-            StatusDot.Fill = GetStatusBrush(_viewModel.SessionStatus);
-            StatusText.Text = _viewModel.IsRefreshing ? "Refreshing..." : _viewModel.SessionResetText;
+            // Status line
+            if (_viewModel.IsRefreshing)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3)); // blue
+                StatusText.Text = "Refreshing...";
+            }
+            else if (!_viewModel.HasCredentials)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99)); // gray
+                StatusText.Text = "No account connected";
+            }
+            else if (!_viewModel.HasClaudeUsage)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00)); // orange
+                StatusText.Text = "Waiting for usage data...";
+            }
+            else
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)); // green = connected
+                StatusText.Text = _viewModel.LastUpdatedText;
+            }
 
             LastUpdatedText.Text = _viewModel.LastUpdatedText;
 
@@ -115,6 +183,11 @@ public partial class PopoverWindow : Window
         SetProgressWidth(WeeklyProgressFill, _viewModel.WeeklyPercentage);
         SetProgressWidth(OpusProgressFill, _viewModel.OpusPercentage);
         SetProgressWidth(SonnetProgressFill, _viewModel.SonnetPercentage);
+
+        SetTimeMarker(SessionTimeMarker, SessionProgressFill,
+            _viewModel.SessionElapsedFraction, _viewModel.SessionPaceColorHex);
+        SetTimeMarker(WeeklyTimeMarker, WeeklyProgressFill,
+            _viewModel.WeeklyElapsedFraction, _viewModel.WeeklyPaceColorHex);
     }
 
     private static void SetProgressWidth(FrameworkElement fill, double percentage)
@@ -131,14 +204,42 @@ public partial class PopoverWindow : Window
             DragMove();
     }
 
-    private static SolidColorBrush GetStatusBrush(UsageStatusLevel status)
+    private static void SetTimeMarker(FrameworkElement marker, FrameworkElement progressFill,
+        double elapsedFraction, string paceColorHex)
     {
-        return status switch
+        if (elapsedFraction > 0.03 && elapsedFraction < 1.0
+            && progressFill.Parent is FrameworkElement parent
+            && parent.Parent is FrameworkElement grandParent
+            && grandParent.ActualWidth > 0)
         {
-            UsageStatusLevel.Safe => new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)),
-            UsageStatusLevel.Moderate => new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00)),
-            UsageStatusLevel.Critical => new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36)),
-            _ => new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50))
-        };
+            marker.Visibility = Visibility.Visible;
+            marker.Margin = new Thickness(grandParent.ActualWidth * elapsedFraction - 1, 0, 0, 0);
+
+            if (marker is System.Windows.Controls.Border border)
+            {
+                var color = BrushFromHex(paceColorHex);
+                color.Opacity = 0.85;
+                border.Background = color;
+                var pct = (int)(elapsedFraction * 100);
+                border.ToolTip = $"Time elapsed: {pct}% of window\nUsage should ideally be at or below this point";
+            }
+        }
+        else
+        {
+            marker.Visibility = Visibility.Collapsed;
+        }
     }
+
+    private void ClaudeStatusPanel_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(
+                "https://status.claude.com") { UseShellExecute = true });
+        }
+        catch { }
+    }
+
+    private static SolidColorBrush BrushFromHex(string hex) => Utilities.BrushHelper.FromHex(hex);
+    private static SolidColorBrush GetStatusBrush(UsageStatusLevel status) => Utilities.BrushHelper.GetStatusBrush(status);
 }

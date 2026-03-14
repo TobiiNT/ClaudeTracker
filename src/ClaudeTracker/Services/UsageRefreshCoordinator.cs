@@ -1,4 +1,5 @@
 using System.Windows.Threading;
+using ClaudeTracker.Models;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.Utilities;
 
@@ -9,9 +10,13 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     private readonly IClaudeApiService _apiService;
     private readonly IProfileService _profileService;
     private readonly INotificationService _notificationService;
+    private readonly IClaudeStatusService _statusService;
     private DispatcherTimer? _timer;
+    private ClaudeStatus _cachedStatus = ClaudeStatus.Unknown;
+    private DateTime _lastStatusFetch = DateTime.MinValue;
 
     public bool IsRunning => _timer?.IsEnabled ?? false;
+    public ClaudeStatus CurrentStatus => _cachedStatus;
 
     public event EventHandler? RefreshStarted;
     public event EventHandler? RefreshCompleted;
@@ -20,11 +25,13 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     public UsageRefreshCoordinator(
         IClaudeApiService apiService,
         IProfileService profileService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IClaudeStatusService statusService)
     {
         _apiService = apiService;
         _profileService = profileService;
         _notificationService = notificationService;
+        _statusService = statusService;
 
         Microsoft.Win32.SystemEvents.PowerModeChanged += OnPowerModeChanged;
     }
@@ -90,12 +97,21 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
                 _notificationService.CheckAndNotify(profile, usage);
             }
 
+            _notificationService.CheckKeyExpiry(profile);
+
             // Fetch API Console usage
             if (profile.HasAPIConsole)
             {
                 var apiUsage = await _apiService.FetchAPIUsageData(
                     profile.ApiOrganizationId!, profile.ApiSessionKey!);
                 _profileService.UpdateUsageData(profile.Id, apiUsage: apiUsage);
+            }
+
+            // Fetch Claude system status (every 5 minutes)
+            if ((DateTime.UtcNow - _lastStatusFetch).TotalMinutes >= Constants.StatusAPI.RefreshIntervalMinutes)
+            {
+                _cachedStatus = await _statusService.FetchStatusAsync();
+                _lastStatusFetch = DateTime.UtcNow;
             }
 
             RefreshCompleted?.Invoke(this, EventArgs.Empty);

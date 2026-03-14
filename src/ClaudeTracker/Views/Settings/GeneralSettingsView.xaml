@@ -1,16 +1,17 @@
 <UserControl x:Class="ClaudeTracker.Views.Settings.GeneralSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:localization="clr-namespace:ClaudeTracker.Localization">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
         <StackPanel MaxWidth="480">
-            <TextBlock Text="General" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="{x:Static localization:Strings.General}" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
             <TextBlock Text="Configure refresh, startup, and notifications"
                        FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
                        Margin="0,0,0,20" />
 
             <!-- Refresh Interval -->
-            <TextBlock Text="Refresh Interval" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+            <TextBlock Text="{x:Static localization:Strings.RefreshInterval}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
             <Grid Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -24,10 +25,10 @@
             </Grid>
 
             <!-- Startup -->
-            <TextBlock Text="Startup" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="{x:Static localization:Strings.Startup}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
-                    <TextBlock Text="Launch at login" FontSize="13" />
+                    <TextBlock Text="{x:Static localization:Strings.LaunchAtLogin}" FontSize="13" />
                     <TextBlock Text="Automatically start Claude Tracker when you log in to Windows"
                                FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
@@ -36,7 +37,7 @@
             </Grid>
             <Grid Margin="0,10,0,0">
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
-                    <TextBlock Text="Auto-start session when at 0%" FontSize="13" />
+                    <TextBlock Text="{x:Static localization:Strings.AutoStartSession}" FontSize="13" />
                     <TextBlock Text="When usage resets to 0%, automatically send a message to start a new session so tracking begins immediately"
                                FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
@@ -45,7 +46,7 @@
             </Grid>
             <Grid Margin="0,10,0,20">
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
-                    <TextBlock Text="Check overage spend limit" FontSize="13" />
+                    <TextBlock Text="{x:Static localization:Strings.CheckOverageLimit}" FontSize="13" />
                     <TextBlock Text="Track and display overage costs when you exceed your plan's included usage"
                                FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
@@ -53,40 +54,65 @@
                               Style="{StaticResource CompactSwitch}" />
             </Grid>
 
-            <!-- Notifications -->
-            <TextBlock Text="Notifications" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <!-- Time & Display -->
+            <TextBlock Text="{x:Static localization:Strings.TimeAndDisplay}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
-                <TextBlock Text="Enable notifications" VerticalAlignment="Center" FontSize="13" />
+                <TextBlock Text="{x:Static localization:Strings.ResetTimeFormat}" VerticalAlignment="Center" FontSize="13" />
+                <ComboBox x:Name="TimeDisplayCombo" HorizontalAlignment="Right" Width="160"
+                          Style="{StaticResource MaterialDesignComboBox}" FontSize="12" />
+            </Grid>
+            <Grid Margin="0,10,0,20">
+                <TextBlock Text="{x:Static localization:Strings.TimeFormat}" VerticalAlignment="Center" FontSize="13" />
+                <ComboBox x:Name="TimeFormatCombo" HorizontalAlignment="Right" Width="160"
+                          Style="{StaticResource MaterialDesignComboBox}" FontSize="12" />
+            </Grid>
+
+            <!-- Notifications -->
+            <TextBlock Text="{x:Static localization:Strings.Notifications}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <Grid Margin="0,6,0,0">
+                <TextBlock Text="{x:Static localization:Strings.EnableNotifications}" VerticalAlignment="Center" FontSize="13" />
                 <ToggleButton x:Name="NotifyToggle" HorizontalAlignment="Right"
                               Style="{StaticResource CompactSwitch}" />
             </Grid>
 
             <StackPanel x:Name="ThresholdPanel" Margin="16,8,0,0">
                 <Grid Margin="0,4">
-                    <TextBlock Text="Alert at 75% usage" VerticalAlignment="Center" FontSize="12" />
+                    <TextBlock Text="{x:Static localization:Strings.AlertAt75}" VerticalAlignment="Center" FontSize="12" />
                     <ToggleButton x:Name="Threshold75Toggle" HorizontalAlignment="Right"
                                   Style="{StaticResource CompactSwitch}" />
                 </Grid>
                 <Grid Margin="0,4">
-                    <TextBlock Text="Alert at 90% usage" VerticalAlignment="Center" FontSize="12" />
+                    <TextBlock Text="{x:Static localization:Strings.AlertAt90}" VerticalAlignment="Center" FontSize="12" />
                     <ToggleButton x:Name="Threshold90Toggle" HorizontalAlignment="Right"
                                   Style="{StaticResource CompactSwitch}" />
                 </Grid>
                 <Grid Margin="0,4">
-                    <TextBlock Text="Alert at 95% usage" VerticalAlignment="Center" FontSize="12" />
+                    <TextBlock Text="{x:Static localization:Strings.AlertAt95}" VerticalAlignment="Center" FontSize="12" />
                     <ToggleButton x:Name="Threshold95Toggle" HorizontalAlignment="Right"
                                   Style="{StaticResource CompactSwitch}" />
                 </Grid>
             </StackPanel>
 
+            <!-- Notification Sound -->
+            <Grid Margin="16,10,0,0">
+                <TextBlock Text="Notification sound" VerticalAlignment="Center" FontSize="12" />
+                <ToggleButton x:Name="SoundToggle" HorizontalAlignment="Right"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+            <Grid x:Name="SoundPickerPanel" Margin="16,8,0,0">
+                <TextBlock Text="Sound" VerticalAlignment="Center" FontSize="12" />
+                <ComboBox x:Name="SoundCombo" HorizontalAlignment="Right" Width="140"
+                          Style="{StaticResource MaterialDesignComboBox}" FontSize="12" />
+            </Grid>
+
             <!-- Test Alert -->
-            <Button x:Name="TestAlertButton" Content="Send Test Alert"
+            <Button x:Name="TestAlertButton" Content="{x:Static localization:Strings.SendTestAlert}"
                     Style="{StaticResource MaterialDesignOutlinedButton}"
                     HorizontalAlignment="Left" Height="34" FontSize="12"
                     Margin="16,12,0,0" />
 
             <!-- Save -->
-            <Button x:Name="SaveButton" Content="Save Changes"
+            <Button x:Name="SaveButton" Content="{x:Static localization:Strings.SaveChanges}"
                     Style="{StaticResource MaterialDesignRaisedButton}"
                     HorizontalAlignment="Right" Height="36" FontSize="12"
                     Margin="0,16,0,0" Visibility="Collapsed" />

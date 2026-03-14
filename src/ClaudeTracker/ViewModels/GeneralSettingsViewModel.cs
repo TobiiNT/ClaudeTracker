@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ClaudeTracker.Models;
 using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
+using ClaudeTracker.Utilities;
 
 namespace ClaudeTracker.ViewModels;
 
@@ -10,6 +12,7 @@ public partial class GeneralSettingsViewModel : ObservableObject
     private readonly IProfileService _profileService;
     private readonly IUsageRefreshCoordinator _refreshCoordinator;
     private readonly LaunchAtLoginService _launchAtLogin;
+    private readonly ISettingsService _settingsService;
 
     [ObservableProperty] private double _refreshInterval;
     [ObservableProperty] private bool _autoStartSession;
@@ -19,6 +22,10 @@ public partial class GeneralSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _threshold90;
     [ObservableProperty] private bool _threshold95;
     [ObservableProperty] private bool _checkOverageLimit;
+    [ObservableProperty] private bool _soundEnabled;
+    [ObservableProperty] private string _soundName = "Default";
+    [ObservableProperty] private PopoverTimeDisplay _popoverTimeDisplay = PopoverTimeDisplay.RemainingTime;
+    [ObservableProperty] private TimeFormatPreference _timeFormatPreference = TimeFormatPreference.System;
     [ObservableProperty] private bool _hasUnsavedChanges;
 
     // Snapshot
@@ -30,16 +37,22 @@ public partial class GeneralSettingsViewModel : ObservableObject
     private bool _initialT90;
     private bool _initialT95;
     private bool _initialOverage;
+    private bool _initialSoundEnabled;
+    private string _initialSoundName = "Default";
+    private PopoverTimeDisplay _initialPopoverTimeDisplay = PopoverTimeDisplay.RemainingTime;
+    private TimeFormatPreference _initialTimeFormatPreference = TimeFormatPreference.System;
     private bool _initialized;
 
     public GeneralSettingsViewModel(
         IProfileService profileService,
         IUsageRefreshCoordinator refreshCoordinator,
-        LaunchAtLoginService launchAtLogin)
+        LaunchAtLoginService launchAtLogin,
+        ISettingsService settingsService)
     {
         _profileService = profileService;
         _refreshCoordinator = refreshCoordinator;
         _launchAtLogin = launchAtLogin;
+        _settingsService = settingsService;
 
         var profile = _profileService.ActiveProfile;
         if (profile != null)
@@ -51,9 +64,14 @@ public partial class GeneralSettingsViewModel : ObservableObject
             Threshold90 = profile.NotificationSettings.Threshold90Enabled;
             Threshold95 = profile.NotificationSettings.Threshold95Enabled;
             CheckOverageLimit = profile.CheckOverageLimitEnabled;
+            SoundEnabled = profile.NotificationSettings.SoundEnabled;
+            SoundName = profile.NotificationSettings.SoundName;
         }
 
         LaunchAtLoginEnabled = _launchAtLogin.IsEnabled;
+
+        PopoverTimeDisplay = _settingsService.Settings.PopoverTimeDisplay;
+        TimeFormatPreference = _settingsService.Settings.TimeFormatPreference;
 
         // Snapshot
         _initialRefresh = RefreshInterval;
@@ -64,6 +82,10 @@ public partial class GeneralSettingsViewModel : ObservableObject
         _initialT90 = Threshold90;
         _initialT95 = Threshold95;
         _initialOverage = CheckOverageLimit;
+        _initialSoundEnabled = SoundEnabled;
+        _initialSoundName = SoundName;
+        _initialPopoverTimeDisplay = PopoverTimeDisplay;
+        _initialTimeFormatPreference = TimeFormatPreference;
         _initialized = true;
     }
 
@@ -75,6 +97,10 @@ public partial class GeneralSettingsViewModel : ObservableObject
     partial void OnThreshold90Changed(bool value) => DetectChanges();
     partial void OnThreshold95Changed(bool value) => DetectChanges();
     partial void OnCheckOverageLimitChanged(bool value) => DetectChanges();
+    partial void OnSoundEnabledChanged(bool value) => DetectChanges();
+    partial void OnSoundNameChanged(string value) => DetectChanges();
+    partial void OnPopoverTimeDisplayChanged(PopoverTimeDisplay value) => DetectChanges();
+    partial void OnTimeFormatPreferenceChanged(TimeFormatPreference value) => DetectChanges();
 
     private void DetectChanges()
     {
@@ -87,7 +113,11 @@ public partial class GeneralSettingsViewModel : ObservableObject
             Threshold75 != _initialT75 ||
             Threshold90 != _initialT90 ||
             Threshold95 != _initialT95 ||
-            CheckOverageLimit != _initialOverage;
+            CheckOverageLimit != _initialOverage ||
+            SoundEnabled != _initialSoundEnabled ||
+            SoundName != _initialSoundName ||
+            PopoverTimeDisplay != _initialPopoverTimeDisplay ||
+            TimeFormatPreference != _initialTimeFormatPreference;
     }
 
     [RelayCommand]
@@ -103,12 +133,19 @@ public partial class GeneralSettingsViewModel : ObservableObject
             profile.NotificationSettings.Threshold90Enabled = Threshold90;
             profile.NotificationSettings.Threshold95Enabled = Threshold95;
             profile.CheckOverageLimitEnabled = CheckOverageLimit;
+            profile.NotificationSettings.SoundEnabled = SoundEnabled;
+            profile.NotificationSettings.SoundName = SoundName;
             _profileService.UpdateProfile(profile);
 
             _refreshCoordinator.UpdateInterval(RefreshInterval);
         }
 
         _launchAtLogin.IsEnabled = LaunchAtLoginEnabled;
+
+        var settings = _settingsService.Settings;
+        settings.PopoverTimeDisplay = PopoverTimeDisplay;
+        settings.TimeFormatPreference = TimeFormatPreference;
+        _settingsService.Save();
 
         // Update snapshot
         _initialRefresh = RefreshInterval;
@@ -119,6 +156,10 @@ public partial class GeneralSettingsViewModel : ObservableObject
         _initialT90 = Threshold90;
         _initialT95 = Threshold95;
         _initialOverage = CheckOverageLimit;
+        _initialSoundEnabled = SoundEnabled;
+        _initialSoundName = SoundName;
+        _initialPopoverTimeDisplay = PopoverTimeDisplay;
+        _initialTimeFormatPreference = TimeFormatPreference;
         HasUnsavedChanges = false;
     }
 }

@@ -100,7 +100,7 @@ public class TrayIconManager : IDisposable
             var iconConfig = profile?.IconConfig ?? MenuBarIconConfiguration.Default;
             var sessionConfig = iconConfig.GetConfig(MenuBarMetricType.Session);
 
-            var percentage = usage?.SessionPercentage ?? 0;
+            var percentage = usage?.EffectiveSessionPercentage ?? 0;
             var displayPercentage = UsageStatusCalculator.GetDisplayPercentage(
                 percentage, iconConfig.ShowRemainingPercentage);
             var status = UsageStatusCalculator.CalculateStatus(
@@ -109,9 +109,11 @@ public class TrayIconManager : IDisposable
             var isDark = App.IsSystemDarkMode();
 
             var customColor = iconConfig.UseCustomColor ? iconConfig.CustomColorHex : null;
+            var metricPrefix = iconConfig.ShowIconNames ? "S:" : null;
             var icon = _renderer.RenderIcon(
                 displayPercentage, status, style,
-                iconConfig.MonochromeMode, isDark, customColor);
+                iconConfig.MonochromeMode, isDark, customColor,
+                iconConfig.ShowIconNames, metricPrefix);
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -277,15 +279,18 @@ public class TrayIconManager : IDisposable
 
         menu.Items.Add(new Separator { Style = sepStyle });
 
+        var hasMetrics = _profileService.ActiveProfile?.HasUsageCredentials == true;
         var floatingItem = new MenuItem
         {
             Header = "Floating Widget",
             IsCheckable = true,
             IsChecked = _settingsService.Settings.IsFloatingModeEnabled,
+            IsEnabled = hasMetrics,
             Style = itemStyle
         };
         floatingItem.Click += (_, _) => ToggleFloatingMode(floatingItem.IsChecked);
-        menu.Items.Add(floatingItem);
+        if (hasMetrics)
+            menu.Items.Add(floatingItem);
 
         menu.Items.Add(new Separator { Style = sepStyle });
 

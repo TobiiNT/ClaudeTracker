@@ -1,8 +1,13 @@
+using ClaudeTracker.Models;
+
 namespace ClaudeTracker.Services.Interfaces;
 
 /// <summary>Coordinates periodic usage data refresh.</summary>
 public interface IUsageRefreshCoordinator
 {
+    /// <summary>Current Claude system status (cached, refreshed every 5 minutes).</summary>
+    ClaudeStatus CurrentStatus { get; }
+
     /// <summary>Starts the periodic refresh timer.</summary>
     void Start();
     /// <summary>Stops the periodic refresh timer.</summary>
