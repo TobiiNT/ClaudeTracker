@@ -69,8 +69,38 @@ jobs:
           -p:IncludeNativeLibrariesForSelfExtract=true
           -p:EnableCompressionInSingleFile=true
 
+      - name: Publish HookBridge (self-contained)
+        run: >
+          dotnet publish src/ClaudeTracker.HookBridge/ClaudeTracker.HookBridge.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          --output ./publish-hookbridge-self-contained
+          -p:Version=${{ steps.version.outputs.VERSION }}
+          -p:AssemblyVersion=${{ steps.version.outputs.VERSION }}.0
+          -p:FileVersion=${{ steps.version.outputs.VERSION }}.0
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+
+      - name: Publish HookBridge (framework-dependent)
+        run: >
+          dotnet publish src/ClaudeTracker.HookBridge/ClaudeTracker.HookBridge.csproj
+          --configuration Release
+          --runtime win-x64
+          --no-self-contained
+          --output ./publish-hookbridge-framework-dependent
+          -p:Version=${{ steps.version.outputs.VERSION }}
+          -p:AssemblyVersion=${{ steps.version.outputs.VERSION }}.0
+          -p:FileVersion=${{ steps.version.outputs.VERSION }}.0
+
       - name: Package portable ZIP
         run: Compress-Archive -Path ./publish-portable/* -DestinationPath ./ClaudeTracker-${{ github.ref_name }}-portable-win-x64.zip
+
+      - name: Package HookBridge ZIPs
+        run: |
+          Compress-Archive -Path ./publish-hookbridge-self-contained/* -DestinationPath ./HookBridge-${{ github.ref_name }}-self-contained-win-x64.zip
+          Compress-Archive -Path ./publish-hookbridge-framework-dependent/* -DestinationPath ./HookBridge-${{ github.ref_name }}-framework-dependent-win-x64.zip
 
       - name: Create GitHub Release with auto-generated notes
         run: gh release create ${{ github.ref_name }} --title "Claude Tracker ${{ github.ref_name }}" --generate-notes
@@ -103,7 +133,12 @@ jobs:
           --tag ${{ github.ref_name }}
           --merge
 
-      - name: Attach portable ZIP to release
-        run: gh release upload ${{ github.ref_name }} ./ClaudeTracker-${{ github.ref_name }}-portable-win-x64.zip --clobber
+      - name: Attach portable ZIP and HookBridge to release
+        run: >
+          gh release upload ${{ github.ref_name }}
+          ./ClaudeTracker-${{ github.ref_name }}-portable-win-x64.zip
+          ./HookBridge-${{ github.ref_name }}-self-contained-win-x64.zip
+          ./HookBridge-${{ github.ref_name }}-framework-dependent-win-x64.zip
+          --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
