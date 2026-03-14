@@ -30,6 +30,24 @@
             <!-- Setup (not connected) -->
             <StackPanel x:Name="SetupPanel">
 
+                <!-- Option 0: Browser sign-in (shown when WebView2 available) -->
+                <Border x:Name="BrowserSignInCard" Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8"
+                        Visibility="Collapsed">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <materialDesign:PackIcon Kind="Web" Width="18" Height="18"
+                                                     Foreground="#2196F3" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Sign in with Browser" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Sign in directly — session key is captured automatically"
+                                   FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+                        <Button x:Name="BrowserSignInButton" Content="Open Browser"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                HorizontalAlignment="Left" Height="34" FontSize="12" />
+                    </StackPanel>
+                </Border>
+
                 <!-- Option 1: Auto-detect from Claude Code CLI -->
                 <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
                     <StackPanel>
@@ -140,6 +158,24 @@
             </Border>
 
             <StackPanel x:Name="ApiSetupPanel">
+                <!-- Browser sign-in for API Console -->
+                <Border x:Name="BrowserApiSignInCard" Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8"
+                        Visibility="Collapsed">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <materialDesign:PackIcon Kind="Web" Width="18" Height="18"
+                                                     Foreground="#2196F3" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Sign in with Browser" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Sign in to API Console — session key is captured automatically"
+                                   FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+                        <Button x:Name="BrowserApiSignInButton" Content="Open Browser"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                HorizontalAlignment="Left" Height="34" FontSize="12" />
+                    </StackPanel>
+                </Border>
+
                 <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"
                            Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
                     <Run Text="1. Open " /><Run Text="console.anthropic.com" FontWeight="SemiBold" />
