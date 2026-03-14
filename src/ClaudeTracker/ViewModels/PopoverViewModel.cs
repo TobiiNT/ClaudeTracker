@@ -43,12 +43,14 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private string _sessionPaceLabel = "";
     [ObservableProperty] private string _sessionPaceColorHex = "#4CAF50";
     [ObservableProperty] private string _sessionPaceTooltip = "";
+    [ObservableProperty] private string _sessionEstimateText = "";
     [ObservableProperty] private double _sessionElapsedFraction;
 
     [ObservableProperty] private PaceStatus? _weeklyPaceStatus;
     [ObservableProperty] private string _weeklyPaceLabel = "";
     [ObservableProperty] private string _weeklyPaceColorHex = "#4CAF50";
     [ObservableProperty] private string _weeklyPaceTooltip = "";
+    [ObservableProperty] private string _weeklyEstimateText = "";
     [ObservableProperty] private double _weeklyElapsedFraction;
 
     [ObservableProperty] private string _claudeStatusDescription = "";
@@ -134,12 +136,16 @@ public partial class PopoverViewModel : ObservableObject
             {
                 SessionPaceLabel = FormatPaceLabel(SessionPaceStatus.Value);
                 SessionPaceColorHex = PaceStatusCalculator.GetColorHex(SessionPaceStatus.Value);
-                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value);
+                var sessionEta = PaceStatusCalculator.EstimateTimeToLimit(
+                    usage.EffectiveSessionPercentage, sessionElapsed, usage.SessionResetTime);
+                SessionEstimateText = FormatEstimate(sessionEta);
+                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta);
             }
             else
             {
                 SessionPaceLabel = "";
                 SessionPaceTooltip = "";
+                SessionEstimateText = "";
             }
 
             var weeklyElapsed = PaceStatusCalculator.CalculateWeeklyElapsed(usage.WeeklyResetTime);
@@ -149,12 +155,16 @@ public partial class PopoverViewModel : ObservableObject
             {
                 WeeklyPaceLabel = FormatPaceLabel(WeeklyPaceStatus.Value);
                 WeeklyPaceColorHex = PaceStatusCalculator.GetColorHex(WeeklyPaceStatus.Value);
-                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value);
+                var weeklyEta = PaceStatusCalculator.EstimateTimeToLimit(
+                    usage.WeeklyPercentage, weeklyElapsed, usage.WeeklyResetTime);
+                WeeklyEstimateText = FormatEstimate(weeklyEta);
+                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value, weeklyEta);
             }
             else
             {
                 WeeklyPaceLabel = "";
                 WeeklyPaceTooltip = "";
+                WeeklyEstimateText = "";
             }
 
             OpusPercentage = usage.OpusWeeklyPercentage;
@@ -241,9 +251,9 @@ public partial class PopoverViewModel : ObservableObject
         };
     }
 
-    private static string FormatPaceTooltip(PaceStatus pace)
+    private static string FormatPaceTooltip(PaceStatus pace, TimeSpan? eta)
     {
-        return pace switch
+        var description = pace switch
         {
             PaceStatus.Comfortable => "Well under budget — you have plenty of usage left",
             PaceStatus.OnTrack     => "Sustainable pace — on track to stay within limits",
@@ -253,5 +263,39 @@ public partial class PopoverViewModel : ObservableObject
             PaceStatus.Runaway     => "Burning through usage much faster than the reset window",
             _                      => ""
         };
+
+        if (eta.HasValue)
+        {
+            var etaText = FormatTimeSpan(eta.Value);
+            return $"{description}\nEst. limit in ~{etaText}";
+        }
+
+        if (pace <= PaceStatus.OnTrack)
+            return $"{description}\nWon't hit limit before reset";
+
+        return description;
+    }
+
+    private static string FormatEstimate(TimeSpan? eta)
+    {
+        if (!eta.HasValue) return "";
+        return $"~{FormatTimeSpan(eta.Value)} to limit";
+    }
+
+    private static string FormatTimeSpan(TimeSpan ts)
+    {
+        if (ts.TotalDays >= 1)
+        {
+            var days = (int)ts.TotalDays;
+            var hours = ts.Hours;
+            return hours > 0 ? $"{days}d {hours}h" : $"{days}d";
+        }
+        if (ts.TotalHours >= 1)
+        {
+            var hours = (int)ts.TotalHours;
+            var minutes = ts.Minutes;
+            return minutes > 0 ? $"{hours}h {minutes}m" : $"{hours}h";
+        }
+        return $"{Math.Max(1, (int)ts.TotalMinutes)}m";
     }
 }

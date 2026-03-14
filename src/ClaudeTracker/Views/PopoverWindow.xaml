@@ -98,6 +98,8 @@
                                         Visibility="Collapsed" Background="Transparent" Cursor="Help">
                                 <Ellipse x:Name="SessionPaceDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
                                 <TextBlock x:Name="SessionPaceText" FontSize="11" VerticalAlignment="Center" />
+                                <TextBlock x:Name="SessionEstimateText" FontSize="11" Margin="8,0,0,0"
+                                           VerticalAlignment="Center" Foreground="#999" />
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -123,6 +125,8 @@
                                         Visibility="Collapsed" Background="Transparent" Cursor="Help">
                                 <Ellipse x:Name="WeeklyPaceDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
                                 <TextBlock x:Name="WeeklyPaceText" FontSize="11" VerticalAlignment="Center" />
+                                <TextBlock x:Name="WeeklyEstimateText" FontSize="11" Margin="8,0,0,0"
+                                           VerticalAlignment="Center" Foreground="#999" />
                             </StackPanel>
                         </StackPanel>
                     </Border>

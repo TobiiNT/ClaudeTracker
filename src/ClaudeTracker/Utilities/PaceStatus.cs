@@ -58,6 +58,39 @@ public static class PaceStatusCalculator
         return Math.Clamp(elapsedSeconds / totalSeconds, 0, 1);
     }
 
+    /// <summary>
+    /// Estimates how long until usage hits 100% at the current burn rate.
+    /// Returns null if usage is 0, data is insufficient, or limit won't be reached before reset.
+    /// </summary>
+    public static TimeSpan? EstimateTimeToLimit(double usedPercentage, double elapsedFraction, DateTime resetTime)
+    {
+        if (elapsedFraction < 0.03 || elapsedFraction >= 1.0 || usedPercentage <= 0)
+            return null;
+
+        var totalWindowSeconds = (resetTime - resetTime).TotalSeconds; // placeholder
+        // Reconstruct elapsed time from fraction and reset time
+        var remaining = resetTime - DateTime.UtcNow;
+        if (remaining.TotalSeconds <= 0) return null;
+
+        var totalWindowSec = remaining.TotalSeconds / (1.0 - elapsedFraction);
+        var elapsedSec = totalWindowSec * elapsedFraction;
+
+        // burn rate = usedPercentage / elapsedSec  (% per second)
+        var burnRate = usedPercentage / elapsedSec;
+        if (burnRate <= 0) return null;
+
+        var percentRemaining = 100.0 - usedPercentage;
+        if (percentRemaining <= 0) return TimeSpan.Zero;
+
+        var secondsToLimit = percentRemaining / burnRate;
+
+        // If limit time is beyond reset time, won't hit the limit
+        if (secondsToLimit > remaining.TotalSeconds)
+            return null;
+
+        return TimeSpan.FromSeconds(secondsToLimit);
+    }
+
     /// <summary>Returns the Material Design hex color for a pace status.</summary>
     public static string GetColorHex(PaceStatus status)
     {

@@ -61,4 +61,33 @@ public class PaceStatusTests
         Assert.Equal("#F44336", PaceStatusCalculator.GetColorHex(PaceStatus.Critical));
         Assert.Equal("#9C27B0", PaceStatusCalculator.GetColorHex(PaceStatus.Runaway));
     }
+
+    [Fact]
+    public void EstimateTimeToLimit_RunawayPace_ReturnsEta()
+    {
+        // 50% used in 25% of window → burns at 2x rate → hits 100% at 50% of window
+        // remaining time to limit = (50/50) * elapsed = elapsed = 25% of window
+        var resetTime = DateTime.UtcNow.AddHours(3.75); // 75% remaining → 25% elapsed of 5h window
+        var eta = PaceStatusCalculator.EstimateTimeToLimit(50.0, 0.25, resetTime);
+        Assert.NotNull(eta);
+        // At 50% used in 25% elapsed, burn rate = 200%/window. Time to use remaining 50% = 25% of window = 1.25h
+        Assert.InRange(eta!.Value.TotalMinutes, 60, 90);
+    }
+
+    [Fact]
+    public void EstimateTimeToLimit_ComfortablePace_ReturnsNull()
+    {
+        // 10% used in 50% of window → won't hit 100% before reset
+        var resetTime = DateTime.UtcNow.AddHours(2.5); // 50% remaining of 5h window
+        var eta = PaceStatusCalculator.EstimateTimeToLimit(10.0, 0.5, resetTime);
+        Assert.Null(eta); // won't hit limit before reset
+    }
+
+    [Fact]
+    public void EstimateTimeToLimit_ZeroUsage_ReturnsNull()
+    {
+        var resetTime = DateTime.UtcNow.AddHours(4);
+        var eta = PaceStatusCalculator.EstimateTimeToLimit(0, 0.2, resetTime);
+        Assert.Null(eta);
+    }
 }
