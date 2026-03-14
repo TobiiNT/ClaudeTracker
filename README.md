@@ -86,7 +86,7 @@ Settings are stored in `%APPDATA%\ClaudeTracker\settings.json`. Logs are written
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| Refresh interval | 30s | How often usage is fetched (10-300s) |
+| Refresh interval | 60s | How often usage is fetched (10-300s) |
 | Icon style | Battery | Tray icon visualization style |
 | Theme | System | Auto, Light, or Dark |
 | Notifications | Enabled | Alert at 75%, 90%, 95% |
