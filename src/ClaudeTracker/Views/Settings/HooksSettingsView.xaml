@@ -1,0 +1,128 @@
+<UserControl x:Class="ClaudeTracker.Views.Settings.HooksSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
+        <StackPanel MaxWidth="480">
+            <TextBlock Text="Hooks Integration" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="Configure Claude Code hooks for real-time event monitoring"
+                       FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                       Margin="0,0,0,20" />
+
+            <!-- Enable Hooks -->
+            <Grid Margin="0,0,0,20">
+                <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
+                    <TextBlock Text="Enable Hooks Integration" FontSize="13" />
+                    <TextBlock Text="When enabled, ClaudeTracker receives real-time events from Claude Code"
+                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+                <ToggleButton x:Name="HooksEnabledToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+
+            <!-- Popups -->
+            <TextBlock Text="POPUPS" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <Grid Margin="0,6,0,0">
+                <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
+                    <TextBlock Text="Permission Popups" FontSize="13" />
+                    <TextBlock Text="Show popup when Claude Code requests tool permission"
+                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+                <ToggleButton x:Name="PermissionPopupsToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+            <Grid Margin="0,10,0,20">
+                <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
+                    <TextBlock Text="Elicitation Popups (MCP)" FontSize="13" />
+                    <TextBlock Text="Show popup when Claude Code requests user input via MCP"
+                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+                <ToggleButton x:Name="ElicitationPopupsToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+
+            <!-- Notifications -->
+            <TextBlock Text="NOTIFICATIONS" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <Grid Margin="0,6,0,0">
+                <TextBlock Text="Task Complete" VerticalAlignment="Center" FontSize="13" />
+                <ToggleButton x:Name="NotifyStopToggle" HorizontalAlignment="Right"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+            <Grid Margin="0,10,0,0">
+                <TextBlock Text="Tool Errors" VerticalAlignment="Center" FontSize="13" />
+                <ToggleButton x:Name="NotifyToolErrorToggle" HorizontalAlignment="Right"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+            <Grid Margin="0,10,0,0">
+                <TextBlock Text="Permission Needed" VerticalAlignment="Center" FontSize="13" />
+                <ToggleButton x:Name="NotifyPermissionToggle" HorizontalAlignment="Right"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+            <Grid Margin="0,10,0,0">
+                <TextBlock Text="Idle / Waiting" VerticalAlignment="Center" FontSize="13" />
+                <ToggleButton x:Name="NotifyIdleToggle" HorizontalAlignment="Right"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+            <Grid Margin="0,10,0,0">
+                <TextBlock Text="Config Changes" VerticalAlignment="Center" FontSize="13" />
+                <ToggleButton x:Name="NotifyConfigChangeToggle" HorizontalAlignment="Right"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+            <Grid Margin="0,10,0,0">
+                <TextBlock Text="Session Lifecycle" VerticalAlignment="Center" FontSize="13" />
+                <ToggleButton x:Name="NotifySessionLifecycleToggle" HorizontalAlignment="Right"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+            <Grid Margin="0,10,0,20">
+                <TextBlock Text="Subagent Events" VerticalAlignment="Center" FontSize="13" />
+                <ToggleButton x:Name="NotifySubagentToggle" HorizontalAlignment="Right"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+
+            <!-- Activity Feed -->
+            <TextBlock Text="ACTIVITY FEED" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <Grid Margin="0,6,0,0">
+                <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
+                    <TextBlock Text="Show Activity Feed" FontSize="13" />
+                    <TextBlock Text="Display recent hook events in the popover"
+                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+                <ToggleButton x:Name="ActivityFeedToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
+                              Style="{StaticResource CompactSwitch}" />
+            </Grid>
+            <TextBlock Text="Max Feed Entries" FontSize="13" Margin="0,14,0,4" />
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="60" />
+                </Grid.ColumnDefinitions>
+                <Slider x:Name="MaxFeedSlider" Minimum="5" Maximum="50"
+                        TickFrequency="5" IsSnapToTickEnabled="True"
+                        TickPlacement="BottomRight" />
+                <TextBlock Grid.Column="1" x:Name="MaxFeedValueText" FontSize="13"
+                           VerticalAlignment="Center" HorizontalAlignment="Center" />
+            </Grid>
+
+            <!-- Installation -->
+            <TextBlock Text="INSTALLATION" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="Install or remove the HookBridge relay into Claude Code's hooks configuration"
+                       FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,0,0,8" />
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                <Button x:Name="InstallButton" Content="Install Hooks"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Height="34" FontSize="12" Margin="0,0,8,0" />
+                <Button x:Name="UninstallButton" Content="Uninstall Hooks"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Height="34" FontSize="12" />
+            </StackPanel>
+            <TextBlock x:Name="InstallStatusText" FontSize="11" Foreground="#999"
+                       TextWrapping="Wrap" Margin="0,4,0,0" />
+
+            <!-- Save -->
+            <Button x:Name="SaveButton" Content="Save Changes"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    HorizontalAlignment="Right" Height="36" FontSize="12"
+                    Margin="0,16,0,0" Visibility="Collapsed" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

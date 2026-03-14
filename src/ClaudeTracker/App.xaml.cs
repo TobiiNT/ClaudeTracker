@@ -237,6 +237,7 @@ public partial class App : Application
         services.AddTransient<GeneralSettingsViewModel>();
         services.AddTransient<ProfilesViewModel>();
 
+        services.AddTransient<HooksSettingsViewModel>();
         services.AddTransient<AboutViewModel>();
 
         // HttpClient
