@@ -129,6 +129,7 @@ public partial class PopoverViewModel : ObservableObject
             WeeklyStatus = UsageStatusCalculator.CalculateStatus(usage.WeeklyPercentage, showRemaining);
 
             // Pace calculation
+            TimeSpan? sessionEta = null;
             var sessionElapsed = PaceStatusCalculator.CalculateSessionElapsed(usage.SessionResetTime);
             SessionElapsedFraction = sessionElapsed;
             SessionPaceStatus = PaceStatusCalculator.Calculate(usage.EffectiveSessionPercentage, sessionElapsed);
@@ -136,10 +137,10 @@ public partial class PopoverViewModel : ObservableObject
             {
                 SessionPaceLabel = FormatPaceLabel(SessionPaceStatus.Value);
                 SessionPaceColorHex = PaceStatusCalculator.GetColorHex(SessionPaceStatus.Value);
-                var sessionEta = PaceStatusCalculator.EstimateTimeToLimit(
+                sessionEta = PaceStatusCalculator.EstimateTimeToLimit(
                     usage.EffectiveSessionPercentage, sessionElapsed, usage.SessionResetTime);
                 SessionEstimateText = FormatEstimate(sessionEta);
-                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta);
+                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta, isWeekly: false);
             }
             else
             {
@@ -157,8 +158,11 @@ public partial class PopoverViewModel : ObservableObject
                 WeeklyPaceColorHex = PaceStatusCalculator.GetColorHex(WeeklyPaceStatus.Value);
                 var weeklyEta = PaceStatusCalculator.EstimateTimeToLimit(
                     usage.WeeklyPercentage, weeklyElapsed, usage.WeeklyResetTime);
+                // Weekly runout cannot be before session runout
+                if (weeklyEta.HasValue && sessionEta.HasValue && weeklyEta.Value < sessionEta.Value)
+                    weeklyEta = sessionEta;
                 WeeklyEstimateText = FormatEstimate(weeklyEta);
-                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value, weeklyEta);
+                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value, weeklyEta, isWeekly: true);
             }
             else
             {
@@ -251,7 +255,7 @@ public partial class PopoverViewModel : ObservableObject
         };
     }
 
-    private static string FormatPaceTooltip(PaceStatus pace, TimeSpan? eta)
+    private static string FormatPaceTooltip(PaceStatus pace, TimeSpan? eta, bool isWeekly = false)
     {
         var description = pace switch
         {
@@ -265,7 +269,10 @@ public partial class PopoverViewModel : ObservableObject
         };
 
         if (eta.HasValue)
-            return $"{description}\nEst. 100% in ~{FormatTimeSpan(eta.Value)}";
+        {
+            var absoluteText = FormatRunoutAbsolute(eta.Value, isWeekly);
+            return $"{description}\nEst. 100% in ~{FormatTimeSpan(eta.Value)} ({absoluteText})";
+        }
 
         return description;
     }
@@ -274,6 +281,46 @@ public partial class PopoverViewModel : ObservableObject
     {
         if (!eta.HasValue) return "";
         return $"~{FormatTimeSpan(eta.Value)} to limit";
+    }
+
+    /// <summary>
+    /// Session: 24h rounded to 15min — "15:45" or "tomorrow 08:30"
+    /// Weekly same day: hours like session — "15:45"
+    /// Weekly different day: day of week — "Friday" or "Next Tuesday"
+    /// </summary>
+    private static string FormatRunoutAbsolute(TimeSpan eta, bool isWeekly)
+    {
+        var now = DateTime.Now;
+        var runoutTime = RoundTo15Min(now.Add(eta));
+
+        if (!isWeekly)
+        {
+            // Session: 24h format, rounded to 15min
+            if (runoutTime.Date == now.Date)
+                return runoutTime.ToString("H:mm");
+            return $"tomorrow {runoutTime.ToString("H:mm")}";
+        }
+
+        // Weekly: same day → show hours like session
+        if (runoutTime.Date == now.Date)
+            return runoutTime.ToString("H:mm");
+
+        // Weekly: different day → show day of week
+        var daysAway = (runoutTime.Date - now.Date).Days;
+        var dow = runoutTime.ToString("dddd"); // e.g. "Tuesday"
+
+        // If within this week (1-6 days), just "Friday"
+        // If next week (7+ days), "Next Tuesday"
+        return daysAway >= 7 ? $"Next {dow}" : dow;
+    }
+
+    private static DateTime RoundTo15Min(DateTime dt)
+    {
+        var minutes = dt.Minute;
+        var rounded = (int)(Math.Round(minutes / 15.0) * 15);
+        if (rounded == 60)
+            return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0).AddHours(1);
+        return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, rounded, 0);
     }
 
     private static string FormatTimeSpan(TimeSpan ts)
