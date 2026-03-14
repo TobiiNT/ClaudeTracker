@@ -9,6 +9,7 @@ namespace ClaudeTracker.Services;
 public class NotificationService : INotificationService
 {
     private readonly HashSet<string> _sentNotifications = new();
+    private readonly HashSet<string> _sentExpiryNotifications = new();
     private DateTime _lastNotificationTime = DateTime.MinValue;
 
     public event EventHandler? NotificationClicked;
@@ -41,6 +42,36 @@ public class NotificationService : INotificationService
         {
             _sentNotifications.RemoveWhere(k => k.StartsWith(profileKey));
         }
+    }
+
+    public void CheckKeyExpiry(Profile profile)
+    {
+        CheckSingleKeyExpiry(profile, "claude", profile.ClaudeSessionKeyExpiry);
+        CheckSingleKeyExpiry(profile, "api", profile.ApiSessionKeyExpiry);
+    }
+
+    private void CheckSingleKeyExpiry(Profile profile, string keyType, DateTime? expiry)
+    {
+        if (!expiry.HasValue) return;
+
+        var remaining = expiry.Value - DateTime.UtcNow;
+        if (remaining.TotalHours > 24) return;
+
+        var expiryKey = $"{profile.Id}_expiry_{keyType}";
+        if (_sentExpiryNotifications.Contains(expiryKey)) return;
+
+        var title = $"Session Key Expiring — {profile.Name}";
+        var message = remaining.TotalHours > 0
+            ? $"Your {keyType} session key expires in {(int)remaining.TotalHours}h {remaining.Minutes}m. Re-authenticate to avoid interruption."
+            : $"Your {keyType} session key has expired. Re-authenticate to continue tracking.";
+
+        SendNotification(title, message, NotificationPopup.NotificationLevel.Warning);
+        _sentExpiryNotifications.Add(expiryKey);
+    }
+
+    public void ResetExpiryNotifications(Guid profileId, string keyType)
+    {
+        _sentExpiryNotifications.Remove($"{profileId}_expiry_{keyType}");
     }
 
     private void SendThresholdNotification(string profileKey, int threshold, double percentage, string profileName)

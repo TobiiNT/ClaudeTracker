@@ -97,6 +97,8 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
                 _notificationService.CheckAndNotify(profile, usage);
             }
 
+            _notificationService.CheckKeyExpiry(profile);
+
             // Fetch API Console usage
             if (profile.HasAPIConsole)
             {

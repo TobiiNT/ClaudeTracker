@@ -7,6 +7,8 @@ public interface INotificationService
 {
     /// <summary>Checks usage against configured thresholds and sends a notification if triggered.</summary>
     void CheckAndNotify(Profile profile, ClaudeUsage usage);
+    /// <summary>Checks whether session keys are expiring within 24 hours and notifies.</summary>
+    void CheckKeyExpiry(Profile profile);
     /// <summary>Sends a Windows toast notification with the given title and message.</summary>
     void SendNotification(string title, string message);
     /// <summary>Raised when the user clicks on a notification popup.</summary>

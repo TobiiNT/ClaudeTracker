@@ -28,6 +28,12 @@ public class Profile
     [JsonPropertyName("cliCredentialsJSON")]
     public string? CliCredentialsJSON { get; set; }
 
+    [JsonPropertyName("claudeSessionKeyExpiry")]
+    public DateTime? ClaudeSessionKeyExpiry { get; set; }
+
+    [JsonPropertyName("apiSessionKeyExpiry")]
+    public DateTime? ApiSessionKeyExpiry { get; set; }
+
     // CLI Account Sync Metadata
     [JsonPropertyName("hasCliAccount")]
     public bool HasCliAccount { get; set; }
