@@ -142,9 +142,27 @@ public partial class PopoverWindow : Window
             ApiUsedText.Text = $"Used: {_viewModel.ApiUsedText}";
             ApiRemainingText.Text = $"Remaining: {_viewModel.ApiRemainingText}";
 
-            // Status
-            StatusDot.Fill = GetStatusBrush(_viewModel.SessionStatus);
-            StatusText.Text = _viewModel.IsRefreshing ? "Refreshing..." : _viewModel.LastUpdatedText;
+            // Status line
+            if (_viewModel.IsRefreshing)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3)); // blue
+                StatusText.Text = "Refreshing...";
+            }
+            else if (!_viewModel.HasCredentials)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99)); // gray
+                StatusText.Text = "No account connected";
+            }
+            else if (!_viewModel.HasClaudeUsage)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00)); // orange
+                StatusText.Text = "Waiting for usage data...";
+            }
+            else
+            {
+                StatusDot.Fill = GetStatusBrush(_viewModel.SessionStatus);
+                StatusText.Text = _viewModel.LastUpdatedText;
+            }
 
             LastUpdatedText.Text = _viewModel.LastUpdatedText;
 

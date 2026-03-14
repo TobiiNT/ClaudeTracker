@@ -279,15 +279,18 @@ public class TrayIconManager : IDisposable
 
         menu.Items.Add(new Separator { Style = sepStyle });
 
+        var hasMetrics = _profileService.ActiveProfile?.HasUsageCredentials == true;
         var floatingItem = new MenuItem
         {
             Header = "Floating Widget",
             IsCheckable = true,
             IsChecked = _settingsService.Settings.IsFloatingModeEnabled,
+            IsEnabled = hasMetrics,
             Style = itemStyle
         };
         floatingItem.Click += (_, _) => ToggleFloatingMode(floatingItem.IsChecked);
-        menu.Items.Add(floatingItem);
+        if (hasMetrics)
+            menu.Items.Add(floatingItem);
 
         menu.Items.Add(new Separator { Style = sepStyle });
 
