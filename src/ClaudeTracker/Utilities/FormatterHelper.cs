@@ -47,6 +47,35 @@ public static class FormatterHelper
         return local.ToString("ddd, MMM d 'at' h:mm tt");
     }
 
+    /// <summary>Formats reset time as absolute ("Today 3:59 PM" or "Today 15:59").</summary>
+    public static string FormatResetTimeAbsolute(DateTime resetTimeUtc, bool use24Hour)
+    {
+        var local = resetTimeUtc.ToLocalTime();
+        var now = DateTime.Now;
+        var timeFormat = use24Hour ? "H:mm" : "h:mm tt";
+
+        var prefix = local.Date == now.Date ? "Today"
+            : local.Date == now.Date.AddDays(1) ? "Tomorrow"
+            : local.ToString("ddd, MMM d");
+
+        return $"{prefix} {local.ToString(timeFormat)}";
+    }
+
+    /// <summary>Formats reset time as "Xh Ym (Today 3:59 PM)".</summary>
+    public static string FormatResetTimeCombined(DateTime resetTimeUtc, bool use24Hour)
+    {
+        var remaining = FormatTimeRemaining(resetTimeUtc);
+        var absolute = FormatResetTimeAbsolute(resetTimeUtc, use24Hour);
+        return $"{remaining} ({absolute})";
+    }
+
+    /// <summary>Determines if the system locale uses 24-hour time.</summary>
+    public static bool IsSystem24Hour()
+    {
+        var pattern = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
+        return pattern.Contains('H');
+    }
+
     /// <summary>Formats a percentage, showing one decimal for values under 1%.</summary>
     public static string FormatPercentage(double percentage)
     {

@@ -43,4 +43,10 @@ public class AppSettings
 
     [JsonPropertyName("isFloatingWidgetDocked")]
     public bool IsFloatingWidgetDocked { get; set; }
+
+    [JsonPropertyName("popoverTimeDisplay")]
+    public string PopoverTimeDisplay { get; set; } = "remainingTime";
+
+    [JsonPropertyName("timeFormatPreference")]
+    public string TimeFormatPreference { get; set; } = "system";
 }
