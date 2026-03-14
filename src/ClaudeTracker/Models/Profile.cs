@@ -54,7 +54,7 @@ public class Profile
 
     // Behavior Settings (Per-Profile)
     [JsonPropertyName("refreshInterval")]
-    public double RefreshInterval { get; set; } = 30.0;
+    public double RefreshInterval { get; set; } = 60.0;
 
     [JsonPropertyName("autoStartSessionEnabled")]
     public bool AutoStartSessionEnabled { get; set; }
