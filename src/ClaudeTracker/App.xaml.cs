@@ -100,17 +100,9 @@ public partial class App : Application
                     {
                         try
                         {
-                            // TODO: Task 7 - uncomment when PermissionRequestPopup is created
-                            // var popup = new Views.PermissionRequestPopup(args.Info, args.ResponseSource);
-                            // popup.Show();
-                            // popup.Activate();
-
-                            // For now, fall back to terminal
-                            args.ResponseSource.TrySetResult(new Models.HookResponse
-                            {
-                                RequestId = "",
-                                Success = true
-                            });
+                            var popup = new Views.PermissionRequestPopup(args.Info, args.ResponseSource);
+                            popup.Show();
+                            popup.Activate();
                         }
                         catch (Exception ex)
                         {
