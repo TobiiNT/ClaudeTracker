@@ -45,6 +45,14 @@ public partial class App : Application
         _services = serviceCollection.BuildServiceProvider();
         Services = _services;
 
+        // Show setup wizard on first launch
+        var settingsService = _services.GetRequiredService<ISettingsService>();
+        if (!settingsService.Settings.HasCompletedSetup)
+        {
+            var wizard = new Views.SetupWizardWindow();
+            wizard.ShowDialog();
+        }
+
         // Initialize theme
         InitializeTheme();
 
