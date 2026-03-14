@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ClaudeTracker.Models;
@@ -57,12 +58,20 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private string _claudeStatusColorHex = "#9E9E9E";
     [ObservableProperty] private bool _showClaudeStatus;
 
+    [ObservableProperty] private int _activeSessionCount;
+    [ObservableProperty] private bool _hasActiveSessions;
+    [ObservableProperty] private bool _showActivityFeed;
+
     public ObservableCollection<Profile> Profiles { get; } = new();
+    public ObservableCollection<SessionState> ActiveSessions { get; } = new();
+    public ObservableCollection<ActivityEntry> ActivityFeed { get; } = new();
 
     public PopoverViewModel(
         IProfileService profileService,
         IUsageRefreshCoordinator refreshCoordinator,
-        ISettingsService settingsService)
+        ISettingsService settingsService,
+        ISessionTrackingService sessionTracking,
+        IActivityService activityService)
     {
         _profileService = profileService;
         _refreshCoordinator = refreshCoordinator;
@@ -83,6 +92,30 @@ public partial class PopoverViewModel : ObservableObject
                 ? "Rate limited — try again later"
                 : "Update failed";
         };
+
+        sessionTracking.SessionsChanged += (_, _) =>
+        {
+            System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+            {
+                ActiveSessions.Clear();
+                foreach (var s in sessionTracking.ActiveSessions)
+                    ActiveSessions.Add(s);
+                ActiveSessionCount = sessionTracking.ActiveSessionCount;
+                HasActiveSessions = ActiveSessionCount > 0;
+            });
+        };
+
+        activityService.RecentFeed.CollectionChanged += (_, _) =>
+        {
+            System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+            {
+                ActivityFeed.Clear();
+                foreach (var e in activityService.RecentFeed)
+                    ActivityFeed.Add(e);
+            });
+        };
+
+        ShowActivityFeed = settingsService.Settings.HookActivityFeedEnabled;
 
         UpdateProfilesList();
         RefreshData();

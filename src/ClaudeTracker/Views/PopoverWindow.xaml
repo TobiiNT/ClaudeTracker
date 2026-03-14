@@ -202,6 +202,85 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- ── Active Claude Code Sessions ── -->
+                    <Border x:Name="SessionsCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,6">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Console" Width="15" Height="15"
+                                                             Foreground="#888" VerticalAlignment="Center"
+                                                             Margin="0,0,5,0" />
+                                    <TextBlock Text="Active Sessions" FontSize="13" FontWeight="Medium" Foreground="#666"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock x:Name="SessionCountText" HorizontalAlignment="Right"
+                                           FontSize="13" FontWeight="SemiBold" Foreground="#444"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                            <ItemsControl x:Name="SessionsList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#08000000" CornerRadius="4" Padding="8,5" Margin="0,2"
+                                                Cursor="Hand">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding ProjectName}" FontSize="12"
+                                                               FontWeight="Medium" Foreground="#555"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding CurrentActivity}" FontSize="10.5"
+                                                               Foreground="#999" TextTrimming="CharacterEllipsis"
+                                                               Margin="0,1,0,0" />
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" FontSize="11" Foreground="#888"
+                                                           VerticalAlignment="Center" Margin="0,0,6,0">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0}">
+                                                            <Binding Path="ToolCallCount" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                <Ellipse Grid.Column="2" Width="7" Height="7"
+                                                         Fill="#4CAF50" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ── Recent Activity Feed ── -->
+                    <Border x:Name="ActivityFeedCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="Recent Activity" FontSize="13" FontWeight="Medium"
+                                       Foreground="#666" Margin="0,0,0,6" />
+                            <ItemsControl x:Name="ActivityFeedList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock FontSize="11" Width="16"
+                                                       Foreground="#888" VerticalAlignment="Center"
+                                                       Text="&#x26A1;" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Summary}"
+                                                       FontSize="11" Foreground="#666"
+                                                       TextTrimming="CharacterEllipsis" Margin="2,0,0,0"
+                                                       VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
                     <!-- Last Updated (hidden — shown in status line above) -->
                     <TextBlock x:Name="LastUpdatedText" Visibility="Collapsed" />
 

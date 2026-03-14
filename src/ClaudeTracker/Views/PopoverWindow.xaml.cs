@@ -42,6 +42,9 @@ public partial class PopoverWindow : Window
                 _viewModel.SwitchProfileCommand.Execute(id);
         };
 
+        SessionsList.ItemsSource = _viewModel.ActiveSessions;
+        ActivityFeedList.ItemsSource = _viewModel.ActivityFeed;
+
         // Debounce: batch rapid property changes into one UI update
         var uiDebounce = new System.Windows.Threading.DispatcherTimer
         {
@@ -171,6 +174,15 @@ public partial class PopoverWindow : Window
             }
 
             LastUpdatedText.Text = _viewModel.LastUpdatedText;
+
+            // Sessions card
+            SessionsCard.Visibility = _viewModel.HasActiveSessions ? Visibility.Visible : Visibility.Collapsed;
+            if (_viewModel.HasActiveSessions)
+                SessionCountText.Text = _viewModel.ActiveSessionCount.ToString();
+
+            // Activity feed
+            ActivityFeedCard.Visibility = _viewModel.ShowActivityFeed && _viewModel.ActivityFeed.Count > 0
+                ? Visibility.Visible : Visibility.Collapsed;
 
             UpdateProgressBars();
         });
