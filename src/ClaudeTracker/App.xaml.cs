@@ -78,6 +78,18 @@ public partial class App : Application
         networkMonitor.NetworkRestored += (_, _) => refreshCoordinator.RefreshNow();
         networkMonitor.Start();
 
+        // Engagement prompts (delayed to not block startup)
+        _ = Task.Delay(5000).ContinueWith(_ =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (Views.GitHubStarPromptWindow.ShouldShow(settingsService.Settings))
+                {
+                    new Views.GitHubStarPromptWindow().Show();
+                }
+            });
+        });
+
         // Listen for system theme changes
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
 

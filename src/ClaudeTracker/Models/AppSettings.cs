@@ -44,6 +44,15 @@ public class AppSettings
     [JsonPropertyName("isFloatingWidgetDocked")]
     public bool IsFloatingWidgetDocked { get; set; }
 
+    [JsonPropertyName("hasStarredGitHub")]
+    public bool HasStarredGitHub { get; set; }
+
+    [JsonPropertyName("lastStarPromptDate")]
+    public DateTime? LastStarPromptDate { get; set; }
+
+    [JsonPropertyName("starPromptDismissedForever")]
+    public bool StarPromptDismissedForever { get; set; }
+
     [JsonPropertyName("popoverTimeDisplay")]
     public string PopoverTimeDisplay { get; set; } = "remainingTime";
 
