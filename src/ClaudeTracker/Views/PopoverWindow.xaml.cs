@@ -74,6 +74,7 @@ public partial class PopoverWindow : Window
                 ClaudeStatusDot.Fill = BrushFromHex(_viewModel.ClaudeStatusColorHex);
                 ClaudeStatusText.Text = _viewModel.ClaudeStatusDescription;
                 ClaudeStatusText.Foreground = BrushFromHex(_viewModel.ClaudeStatusColorHex);
+                ClaudeStatusTooltip.Text = $"{_viewModel.ClaudeStatusDescription}\nClick to view details on status.claude.com";
             }
             else
             {
@@ -191,6 +192,16 @@ public partial class PopoverWindow : Window
         {
             marker.Visibility = Visibility.Collapsed;
         }
+    }
+
+    private void ClaudeStatusPanel_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(
+                "https://status.claude.com") { UseShellExecute = true });
+        }
+        catch { }
     }
 
     private static SolidColorBrush BrushFromHex(string hex)

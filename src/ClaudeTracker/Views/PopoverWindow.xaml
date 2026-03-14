@@ -70,10 +70,16 @@
 
                     <!-- Claude Status Indicator (shown only during issues) -->
                     <Border x:Name="ClaudeStatusPanel" Visibility="Collapsed"
-                            Background="#10FF9800" CornerRadius="6" Padding="8,5" Margin="0,0,0,6">
+                            Background="#10FF9800" CornerRadius="6" Padding="8,5" Margin="0,0,0,6"
+                            Cursor="Hand" MouseLeftButtonUp="ClaudeStatusPanel_Click">
+                        <Border.ToolTip>
+                            <TextBlock x:Name="ClaudeStatusTooltip" />
+                        </Border.ToolTip>
                         <StackPanel Orientation="Horizontal">
                             <Ellipse x:Name="ClaudeStatusDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
                             <TextBlock x:Name="ClaudeStatusText" FontSize="12" VerticalAlignment="Center" />
+                            <materialDesign:PackIcon Kind="OpenInNew" Width="12" Height="12"
+                                                     Foreground="#999" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
 
