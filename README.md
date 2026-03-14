@@ -17,6 +17,7 @@
 </p>
 
 ### [⬇️ Download Latest Release (v1.2.0)](https://github.com/TobiiNT/ClaudeTracker/releases/latest)
+> **Note**: Windows may show a SmartScreen warning on first run. Click "More info" → "Run anyway" — this is expected for unsigned apps.
 ---
 
 Get instant visibility into your Claude session and weekly usage, overage costs, and receive alerts before hitting rate limits. Windows port of [Claude Usage Tracker](https://github.com/hamed-elfayome/Claude-Usage-Tracker) (macOS).
