@@ -7,6 +7,8 @@ using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.ViewModels;
 using ClaudeTracker.TrayIcon;
+using ClaudeTracker.Services.Handlers;
+using ClaudeTracker.Services.Observers;
 
 namespace ClaudeTracker;
 
@@ -77,6 +79,63 @@ public partial class App : Application
         var networkMonitor = _services.GetRequiredService<INetworkMonitorService>();
         networkMonitor.NetworkRestored += (_, _) => refreshCoordinator.RefreshNow();
         networkMonitor.Start();
+
+        // Start hooks integration
+        if (settingsService.Settings.HooksEnabled)
+        {
+            var hookDispatcher = _services.GetRequiredService<IHookEventDispatcher>();
+            hookDispatcher.Initialize();
+
+            var hookIpcService = _services.GetRequiredService<IHookIpcService>();
+            hookIpcService.Start();
+
+            // Wire PermissionRequestHandler to show popup UI
+            var permHandler = _services.GetServices<IHookEventHandler>()
+                .OfType<PermissionRequestHandler>().FirstOrDefault();
+            if (permHandler != null)
+            {
+                permHandler.PermissionRequested += (_, args) =>
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        try
+                        {
+                            // TODO: Task 7 - uncomment when PermissionRequestPopup is created
+                            // var popup = new Views.PermissionRequestPopup(args.Info, args.ResponseSource);
+                            // popup.Show();
+                            // popup.Activate();
+
+                            // For now, fall back to terminal
+                            args.ResponseSource.TrySetResult(new Models.HookResponse
+                            {
+                                RequestId = "",
+                                Success = true
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            LoggingService.Instance.LogError("Failed to show permission popup", ex);
+                            args.ResponseSource.TrySetResult(new Models.HookResponse
+                            {
+                                RequestId = "",
+                                Success = true
+                            });
+                        }
+                    });
+                };
+            }
+
+            // Start stale session pruning timer
+            var sessionTracking = _services.GetRequiredService<ISessionTrackingService>();
+            var pruneTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromMinutes(5)
+            };
+            pruneTimer.Tick += (_, _) => sessionTracking.PruneStale();
+            pruneTimer.Start();
+
+            LoggingService.Instance.Log("Hooks integration initialized");
+        }
 
         // Engagement prompts (delayed to not block startup)
         _ = Task.Delay(5000).ContinueWith(_ =>
@@ -194,6 +253,27 @@ public partial class App : Application
             client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
+
+        // ── Hooks Integration ──
+        services.AddSingleton<IHookIpcService, HookIpcService>();
+        services.AddSingleton<IHookEventDispatcher, HookEventDispatcher>();
+
+        // Interactive handlers
+        services.AddSingleton<IHookEventHandler, PermissionRequestHandler>();
+        services.AddSingleton<IHookEventHandler, PreToolUseHandler>();
+        services.AddSingleton<IHookEventHandler, ElicitationHandler>();
+        services.AddSingleton<IHookEventHandler, UserPromptHandler>();
+        services.AddSingleton<IHookEventHandler, StopHandler>();
+        services.AddSingleton<IHookEventHandler, SubagentStopHandler>();
+        services.AddSingleton<IHookEventHandler, ConfigChangeHandler>();
+
+        // Observers
+        services.AddSingleton<IHookEventObserver, ActivityRecorder>();
+        services.AddSingleton<IHookEventObserver, SessionTracker>();
+
+        // Services
+        services.AddSingleton<IActivityService, ActivityService>();
+        services.AddSingleton<ISessionTrackingService, SessionTrackingService>();
     }
 
     private void InitializeTheme()
