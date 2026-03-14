@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ClaudeTracker.Models;
 using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.Utilities;
@@ -23,8 +24,8 @@ public partial class GeneralSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _checkOverageLimit;
     [ObservableProperty] private bool _soundEnabled;
     [ObservableProperty] private string _soundName = "Default";
-    [ObservableProperty] private string _popoverTimeDisplay = "remainingTime";
-    [ObservableProperty] private string _timeFormatPreference = "system";
+    [ObservableProperty] private PopoverTimeDisplay _popoverTimeDisplay = PopoverTimeDisplay.RemainingTime;
+    [ObservableProperty] private TimeFormatPreference _timeFormatPreference = TimeFormatPreference.System;
     [ObservableProperty] private bool _hasUnsavedChanges;
 
     // Snapshot
@@ -38,8 +39,8 @@ public partial class GeneralSettingsViewModel : ObservableObject
     private bool _initialOverage;
     private bool _initialSoundEnabled;
     private string _initialSoundName = "Default";
-    private string _initialPopoverTimeDisplay = "remainingTime";
-    private string _initialTimeFormatPreference = "system";
+    private PopoverTimeDisplay _initialPopoverTimeDisplay = PopoverTimeDisplay.RemainingTime;
+    private TimeFormatPreference _initialTimeFormatPreference = TimeFormatPreference.System;
     private bool _initialized;
 
     public GeneralSettingsViewModel(
@@ -98,8 +99,8 @@ public partial class GeneralSettingsViewModel : ObservableObject
     partial void OnCheckOverageLimitChanged(bool value) => DetectChanges();
     partial void OnSoundEnabledChanged(bool value) => DetectChanges();
     partial void OnSoundNameChanged(string value) => DetectChanges();
-    partial void OnPopoverTimeDisplayChanged(string value) => DetectChanges();
-    partial void OnTimeFormatPreferenceChanged(string value) => DetectChanges();
+    partial void OnPopoverTimeDisplayChanged(PopoverTimeDisplay value) => DetectChanges();
+    partial void OnTimeFormatPreferenceChanged(TimeFormatPreference value) => DetectChanges();
 
     private void DetectChanges()
     {

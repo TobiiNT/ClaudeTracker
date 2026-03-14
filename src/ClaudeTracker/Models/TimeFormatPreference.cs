@@ -1,5 +1,8 @@
+using System.Text.Json.Serialization;
+
 namespace ClaudeTracker.Models;
 
+[JsonConverter(typeof(JsonStringEnumConverter<TimeFormatPreference>))]
 public enum TimeFormatPreference
 {
     System,
@@ -7,9 +10,10 @@ public enum TimeFormatPreference
     TwentyFourHour
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter<PopoverTimeDisplay>))]
 public enum PopoverTimeDisplay
 {
-    ResetTime,
     RemainingTime,
+    ResetTime,
     Both
 }

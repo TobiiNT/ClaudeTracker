@@ -66,8 +66,8 @@ public class AppSettings
     public int? FeedbackRating { get; set; }
 
     [JsonPropertyName("popoverTimeDisplay")]
-    public string PopoverTimeDisplay { get; set; } = "remainingTime";
+    public PopoverTimeDisplay PopoverTimeDisplay { get; set; } = PopoverTimeDisplay.RemainingTime;
 
     [JsonPropertyName("timeFormatPreference")]
-    public string TimeFormatPreference { get; set; } = "system";
+    public TimeFormatPreference TimeFormatPreference { get; set; } = TimeFormatPreference.System;
 }

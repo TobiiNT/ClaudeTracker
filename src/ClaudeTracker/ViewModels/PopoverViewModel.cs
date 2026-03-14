@@ -110,8 +110,8 @@ public partial class PopoverViewModel : ObservableObject
             var settings = _settingsService.Settings;
             var use24Hour = settings.TimeFormatPreference switch
             {
-                "twelveHour" => false,
-                "twentyFourHour" => true,
+                TimeFormatPreference.TwelveHour => false,
+                TimeFormatPreference.TwentyFourHour => true,
                 _ => FormatterHelper.IsSystem24Hour()
             };
             var timeDisplay = settings.PopoverTimeDisplay;
@@ -238,12 +238,12 @@ public partial class PopoverViewModel : ObservableObject
             Profiles.Add(p);
     }
 
-    private static string FormatResetText(DateTime resetTime, string displayMode, bool use24Hour)
+    private static string FormatResetText(DateTime resetTime, PopoverTimeDisplay displayMode, bool use24Hour)
     {
         return displayMode switch
         {
-            "resetTime" => $"Resets {FormatterHelper.FormatResetTimeAbsolute(resetTime, use24Hour)}",
-            "both" => $"Resets {FormatterHelper.FormatResetTimeCombined(resetTime, use24Hour)}",
+            PopoverTimeDisplay.ResetTime => $"Resets {FormatterHelper.FormatResetTimeAbsolute(resetTime, use24Hour)}",
+            PopoverTimeDisplay.Both => $"Resets {FormatterHelper.FormatResetTimeCombined(resetTime, use24Hour)}",
             _ => $"Resets {FormatterHelper.FormatTimeRemaining(resetTime)}"
         };
     }
