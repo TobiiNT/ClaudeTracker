@@ -126,6 +126,41 @@ public partial class App : Application
             pruneTimer.Tick += (_, _) => sessionTracking.PruneStale();
             pruneTimer.Start();
 
+            // Wire configurable notifications from hook events
+            var activityServiceForNotifications = _services.GetRequiredService<IActivityService>();
+            var notificationServiceForHooks = _services.GetRequiredService<INotificationService>();
+
+            activityServiceForNotifications.RecentFeed.CollectionChanged += (_, e) =>
+            {
+                if (e.NewItems == null) return;
+                foreach (Models.ActivityEntry entry in e.NewItems)
+                {
+                    var prefs = settingsService.Settings.HookNotificationPreferences;
+                    var shouldNotify = entry.EventName switch
+                    {
+                        "PostToolUseFailure" => prefs.GetValueOrDefault("toolError", true),
+                        "Notification" when entry.RawPayload.Contains("permission_prompt") =>
+                            prefs.GetValueOrDefault("permission", true),
+                        "Notification" when entry.RawPayload.Contains("idle_prompt") =>
+                            prefs.GetValueOrDefault("idle", true),
+                        "ConfigChange" => prefs.GetValueOrDefault("configChange", false),
+                        "SessionStart" or "SessionEnd" => prefs.GetValueOrDefault("sessionLifecycle", false),
+                        "SubagentStart" or "SubagentStop" => prefs.GetValueOrDefault("subagent", false),
+                        _ => false
+                    };
+
+                    if (shouldNotify)
+                    {
+                        var level = entry.EventName == "PostToolUseFailure"
+                            ? Views.NotificationPopup.NotificationLevel.Warning
+                            : Views.NotificationPopup.NotificationLevel.Info;
+
+                        ((NotificationService)notificationServiceForHooks).SendNotification(
+                            entry.EventName, entry.Summary, level);
+                    }
+                }
+            };
+
             LoggingService.Instance.Log("Hooks integration initialized");
         }
 
