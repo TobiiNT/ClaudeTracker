@@ -138,8 +138,8 @@ public partial class PopoverViewModel : ObservableObject
                 SessionPaceColorHex = PaceStatusCalculator.GetColorHex(SessionPaceStatus.Value);
                 var sessionEta = PaceStatusCalculator.EstimateTimeToLimit(
                     usage.EffectiveSessionPercentage, sessionElapsed, usage.SessionResetTime);
-                SessionEstimateText = FormatEstimate(sessionEta);
-                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta);
+                SessionEstimateText = FormatEstimate(sessionEta, use24Hour);
+                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta, use24Hour);
             }
             else
             {
@@ -157,8 +157,8 @@ public partial class PopoverViewModel : ObservableObject
                 WeeklyPaceColorHex = PaceStatusCalculator.GetColorHex(WeeklyPaceStatus.Value);
                 var weeklyEta = PaceStatusCalculator.EstimateTimeToLimit(
                     usage.WeeklyPercentage, weeklyElapsed, usage.WeeklyResetTime);
-                WeeklyEstimateText = FormatEstimate(weeklyEta);
-                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value, weeklyEta);
+                WeeklyEstimateText = FormatEstimate(weeklyEta, use24Hour);
+                WeeklyPaceTooltip = FormatPaceTooltip(WeeklyPaceStatus.Value, weeklyEta, use24Hour);
             }
             else
             {
@@ -251,7 +251,7 @@ public partial class PopoverViewModel : ObservableObject
         };
     }
 
-    private static string FormatPaceTooltip(PaceStatus pace, TimeSpan? eta)
+    private static string FormatPaceTooltip(PaceStatus pace, TimeSpan? eta, bool use24Hour = false)
     {
         var description = pace switch
         {
@@ -266,8 +266,10 @@ public partial class PopoverViewModel : ObservableObject
 
         if (eta.HasValue)
         {
-            var etaText = FormatTimeSpan(eta.Value);
-            return $"{description}\nEst. limit in ~{etaText}";
+            var runoutTime = DateTime.Now.Add(eta.Value);
+            var timeFormat = use24Hour ? "H:mm" : "h:mm tt";
+            var datePrefix = runoutTime.Date == DateTime.Now.Date ? "today" : "tomorrow";
+            return $"{description}\nEst. limit in ~{FormatTimeSpan(eta.Value)} ({datePrefix} {runoutTime.ToString(timeFormat)})";
         }
 
         if (pace <= PaceStatus.OnTrack)
@@ -276,10 +278,12 @@ public partial class PopoverViewModel : ObservableObject
         return description;
     }
 
-    private static string FormatEstimate(TimeSpan? eta)
+    private static string FormatEstimate(TimeSpan? eta, bool use24Hour = false)
     {
         if (!eta.HasValue) return "";
-        return $"~{FormatTimeSpan(eta.Value)} to limit";
+        var runoutTime = DateTime.Now.Add(eta.Value);
+        var timeFormat = use24Hour ? "H:mm" : "h:mm tt";
+        return $"~{FormatTimeSpan(eta.Value)} to limit ({runoutTime.ToString(timeFormat)})";
     }
 
     private static string FormatTimeSpan(TimeSpan ts)
