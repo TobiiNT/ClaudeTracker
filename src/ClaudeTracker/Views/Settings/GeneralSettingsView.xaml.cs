@@ -54,6 +54,34 @@ public partial class GeneralSettingsView : UserControl
         Threshold95Toggle.Checked += (_, _) => _vm.Threshold95 = true;
         Threshold95Toggle.Unchecked += (_, _) => _vm.Threshold95 = false;
 
+        // Time display combo
+        TimeDisplayCombo.ItemsSource = new[] {
+            new { Display = "Remaining Time", Value = "remainingTime" },
+            new { Display = "Reset Time", Value = "resetTime" },
+            new { Display = "Both", Value = "both" }
+        };
+        TimeDisplayCombo.DisplayMemberPath = "Display";
+        TimeDisplayCombo.SelectedValuePath = "Value";
+        TimeDisplayCombo.SelectedValue = _vm.PopoverTimeDisplay;
+        TimeDisplayCombo.SelectionChanged += (_, _) =>
+        {
+            if (TimeDisplayCombo.SelectedValue is string v) _vm.PopoverTimeDisplay = v;
+        };
+
+        // Time format combo
+        TimeFormatCombo.ItemsSource = new[] {
+            new { Display = "System Default", Value = "system" },
+            new { Display = "12-Hour (3:59 PM)", Value = "twelveHour" },
+            new { Display = "24-Hour (15:59)", Value = "twentyFourHour" }
+        };
+        TimeFormatCombo.DisplayMemberPath = "Display";
+        TimeFormatCombo.SelectedValuePath = "Value";
+        TimeFormatCombo.SelectedValue = _vm.TimeFormatPreference;
+        TimeFormatCombo.SelectionChanged += (_, _) =>
+        {
+            if (TimeFormatCombo.SelectedValue is string v) _vm.TimeFormatPreference = v;
+        };
+
         TestAlertButton.Click += (_, _) =>
         {
             var notificationService = App.Services.GetRequiredService<INotificationService>();

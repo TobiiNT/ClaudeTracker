@@ -53,6 +53,19 @@
                               Style="{StaticResource CompactSwitch}" />
             </Grid>
 
+            <!-- Time & Display -->
+            <TextBlock Text="Time &amp; Display" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <Grid Margin="0,6,0,0">
+                <TextBlock Text="Reset time format" VerticalAlignment="Center" FontSize="13" />
+                <ComboBox x:Name="TimeDisplayCombo" HorizontalAlignment="Right" Width="160"
+                          Style="{StaticResource MaterialDesignComboBox}" FontSize="12" />
+            </Grid>
+            <Grid Margin="0,10,0,20">
+                <TextBlock Text="Time format" VerticalAlignment="Center" FontSize="13" />
+                <ComboBox x:Name="TimeFormatCombo" HorizontalAlignment="Right" Width="160"
+                          Style="{StaticResource MaterialDesignComboBox}" FontSize="12" />
+            </Grid>
+
             <!-- Notifications -->
             <TextBlock Text="Notifications" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">

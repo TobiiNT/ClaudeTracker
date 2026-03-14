@@ -12,6 +12,7 @@ public partial class PopoverViewModel : ObservableObject
 {
     private readonly IProfileService _profileService;
     private readonly IUsageRefreshCoordinator _refreshCoordinator;
+    private readonly ISettingsService _settingsService;
 
     [ObservableProperty] private string _profileName = "Default";
     [ObservableProperty] private string _sessionPercentageText = "0%";
@@ -56,10 +57,12 @@ public partial class PopoverViewModel : ObservableObject
 
     public PopoverViewModel(
         IProfileService profileService,
-        IUsageRefreshCoordinator refreshCoordinator)
+        IUsageRefreshCoordinator refreshCoordinator,
+        ISettingsService settingsService)
     {
         _profileService = profileService;
         _refreshCoordinator = refreshCoordinator;
+        _settingsService = settingsService;
 
         _profileService.ActiveProfileChanged += (_, _) => { UpdateProfilesList(); RefreshData(); };
         _profileService.ProfilesChanged += (_, _) => UpdateProfilesList();
@@ -100,17 +103,25 @@ public partial class PopoverViewModel : ObservableObject
         if (usage != null)
         {
             var showRemaining = profile.IconConfig.ShowRemainingPercentage;
+            var settings = _settingsService.Settings;
+            var use24Hour = settings.TimeFormatPreference switch
+            {
+                "twelveHour" => false,
+                "twentyFourHour" => true,
+                _ => FormatterHelper.IsSystem24Hour()
+            };
+            var timeDisplay = settings.PopoverTimeDisplay;
 
             SessionPercentage = usage.EffectiveSessionPercentage;
             SessionPercentageText = FormatterHelper.FormatPercentage(
                 UsageStatusCalculator.GetDisplayPercentage(usage.EffectiveSessionPercentage, showRemaining));
-            SessionResetText = $"Resets {FormatterHelper.FormatTimeRemaining(usage.SessionResetTime)}";
+            SessionResetText = FormatResetText(usage.SessionResetTime, timeDisplay, use24Hour);
             SessionStatus = UsageStatusCalculator.CalculateStatus(usage.EffectiveSessionPercentage, showRemaining);
 
             WeeklyPercentage = usage.WeeklyPercentage;
             WeeklyPercentageText = FormatterHelper.FormatPercentage(
                 UsageStatusCalculator.GetDisplayPercentage(usage.WeeklyPercentage, showRemaining));
-            WeeklyResetText = $"Resets {FormatterHelper.FormatTimeRemaining(usage.WeeklyResetTime)}";
+            WeeklyResetText = FormatResetText(usage.WeeklyResetTime, timeDisplay, use24Hour);
             WeeklyStatus = UsageStatusCalculator.CalculateStatus(usage.WeeklyPercentage, showRemaining);
 
             // Pace calculation
@@ -198,6 +209,16 @@ public partial class PopoverViewModel : ObservableObject
         Profiles.Clear();
         foreach (var p in source)
             Profiles.Add(p);
+    }
+
+    private static string FormatResetText(DateTime resetTime, string displayMode, bool use24Hour)
+    {
+        return displayMode switch
+        {
+            "resetTime" => $"Resets {FormatterHelper.FormatResetTimeAbsolute(resetTime, use24Hour)}",
+            "both" => $"Resets {FormatterHelper.FormatResetTimeCombined(resetTime, use24Hour)}",
+            _ => $"Resets {FormatterHelper.FormatTimeRemaining(resetTime)}"
+        };
     }
 
     private static string FormatPaceLabel(PaceStatus pace)
