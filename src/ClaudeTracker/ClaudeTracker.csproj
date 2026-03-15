@@ -51,6 +51,21 @@
     <Content Include="Assets\app_icon.ico" />
   </ItemGroup>
 
+  <!-- Copy HookBridge exe to output directory alongside main app -->
+  <ItemGroup>
+    <ProjectReference Include="..\ClaudeTracker.HookBridge\ClaudeTracker.HookBridge.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <Target Name="CopyHookBridge" AfterTargets="Build">
+    <ItemGroup>
+      <HookBridgeFiles Include="$(SolutionDir)src\ClaudeTracker.HookBridge\bin\$(Configuration)\net8.0\ClaudeTracker.HookBridge.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(HookBridgeFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
+
   <ItemGroup>
     <EmbeddedResource Update="Localization\Strings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

@@ -102,12 +102,23 @@ public partial class HooksSettingsView : UserControl
         RunBridgeCommand("uninstall");
     }
 
+    private static string? FindHookBridge()
+    {
+        var candidates = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "ClaudeTracker.HookBridge.exe"),
+            Path.Combine(AppContext.BaseDirectory, "HookBridge", "ClaudeTracker.HookBridge.exe"),
+            Path.Combine(Path.GetDirectoryName(AppContext.BaseDirectory.TrimEnd('\\', '/')) ?? "", "ClaudeTracker.HookBridge", "ClaudeTracker.HookBridge.exe"),
+        };
+        return candidates.FirstOrDefault(File.Exists);
+    }
+
     private void RunBridgeCommand(string command)
     {
-        var bridgePath = Path.Combine(AppContext.BaseDirectory, "ClaudeTracker.HookBridge.exe");
-        if (!File.Exists(bridgePath))
+        var bridgePath = FindHookBridge();
+        if (bridgePath == null)
         {
-            InstallStatusText.Text = "HookBridge not found. Please install manually.";
+            InstallStatusText.Text = "HookBridge not found. Build the ClaudeTracker.HookBridge project first, or place it alongside ClaudeTracker.exe.";
             return;
         }
 
