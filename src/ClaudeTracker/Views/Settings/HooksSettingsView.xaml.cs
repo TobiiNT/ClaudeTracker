@@ -33,6 +33,15 @@ public partial class HooksSettingsView : UserControl
         ElicitationPopupsToggle.Checked += (_, _) => _vm.ElicitationPopupsEnabled = true;
         ElicitationPopupsToggle.Unchecked += (_, _) => _vm.ElicitationPopupsEnabled = false;
 
+        // Popup position
+        PopupPositionCombo.ItemsSource = new[] { "Top Right", "Top Left", "Bottom Right", "Bottom Left" };
+        PopupPositionCombo.SelectedItem = FormatPosition(_vm.PopupPosition);
+        PopupPositionCombo.SelectionChanged += (_, _) =>
+        {
+            if (PopupPositionCombo.SelectedItem is string v)
+                _vm.PopupPosition = v.Replace(" ", "");
+        };
+
         // Notifications
         NotifyStopToggle.IsChecked = _vm.NotifyStop;
         NotifyStopToggle.Checked += (_, _) => _vm.NotifyStop = true;
@@ -114,6 +123,14 @@ public partial class HooksSettingsView : UserControl
                     ? Visibility.Visible : Visibility.Collapsed);
         };
     }
+
+    private static string FormatPosition(string pos) => pos switch
+    {
+        "TopLeft" => "Top Left",
+        "BottomRight" => "Bottom Right",
+        "BottomLeft" => "Bottom Left",
+        _ => "Bottom Right"
+    };
 
     private void UpdateHooksEnabledVisibility(bool enabled)
     {

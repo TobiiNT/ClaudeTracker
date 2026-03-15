@@ -104,16 +104,16 @@ public partial class PermissionRequestPopup : Window
     {
         // Position at bottom-right
         var workArea = SystemParameters.WorkArea;
-        Left = workArea.Right - ActualWidth - 12;
-        Top = workArea.Bottom - ActualHeight - 12;
+        PopupStackManager.PositionWindow(this);
 
         // Reposition all stacked popups
         PopupStackManager.RepositionAll();
 
-        // Slide-up + fade-in animation
+        // Slide + fade-in animation (direction based on position)
+        var isBottom = PopupStackManager.GetPosition().Contains("Bottom");
         var slideAnim = new DoubleAnimation
         {
-            From = Top + 40,
+            From = isBottom ? Top + 40 : Top - 40,
             To = Top,
             Duration = TimeSpan.FromMilliseconds(250),
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }

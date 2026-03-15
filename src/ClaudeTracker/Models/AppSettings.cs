@@ -79,6 +79,9 @@ public class AppSettings
     [JsonPropertyName("hooksOnboardingDismissed")]
     public bool HooksOnboardingDismissed { get; set; }
 
+    [JsonPropertyName("hookPopupPosition")]
+    public string HookPopupPosition { get; set; } = "BottomRight";
+
     [JsonPropertyName("hooksEnabled")]
     public bool HooksEnabled { get; set; }
 

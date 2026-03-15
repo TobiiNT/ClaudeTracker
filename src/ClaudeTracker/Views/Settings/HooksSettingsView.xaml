@@ -50,6 +50,11 @@
                 <ToggleButton x:Name="PermissionPopupsToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
             </Grid>
+            <Grid Margin="0,10,0,0">
+                <TextBlock Text="Popup Position" VerticalAlignment="Center" FontSize="13" />
+                <ComboBox x:Name="PopupPositionCombo" HorizontalAlignment="Right" Width="140"
+                          Style="{StaticResource MaterialDesignComboBox}" FontSize="12" />
+            </Grid>
             <Grid Margin="0,10,0,20">
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="Elicitation Popups (MCP)" FontSize="13" />
