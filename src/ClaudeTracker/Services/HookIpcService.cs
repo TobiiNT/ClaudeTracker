@@ -25,6 +25,14 @@ public class HookIpcService : IHookIpcService
 
     public event Func<HookEvent, Task<HookResponse>>? EventReceived;
 
+    /// <summary>Fired when a HookBridge client disconnects (user answered in terminal).</summary>
+    public event EventHandler<string>? PipeDisconnected;
+
+    private void OnPipeDisconnected(string requestId)
+    {
+        PipeDisconnected?.Invoke(this, requestId);
+    }
+
     // Win32 interop for detecting pipe client disconnect
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool PeekNamedPipe(
@@ -150,6 +158,7 @@ public class HookIpcService : IHookIpcService
         // 4. For interactive events, monitor pipe disconnect (HookBridge/user answered in terminal)
         if (Constants.Hooks.InteractiveEvents.Contains(evt.EventName))
         {
+            using var handlerCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             var handlerTask = handler.Invoke(evt);
             var disconnectTcs = new TaskCompletionSource<HookResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -178,9 +187,11 @@ public class HookIpcService : IHookIpcService
             }
             else
             {
-                // Client disconnected — user answered in terminal
-                LoggingService.Instance.Log($"[HookIpc] Client disconnected for {evt.EventName}, using default response");
+                // Client disconnected — user answered in terminal.
+                // Fire the PipeDisconnected event so UI popups can auto-close.
+                LoggingService.Instance.Log($"[HookIpc] Client disconnected for {evt.EventName}, notifying UI");
                 response = defaultResponse;
+                OnPipeDisconnected(evt.RequestId);
             }
 
             // Only write if pipe is still connected

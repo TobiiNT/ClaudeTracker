@@ -8,4 +8,7 @@ public interface IHookIpcService : IDisposable
     void Start();
     void Stop();
     event Func<HookEvent, Task<HookResponse>>? EventReceived;
+
+    /// <summary>Fired when a HookBridge client disconnects (user answered in terminal).</summary>
+    event EventHandler<string>? PipeDisconnected;
 }

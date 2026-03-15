@@ -90,12 +90,22 @@ public partial class App : Application
             hookIpcService.Start();
 
             // Wire PermissionRequestHandler to show popup UI
+            // Track pending popup TCS keyed by request ID so we can resolve on disconnect
+            var pendingPopups = new System.Collections.Concurrent.ConcurrentDictionary<string, TaskCompletionSource<Models.HookResponse>>();
+
             var permHandler = _services.GetServices<IHookEventHandler>()
                 .OfType<PermissionRequestHandler>().FirstOrDefault();
             if (permHandler != null)
             {
                 permHandler.PermissionRequested += (_, args) =>
                 {
+                    // Track this TCS for disconnect auto-close
+                    pendingPopups[args.Info.SessionId] = args.ResponseSource;
+                    args.ResponseSource.Task.ContinueWith(_ =>
+                    {
+                        pendingPopups.TryRemove(args.Info.SessionId, out var _ignored);
+                    });
+
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         try
@@ -116,6 +126,22 @@ public partial class App : Application
                     });
                 };
             }
+
+            // When pipe disconnects (user answered in terminal), close any pending popup
+            hookIpcService.PipeDisconnected += (_, requestId) =>
+            {
+                // Resolve all pending popups — the user answered in terminal
+                foreach (var kvp in pendingPopups)
+                {
+                    kvp.Value.TrySetResult(new Models.HookResponse
+                    {
+                        RequestId = requestId,
+                        Success = true,
+                        JsonOutput = null
+                    });
+                }
+                pendingPopups.Clear();
+            };
 
             // Start stale session pruning timer
             var sessionTracking = _services.GetRequiredService<ISessionTrackingService>();
