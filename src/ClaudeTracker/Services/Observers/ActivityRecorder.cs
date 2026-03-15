@@ -33,6 +33,7 @@ public class ActivityRecorder : IHookEventObserver
             EventName = evt.EventName,
             Timestamp = evt.Timestamp,
             Summary = BuildSummary(evt.EventName, json),
+            Detail = BuildDetail(evt.EventName, json),
             Icon = GetIcon(evt.EventName),
             ToolName = GetToolName(evt.EventName, json),
             ProjectName = projectName,
@@ -69,7 +70,7 @@ public class ActivityRecorder : IHookEventObserver
 
     private static string FormatToolSummary(string toolName, JsonNode? json) => toolName switch
     {
-        "Bash" => $"Bash: {Truncate(json?["tool_input"]?["command"]?.GetValue<string>(), 60)}",
+        "Bash" => FormatBashSummary(json),
         "Edit" => $"Edit {Truncate(json?["tool_input"]?["file_path"]?.GetValue<string>(), 50)}",
         "Write" => $"Write {Truncate(json?["tool_input"]?["file_path"]?.GetValue<string>(), 50)}",
         "Read" => $"Read {Truncate(json?["tool_input"]?["file_path"]?.GetValue<string>(), 50)}",
@@ -95,6 +96,30 @@ public class ActivityRecorder : IHookEventObserver
     {
         if (eventName is "PreToolUse" or "PostToolUse" or "PostToolUseFailure" or "PermissionRequest")
             return json?["tool_name"]?.GetValue<string>();
+        return null;
+    }
+
+    private static string FormatBashSummary(JsonNode? json)
+    {
+        var desc = json?["tool_input"]?["description"]?.GetValue<string>();
+        if (!string.IsNullOrWhiteSpace(desc))
+            return $"Bash \u2013 {Truncate(desc, 55)}";
+        return $"Bash: {Truncate(json?["tool_input"]?["command"]?.GetValue<string>(), 60)}";
+    }
+
+    /// <summary>Returns a detail line (e.g. full command) for entries that have a description summary.</summary>
+    private static string? BuildDetail(string eventName, JsonNode? json)
+    {
+        if (eventName is "PreToolUse" or "PostToolUse" or "PostToolUseFailure" or "PermissionRequest")
+        {
+            var toolName = json?["tool_name"]?.GetValue<string>();
+            if (toolName == "Bash")
+            {
+                var desc = json?["tool_input"]?["description"]?.GetValue<string>();
+                if (!string.IsNullOrWhiteSpace(desc))
+                    return Truncate(json?["tool_input"]?["command"]?.GetValue<string>(), 80);
+            }
+        }
         return null;
     }
 

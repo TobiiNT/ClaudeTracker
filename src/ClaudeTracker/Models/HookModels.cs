@@ -71,6 +71,9 @@ public class ActivityEntry
     [JsonPropertyName("toolName")]
     public string? ToolName { get; set; }
 
+    [JsonPropertyName("detail")]
+    public string? Detail { get; set; }
+
     [JsonPropertyName("projectName")]
     public string ProjectName { get; set; } = string.Empty;
 

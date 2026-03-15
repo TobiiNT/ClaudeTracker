@@ -36,6 +36,12 @@ public partial class PermissionRequestPopup : Window
             : info.Cwd;
 
         ToolNameText.Text = info.ToolName;
+        var desc = GetStringValue(info.ToolInput, "description");
+        if (!string.IsNullOrEmpty(desc))
+        {
+            ToolDescText.Text = "\u2013 " + desc;
+            ToolDescText.Visibility = System.Windows.Visibility.Visible;
+        }
         ToolInputText.Text = FormatToolInput(info.ToolName, info.ToolInput);
 
         // Build "Always Allow" buttons from suggestions
