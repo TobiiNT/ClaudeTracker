@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ShowInTaskbar="False" Topmost="True"
+        ShowActivated="False"
         SizeToContent="Height" Width="400"
         ResizeMode="NoResize">
     <Border CornerRadius="10" Padding="16,14"

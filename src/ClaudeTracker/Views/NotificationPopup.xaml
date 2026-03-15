@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ShowInTaskbar="False" Topmost="True"
+        ShowActivated="False"
         SizeToContent="WidthAndHeight" MaxWidth="360"
         ResizeMode="NoResize">
     <Border x:Name="PopupBorder" CornerRadius="10" Padding="14,12"

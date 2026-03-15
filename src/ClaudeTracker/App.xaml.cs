@@ -114,7 +114,6 @@ public partial class App : Application
                         {
                             var popup = new Views.PermissionRequestPopup(args.Info, args.ResponseSource);
                             popup.Show();
-                            popup.Activate();
                         }
                         catch (Exception ex)
                         {
