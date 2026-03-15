@@ -25,8 +25,12 @@ public class HookEventDispatcher : IHookEventDispatcher
         _observers = observers;
     }
 
+    private bool _initialized;
+
     public void Initialize()
     {
+        if (_initialized) return;
+        _initialized = true;
         _ipcService.EventReceived += OnEventReceived;
     }
 

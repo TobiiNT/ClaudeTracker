@@ -78,6 +78,10 @@ public partial class HooksSettingsView : UserControl
         InstallButton.Click += OnInstallClick;
         UninstallButton.Click += OnUninstallClick;
 
+        // Check installation status on load
+        _vm.CheckInstallStatus();
+        UpdateInstallUI();
+
         // Save button
         SaveButton.Click += (_, _) =>
         {
@@ -92,14 +96,25 @@ public partial class HooksSettingsView : UserControl
         };
     }
 
+    private void UpdateInstallUI()
+    {
+        InstallStatusText.Text = _vm.InstallStatusText;
+        InstallButton.IsEnabled = !_vm.IsHooksInstalled;
+        UninstallButton.IsEnabled = _vm.IsHooksInstalled;
+    }
+
     private void OnInstallClick(object sender, RoutedEventArgs e)
     {
         RunBridgeCommand("install");
+        _vm.CheckInstallStatus();
+        UpdateInstallUI();
     }
 
     private void OnUninstallClick(object sender, RoutedEventArgs e)
     {
         RunBridgeCommand("uninstall");
+        _vm.CheckInstallStatus();
+        UpdateInstallUI();
     }
 
     private static string? FindHookBridge()

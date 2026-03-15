@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ClaudeTracker.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ClaudeTracker.ViewModels;
 
@@ -22,6 +23,10 @@ public partial class HooksSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _notifySessionLifecycle;
     [ObservableProperty] private bool _notifySubagent;
     [ObservableProperty] private bool _hasUnsavedChanges;
+    [ObservableProperty] private bool _isHooksInstalled;
+    [ObservableProperty] private string _installStatusText = "";
+
+    public bool IsIpcRunning => _hookIpcService.IsRunning;
 
     // Snapshot
     private bool _initialHooksEnabled;
@@ -76,6 +81,31 @@ public partial class HooksSettingsViewModel : ObservableObject
         _initialNotifySessionLifecycle = NotifySessionLifecycle;
         _initialNotifySubagent = NotifySubagent;
         _initialized = true;
+    }
+
+    public void CheckInstallStatus()
+    {
+        try
+        {
+            var settingsPath = Utilities.Constants.Hooks.ClaudeSettingsPath;
+            if (System.IO.File.Exists(settingsPath))
+            {
+                var content = System.IO.File.ReadAllText(settingsPath);
+                IsHooksInstalled = content.Contains("ClaudeTracker.HookBridge");
+            }
+            else
+            {
+                IsHooksInstalled = false;
+            }
+
+            InstallStatusText = IsHooksInstalled
+                ? $"Hooks installed. IPC server: {(IsIpcRunning ? "running" : "stopped")}"
+                : "Hooks not installed. Click Install to register with Claude Code.";
+        }
+        catch
+        {
+            InstallStatusText = "Unable to check installation status.";
+        }
     }
 
     partial void OnHooksEnabledChanged(bool value) => DetectChanges();
@@ -135,9 +165,16 @@ public partial class HooksSettingsViewModel : ObservableObject
         if (hooksEnabledChanged)
         {
             if (HooksEnabled)
+            {
+                // Initialize dispatcher if not yet done, then start IPC
+                var dispatcher = App.Services.GetRequiredService<IHookEventDispatcher>();
+                dispatcher.Initialize();
                 _hookIpcService.Start();
+            }
             else
+            {
                 _hookIpcService.Stop();
+            }
         }
 
         // Update snapshot
