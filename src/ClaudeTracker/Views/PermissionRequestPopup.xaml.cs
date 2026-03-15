@@ -524,14 +524,18 @@ public partial class PermissionRequestPopup : Window
                 }
             }
 
-            var key = $"question_{qIdx}";
+            // Key by question text (Claude Code expects this format)
+            var key = q.Question;
             if (q.MultiSelect)
-                answers[key] = selectedLabels;
+                answers[key] = string.Join(", ", selectedLabels);
             else
                 answers[key] = selectedLabels.FirstOrDefault() ?? "";
         }
 
-        return answers;
+        // Return as the full updated tool input with answers merged
+        var updatedInput = new Dictionary<string, object>(_info.ToolInput);
+        updatedInput["answers"] = answers;
+        return updatedInput;
     }
 
     private void BuildAlwaysAllowButtons(List<PermissionSuggestion> suggestions)
