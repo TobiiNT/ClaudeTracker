@@ -94,6 +94,11 @@ jobs:
           -p:AssemblyVersion=${{ steps.version.outputs.VERSION }}.0
           -p:FileVersion=${{ steps.version.outputs.VERSION }}.0
 
+      - name: Bundle HookBridge into publish directories
+        run: |
+          Copy-Item ./publish-hookbridge-self-contained/ClaudeTracker.HookBridge.exe ./publish/
+          Copy-Item ./publish-hookbridge-self-contained/ClaudeTracker.HookBridge.exe ./publish-portable/
+
       - name: Package portable ZIP
         run: Compress-Archive -Path ./publish-portable/* -DestinationPath ./ClaudeTracker-${{ github.ref_name }}-portable-win-x64.zip
 
