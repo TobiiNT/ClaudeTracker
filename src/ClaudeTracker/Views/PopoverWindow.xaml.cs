@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +9,26 @@ using ClaudeTracker.Services;
 using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views;
+
+public class ActivityIconConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return value is ActivityIcon icon ? icon switch
+        {
+            ActivityIcon.Tool => "\u26A1",         // ⚡
+            ActivityIcon.Permission => "\uD83D\uDD10", // 🔐
+            ActivityIcon.Session => "\uD83D\uDCBB",    // 💻
+            ActivityIcon.Subagent => "\u25B6\uFE0F",   // ▶️
+            ActivityIcon.Notification => "\uD83D\uDD14", // 🔔
+            ActivityIcon.System => "\u2699\uFE0F",     // ⚙️
+            _ => "\u26A1"
+        } : "\u26A1";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
 
 public partial class PopoverWindow : Window
 {

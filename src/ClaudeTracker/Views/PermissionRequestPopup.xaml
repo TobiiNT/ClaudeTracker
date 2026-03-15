@@ -27,7 +27,7 @@
                 <StackPanel>
                     <TextBlock x:Name="ToolNameText" FontSize="12" FontWeight="SemiBold" Foreground="#BB86FC" Margin="0,0,0,4" />
                     <ScrollViewer MaxHeight="120" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                        <TextBlock x:Name="ToolInputText" FontSize="11" Foreground="#CCCCCC" TextWrapping="Wrap" FontFamily="Consolas" />
+                        <TextBlock x:Name="ToolInputText" FontSize="11" Foreground="#CCCCCC" TextWrapping="Wrap" FontFamily="Consolas, Segoe UI" />
                     </ScrollViewer>
                 </StackPanel>
             </Border>

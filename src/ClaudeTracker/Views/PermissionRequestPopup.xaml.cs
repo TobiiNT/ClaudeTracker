@@ -336,6 +336,18 @@ public partial class PermissionRequestPopup : Window
                 otherStack.Children.Add(otherTextBox);
                 otherBorder.Child = otherStack;
 
+                // Hide textbox when it loses focus and is empty
+                otherTextBox.LostFocus += (_, _) =>
+                {
+                    if (string.IsNullOrWhiteSpace(otherTextBox.Text))
+                    {
+                        otherTextBox.Visibility = Visibility.Collapsed;
+                        _askSelections[questionIndex].Remove(otherIndex);
+                        otherBorder.Background = new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A));
+                        UpdateAllowButtonState();
+                    }
+                };
+
                 otherBorder.MouseLeftButtonDown += (_, _) =>
                 {
                     ToggleAskOption(questionIndex, otherIndex, otherBorder);
