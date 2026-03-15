@@ -100,7 +100,7 @@ internal static class Program
             ["requestId"] = Guid.NewGuid().ToString(),
             ["eventName"] = eventName,
             ["payload"] = rawInput,
-            ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            ["timestamp"] = DateTime.UtcNow.ToString("O")
         };
 
         var envelopeJson = envelope.ToJsonString();
