@@ -332,9 +332,9 @@ public partial class PermissionRequestPopup : Window
                     Visibility = Visibility.Collapsed,
                     CaretBrush = new SolidColorBrush(Colors.White)
                 };
+                otherStack.Children.Add(otherTextBox);
 
                 _askOtherTextBoxes[qIdx] = otherTextBox;
-                otherStack.Children.Add(otherTextBox);
                 otherBorder.Child = otherStack;
 
                 // Hide textbox when it loses focus and is empty
@@ -351,8 +351,8 @@ public partial class PermissionRequestPopup : Window
 
                 otherBorder.PreviewMouseLeftButtonDown += (_, e) =>
                 {
-                    // Don't toggle when clicking inside the TextBox
-                    if (e.OriginalSource is System.Windows.Controls.Primitives.TextBoxBase)
+                    // Don't toggle when clicking inside the visible TextBox
+                    if (otherTextBox.IsVisible && otherTextBox.IsMouseOver)
                         return;
 
                     ToggleAskOption(questionIndex, otherIndex, otherBorder);
@@ -360,7 +360,7 @@ public partial class PermissionRequestPopup : Window
                         ? Visibility.Visible
                         : Visibility.Collapsed;
                     if (otherTextBox.Visibility == Visibility.Visible)
-                        otherTextBox.Focus();
+                        Dispatcher.BeginInvoke(() => otherTextBox.Focus());
                 };
 
                 AskContent.Children.Add(otherBorder);
