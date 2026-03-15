@@ -20,11 +20,38 @@
         <!-- Description -->
         <TextBlock TextWrapping="Wrap" TextAlignment="Center" FontSize="13"
                    Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
-                   Margin="0,0,0,24">
-            ClaudeTracker can now receive real-time events from Claude Code —
-            permission popups, activity tracking, and notifications.
-            Enable hooks to get started.
+                   Margin="0,0,0,16">
+            Running multiple Claude sessions? Stop tab-switching
+            to find which terminal needs your attention.
         </TextBlock>
+
+        <!-- Benefits -->
+        <StackPanel Margin="16,0,16,20">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <materialDesign:PackIcon Kind="ShieldCheck" Width="16" Height="16"
+                                         Foreground="#7C4DFF" VerticalAlignment="Top" Margin="0,1,8,0" />
+                <TextBlock TextWrapping="Wrap" FontSize="12"
+                           Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
+                    <Run FontWeight="SemiBold">Permission popups</Run> — approve tool calls from any window, no terminal switching
+                </TextBlock>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <materialDesign:PackIcon Kind="BellRing" Width="16" Height="16"
+                                         Foreground="#2196F3" VerticalAlignment="Top" Margin="0,1,8,0" />
+                <TextBlock TextWrapping="Wrap" FontSize="12"
+                           Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
+                    <Run FontWeight="SemiBold">Task notifications</Run> — know when Claude finishes without checking each session
+                </TextBlock>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="FormatListBulleted" Width="16" Height="16"
+                                         Foreground="#4CAF50" VerticalAlignment="Top" Margin="0,1,8,0" />
+                <TextBlock TextWrapping="Wrap" FontSize="12"
+                           Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
+                    <Run FontWeight="SemiBold">Activity feed</Run> — see all sessions at a glance from the tray icon
+                </TextBlock>
+            </StackPanel>
+        </StackPanel>
 
         <!-- Status text (hidden by default, shown during install) -->
         <TextBlock x:Name="StatusText" FontSize="11" TextWrapping="Wrap"
