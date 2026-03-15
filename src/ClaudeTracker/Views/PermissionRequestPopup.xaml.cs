@@ -147,7 +147,7 @@ public partial class PermissionRequestPopup : Window
                 FontFamily = new FontFamily("Consolas"),
                 FontSize = 10,
                 Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x8A, 0x80)),
-                TextWrapping = TextWrapping.NoWrap
+                TextWrapping = TextWrapping.Wrap
             });
         }
 
@@ -159,7 +159,7 @@ public partial class PermissionRequestPopup : Window
                 FontFamily = new FontFamily("Consolas"),
                 FontSize = 10,
                 Foreground = new SolidColorBrush(Color.FromRgb(0x69, 0xF0, 0xAE)),
-                TextWrapping = TextWrapping.NoWrap
+                TextWrapping = TextWrapping.Wrap
             });
         }
 
@@ -201,7 +201,7 @@ public partial class PermissionRequestPopup : Window
                 FontFamily = new FontFamily("Consolas"),
                 FontSize = 10,
                 Foreground = new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xCC)),
-                TextWrapping = TextWrapping.NoWrap
+                TextWrapping = TextWrapping.Wrap
             });
             WriteContent.Children.Add(linePanel);
         }

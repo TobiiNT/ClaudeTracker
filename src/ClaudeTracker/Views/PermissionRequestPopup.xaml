@@ -10,7 +10,8 @@
         <Border.Effect>
             <DropShadowEffect ShadowDepth="3" Opacity="0.4" BlurRadius="16" Direction="270" />
         </Border.Effect>
-        <ScrollViewer MaxHeight="600" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer MaxHeight="600" Style="{StaticResource ModernScrollViewer}"
+                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
             <!-- Header -->
             <DockPanel Margin="0,0,0,10">
@@ -31,7 +32,8 @@
                                    Margin="6,0,0,0" TextTrimming="CharacterEllipsis"
                                    Visibility="Collapsed" />
                     </StackPanel>
-                    <ScrollViewer MaxHeight="120" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <ScrollViewer MaxHeight="120" Style="{StaticResource ModernScrollViewer}"
+                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <TextBlock x:Name="ToolInputText" FontSize="11" Foreground="#CCCCCC" TextWrapping="Wrap" FontFamily="Consolas, Segoe UI" />
                     </ScrollViewer>
                 </StackPanel>
@@ -46,7 +48,8 @@
                 <Border Grid.Column="0" Background="#1A1A1A" CornerRadius="6" Padding="6,6">
                     <StackPanel>
                         <TextBlock Text="Old" FontSize="10" Foreground="#FF8A80" Margin="0,0,0,4" FontWeight="SemiBold" />
-                        <ScrollViewer x:Name="OldScroll" MaxHeight="200" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <ScrollViewer x:Name="OldScroll" MaxHeight="200" Style="{StaticResource ModernScrollViewer}"
+                                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <StackPanel x:Name="OldContent" />
                         </ScrollViewer>
                     </StackPanel>
@@ -54,7 +57,8 @@
                 <Border Grid.Column="2" Background="#1A1A1A" CornerRadius="6" Padding="6,6">
                     <StackPanel>
                         <TextBlock Text="New" FontSize="10" Foreground="#69F0AE" Margin="0,0,0,4" FontWeight="SemiBold" />
-                        <ScrollViewer x:Name="NewScroll" MaxHeight="200" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <ScrollViewer x:Name="NewScroll" MaxHeight="200" Style="{StaticResource ModernScrollViewer}"
+                                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <StackPanel x:Name="NewContent" />
                         </ScrollViewer>
                     </StackPanel>
@@ -62,13 +66,14 @@
             </Grid>
             <!-- Ask panel (AskUserQuestion) -->
             <Border x:Name="AskPanel" Background="#1A1A1A" CornerRadius="6" Padding="10,8" Margin="0,0,0,10" Visibility="Collapsed">
-                <ScrollViewer MaxHeight="250" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer MaxHeight="250" Style="{StaticResource ModernScrollViewer}" VerticalScrollBarVisibility="Auto">
                     <StackPanel x:Name="AskContent" />
                 </ScrollViewer>
             </Border>
             <!-- Write panel -->
             <Border x:Name="WritePanel" Background="#1A1A1A" CornerRadius="6" Padding="10,8" Margin="0,0,0,10" Visibility="Collapsed">
-                <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ScrollViewer MaxHeight="200" Style="{StaticResource ModernScrollViewer}"
+                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel x:Name="WriteContent" />
                 </ScrollViewer>
             </Border>

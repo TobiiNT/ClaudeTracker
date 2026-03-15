@@ -28,7 +28,9 @@
             </Grid.RowDefinitions>
 
             <!-- ═══ Content body ═══ -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden"
+            <ScrollViewer Grid.Row="1" Style="{StaticResource ModernScrollViewer}"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
                           Padding="16,10,16,6">
                 <StackPanel x:Name="UsageCardsPanel">
 
