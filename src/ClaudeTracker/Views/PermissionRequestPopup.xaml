@@ -45,7 +45,7 @@
                                   VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <TextBlock x:Name="ToolInputText" FontSize="11"
                                    Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-                                   TextWrapping="Wrap" FontFamily="Consolas, Segoe UI" />
+                                   TextWrapping="Wrap" FontFamily="Segoe UI, Consolas" />
                     </ScrollViewer>
                 </StackPanel>
             </Border>

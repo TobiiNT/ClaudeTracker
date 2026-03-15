@@ -47,7 +47,9 @@ public class ActivityRecorder : IHookEventObserver
 
     private static string BuildSummary(string eventName, JsonNode? json) => eventName switch
     {
-        Events.PreToolUse or Events.PostToolUse or Events.PostToolUseFailure or Events.PermissionRequest =>
+        Events.PostToolUseFailure =>
+            $"\u274c {FormatToolSummary(json?[Fields.ToolName]?.GetValue<string>() ?? "?", json)}",
+        Events.PreToolUse or Events.PostToolUse or Events.PermissionRequest =>
             FormatToolSummary(json?[Fields.ToolName]?.GetValue<string>() ?? "?", json),
         Events.Notification => json?[Fields.Message]?.GetValue<string>() ?? "Notification",
         Events.Stop => "Task completed",
@@ -107,9 +109,19 @@ public class ActivityRecorder : IHookEventObserver
         return $"Bash: {Truncate(json?[Fields.ToolInput]?[Fields.Command]?.GetValue<string>(), 60)}";
     }
 
-    /// <summary>Returns a detail line (e.g. full command) for entries that have a description summary.</summary>
+    /// <summary>Returns a detail line (e.g. full command or error message).</summary>
     private static string? BuildDetail(string eventName, JsonNode? json)
     {
+        // Tool failure — extract error message
+        if (eventName == Events.PostToolUseFailure)
+        {
+            var error = json?["error"]?.GetValue<string>()
+                ?? json?["tool_error"]?.GetValue<string>()
+                ?? json?["tool_result"]?.GetValue<string>();
+            if (!string.IsNullOrWhiteSpace(error))
+                return Truncate(error, 120);
+        }
+
         if (eventName is Events.PreToolUse or Events.PostToolUse or Events.PostToolUseFailure or Events.PermissionRequest)
         {
             var toolName = json?[Fields.ToolName]?.GetValue<string>();

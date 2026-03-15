@@ -21,8 +21,21 @@ public partial class PermissionRequestPopup : Window
     // Theme-aware brushes resolved from MaterialDesign resources
     private Brush FgBrush => (Brush)FindResource("MaterialDesign.Brush.Foreground");
     private Brush FgLightBrush => (Brush)FindResource("MaterialDesign.Brush.ForegroundLight");
+    private Brush FgDimBrush { get { var b = ((SolidColorBrush)FgBrush).Clone(); b.Opacity = 0.6; return b; } }
     private Brush CardBgBrush => (Brush)FindResource("MaterialDesign.Brush.Card.Background");
     private Brush SurfaceBrush => (Brush)FindResource("MaterialDesign.Brush.Background");
+    private Brush OptionBgBrush
+    {
+        get
+        {
+            var cardColor = ((SolidColorBrush)CardBgBrush).Color;
+            // Lighten slightly for contrast against card background
+            var r = (byte)Math.Min(255, cardColor.R + 20);
+            var g = (byte)Math.Min(255, cardColor.G + 20);
+            var b = (byte)Math.Min(255, cardColor.B + 20);
+            return new SolidColorBrush(Color.FromRgb(r, g, b));
+        }
+    }
 
     // AskUserQuestion state
     private readonly Dictionary<int, HashSet<int>> _askSelections = new();
@@ -152,7 +165,7 @@ public partial class PermissionRequestPopup : Window
             OldContent.Children.Add(new TextBlock
             {
                 Text = line,
-                FontFamily = new FontFamily("Consolas"),
+                FontFamily = new FontFamily("Cascadia Code, Consolas, Segoe UI"),
                 FontSize = 10,
                 Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x8A, 0x80)),
                 TextWrapping = TextWrapping.Wrap
@@ -164,7 +177,7 @@ public partial class PermissionRequestPopup : Window
             NewContent.Children.Add(new TextBlock
             {
                 Text = line,
-                FontFamily = new FontFamily("Consolas"),
+                FontFamily = new FontFamily("Cascadia Code, Consolas, Segoe UI"),
                 FontSize = 10,
                 Foreground = new SolidColorBrush(Color.FromRgb(0x69, 0xF0, 0xAE)),
                 TextWrapping = TextWrapping.Wrap
@@ -198,7 +211,7 @@ public partial class PermissionRequestPopup : Window
             linePanel.Children.Add(new TextBlock
             {
                 Text = $"{i + 1,4} ",
-                FontFamily = new FontFamily("Consolas"),
+                FontFamily = new FontFamily("Cascadia Code, Consolas, Segoe UI"),
                 FontSize = 10,
                 Foreground = FgLightBrush,
                 MinWidth = 35
@@ -206,7 +219,7 @@ public partial class PermissionRequestPopup : Window
             linePanel.Children.Add(new TextBlock
             {
                 Text = displayLines[i],
-                FontFamily = new FontFamily("Consolas"),
+                FontFamily = new FontFamily("Cascadia Code, Consolas, Segoe UI"),
                 FontSize = 10,
                 Foreground = FgBrush,
                 TextWrapping = TextWrapping.Wrap
@@ -277,7 +290,7 @@ public partial class PermissionRequestPopup : Window
 
                 var optionBorder = new Border
                 {
-                    Background = new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A)),
+                    Background = OptionBgBrush,
                     CornerRadius = new CornerRadius(4),
                     Padding = new Thickness(8, 6, 8, 6),
                     Margin = new Thickness(0, 2, 0, 2),
@@ -299,7 +312,7 @@ public partial class PermissionRequestPopup : Window
                     {
                         Text = opt.Description,
                         FontSize = 10,
-                        Foreground = FgLightBrush,
+                        Foreground = FgDimBrush,
                         TextWrapping = TextWrapping.Wrap
                     });
                 }
@@ -321,7 +334,7 @@ public partial class PermissionRequestPopup : Window
 
                 var otherBorder = new Border
                 {
-                    Background = new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A)),
+                    Background = OptionBgBrush,
                     CornerRadius = new CornerRadius(4),
                     Padding = new Thickness(8, 6, 8, 6),
                     Margin = new Thickness(0, 2, 0, 2),
@@ -362,7 +375,7 @@ public partial class PermissionRequestPopup : Window
                     {
                         otherTextBox.Visibility = Visibility.Collapsed;
                         _askSelections[questionIndex].Remove(otherIndex);
-                        otherBorder.Background = new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A));
+                        otherBorder.Background = OptionBgBrush;
                         UpdateAllowButtonState();
                     }
                 };
@@ -394,7 +407,9 @@ public partial class PermissionRequestPopup : Window
         if (selections.Contains(optionIndex))
         {
             selections.Remove(optionIndex);
-            optionBorder.Background = new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A));
+            optionBorder.Background = OptionBgBrush;
+            optionBorder.BorderBrush = null;
+            optionBorder.BorderThickness = new Thickness(0);
         }
         else
         {
@@ -405,7 +420,9 @@ public partial class PermissionRequestPopup : Window
                 ResetAskOptionColors(questionIndex);
             }
             selections.Add(optionIndex);
-            optionBorder.Background = new SolidColorBrush(Color.FromRgb(0x3A, 0x2A, 0x5A));
+            optionBorder.Background = new SolidColorBrush(Color.FromArgb(0x30, 0x7C, 0x4D, 0xFF));
+            optionBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(0x7C, 0x4D, 0xFF));
+            optionBorder.BorderThickness = new Thickness(1.5);
         }
 
         UpdateAllowButtonState();
@@ -424,7 +441,9 @@ public partial class PermissionRequestPopup : Window
             }
             else if (child is Border b && currentQ == questionIndex)
             {
-                b.Background = new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A));
+                b.Background = OptionBgBrush;
+                b.BorderBrush = null;
+                b.BorderThickness = new Thickness(0);
             }
         }
     }

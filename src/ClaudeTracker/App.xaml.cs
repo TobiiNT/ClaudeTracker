@@ -218,6 +218,8 @@ public partial class App : Application
                             && prefs.GetValueOrDefault("permission", true),
                         Events.Notification when entry.Summary.Contains("idle", StringComparison.OrdinalIgnoreCase) =>
                             prefs.GetValueOrDefault("idle", true),
+                        Events.Notification => true, // catch-all for other notification types
+                        Events.TaskCompleted => prefs.GetValueOrDefault("stop", true),
                         Events.ConfigChange => prefs.GetValueOrDefault("configChange", false),
                         Events.SessionStart or Events.SessionEnd => prefs.GetValueOrDefault("sessionLifecycle", false),
                         Events.SubagentStart or Events.SubagentStop => prefs.GetValueOrDefault("subagent", false),
@@ -230,8 +232,13 @@ public partial class App : Application
                             ? Views.NotificationPopup.NotificationLevel.Warning
                             : Views.NotificationPopup.NotificationLevel.Info;
 
+                        var title = entry.EventName == Events.PostToolUseFailure
+                            ? "Tool Error" : entry.EventName;
+                        var body = !string.IsNullOrEmpty(entry.Detail)
+                            ? $"{entry.Summary}\n{entry.Detail}" : entry.Summary;
+
                         ((NotificationService)notificationServiceForHooks).SendNotification(
-                            entry.EventName, entry.Summary, level);
+                            title, body, level);
                     }
                 }
             };

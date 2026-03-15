@@ -96,7 +96,9 @@ internal static class Program
         // Monitor parent process (bash) — exit if it dies so the pipe disconnects
         MonitorParentProcess();
 
-        // 1. Read all stdin
+        // 1. Force UTF-8 for non-ASCII content (Vietnamese, CJK, etc.)
+        Console.InputEncoding = Encoding.UTF8;
+        Console.OutputEncoding = Encoding.UTF8;
         var rawInput = await Console.In.ReadToEndAsync();
         if (string.IsNullOrWhiteSpace(rawInput))
             return 0;
