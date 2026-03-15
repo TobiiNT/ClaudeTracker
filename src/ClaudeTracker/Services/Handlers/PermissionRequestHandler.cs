@@ -28,7 +28,6 @@ public class PermissionRequestHandler : IHookEventHandler
     public async Task<HookResponse> HandleAsync(HookEvent evt)
     {
         LoggingService.Instance.Log($"PermissionRequestHandler: Processing request {evt.RequestId}");
-        LoggingService.Instance.Log($"PermissionRequestHandler: Raw payload:\n{evt.Payload}");
 
         // If permission popups are disabled, return success with no jsonOutput
         // (falls back to terminal handling)
