@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services.Interfaces;
+using static ClaudeTracker.Utilities.Constants.Hooks;
 
 namespace ClaudeTracker.Services.Handlers;
 
@@ -21,7 +22,7 @@ public class ElicitationHandler : IHookEventHandler
         _settingsService = settingsService;
     }
 
-    public bool CanHandle(string eventName) => eventName == "Elicitation";
+    public bool CanHandle(string eventName) => eventName == Events.Elicitation;
 
     public async Task<HookResponse> HandleAsync(HookEvent evt)
     {
@@ -90,12 +91,12 @@ public class ElicitationHandler : IHookEventHandler
             return info;
 
         info.McpServerName = node["mcp_server_name"]?.GetValue<string>() ?? string.Empty;
-        info.Message = node["message"]?.GetValue<string>() ?? string.Empty;
+        info.Message = node[Fields.Message]?.GetValue<string>() ?? string.Empty;
         info.Mode = node["mode"]?.GetValue<string>() ?? string.Empty;
-        info.Url = node["url"]?.GetValue<string>() ?? string.Empty;
+        info.Url = node[Fields.Url]?.GetValue<string>() ?? string.Empty;
         info.ElicitationId = node["elicitation_id"]?.GetValue<string>() ?? string.Empty;
-        info.SessionId = node["session_id"]?.GetValue<string>() ?? string.Empty;
-        info.Cwd = node["cwd"]?.GetValue<string>() ?? string.Empty;
+        info.SessionId = node[Fields.SessionId]?.GetValue<string>() ?? string.Empty;
+        info.Cwd = node[Fields.Cwd]?.GetValue<string>() ?? string.Empty;
 
         // Parse requested_schema as Dictionary<string, object>
         var schemaNode = node["requested_schema"];

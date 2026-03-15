@@ -9,6 +9,7 @@ using ClaudeTracker.ViewModels;
 using ClaudeTracker.TrayIcon;
 using ClaudeTracker.Services.Handlers;
 using ClaudeTracker.Services.Observers;
+using static ClaudeTracker.Utilities.Constants.Hooks;
 
 namespace ClaudeTracker;
 
@@ -153,8 +154,8 @@ public partial class App : Application
 
                 // PostToolUse = tool executed (allowed), Stop = session ended,
                 // UserPromptSubmit = user sent next prompt (denied/completed)
-                if (evt.EventName is not ("PostToolUse" or "PostToolUseFailure"
-                    or "Stop" or "UserPromptSubmit"))
+                if (evt.EventName is not (Events.PostToolUse or Events.PostToolUseFailure
+                    or Events.Stop or Events.UserPromptSubmit))
                     return;
 
                 // Extract session_id from the event payload to match against pending popups
@@ -162,7 +163,7 @@ public partial class App : Application
                 try
                 {
                     var payloadNode = System.Text.Json.Nodes.JsonNode.Parse(evt.Payload);
-                    evtSessionId = payloadNode?["session_id"]?.GetValue<string>() ?? "";
+                    evtSessionId = payloadNode?[Fields.SessionId]?.GetValue<string>() ?? "";
                 }
                 catch { }
 
@@ -204,21 +205,21 @@ public partial class App : Application
                     var prefs = settingsService.Settings.HookNotificationPreferences;
                     var shouldNotify = entry.EventName switch
                     {
-                        "PostToolUseFailure" => prefs.GetValueOrDefault("toolError", true),
-                        "Notification" when entry.RawPayload.Contains("permission_prompt") =>
+                        Events.PostToolUseFailure => prefs.GetValueOrDefault("toolError", true),
+                        Events.Notification when entry.RawPayload.Contains("permission_prompt") =>
                             !settingsService.Settings.HookPermissionPopupsEnabled
                             && prefs.GetValueOrDefault("permission", true),
-                        "Notification" when entry.RawPayload.Contains("idle_prompt") =>
+                        Events.Notification when entry.RawPayload.Contains("idle_prompt") =>
                             prefs.GetValueOrDefault("idle", true),
-                        "ConfigChange" => prefs.GetValueOrDefault("configChange", false),
-                        "SessionStart" or "SessionEnd" => prefs.GetValueOrDefault("sessionLifecycle", false),
-                        "SubagentStart" or "SubagentStop" => prefs.GetValueOrDefault("subagent", false),
+                        Events.ConfigChange => prefs.GetValueOrDefault("configChange", false),
+                        Events.SessionStart or Events.SessionEnd => prefs.GetValueOrDefault("sessionLifecycle", false),
+                        Events.SubagentStart or Events.SubagentStop => prefs.GetValueOrDefault("subagent", false),
                         _ => false
                     };
 
                     if (shouldNotify)
                     {
-                        var level = entry.EventName == "PostToolUseFailure"
+                        var level = entry.EventName == Events.PostToolUseFailure
                             ? Views.NotificationPopup.NotificationLevel.Warning
                             : Views.NotificationPopup.NotificationLevel.Info;
 

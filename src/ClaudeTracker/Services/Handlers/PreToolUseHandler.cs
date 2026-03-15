@@ -1,5 +1,6 @@
 using ClaudeTracker.Models;
 using ClaudeTracker.Services.Interfaces;
+using static ClaudeTracker.Utilities.Constants.Hooks;
 
 namespace ClaudeTracker.Services.Handlers;
 
@@ -9,7 +10,7 @@ namespace ClaudeTracker.Services.Handlers;
 /// </summary>
 public class PreToolUseHandler : IHookEventHandler
 {
-    public bool CanHandle(string eventName) => eventName == "PreToolUse";
+    public bool CanHandle(string eventName) => eventName == Events.PreToolUse;
 
     public Task<HookResponse> HandleAsync(HookEvent evt)
     {

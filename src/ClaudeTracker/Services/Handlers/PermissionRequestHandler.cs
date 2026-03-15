@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services.Interfaces;
+using static ClaudeTracker.Utilities.Constants.Hooks;
 
 namespace ClaudeTracker.Services.Handlers;
 
@@ -22,7 +23,7 @@ public class PermissionRequestHandler : IHookEventHandler
         _settingsService = settingsService;
     }
 
-    public bool CanHandle(string eventName) => eventName == "PermissionRequest";
+    public bool CanHandle(string eventName) => eventName == Events.PermissionRequest;
 
     public async Task<HookResponse> HandleAsync(HookEvent evt)
     {
@@ -90,20 +91,20 @@ public class PermissionRequestHandler : IHookEventHandler
         if (node == null)
             return info;
 
-        info.ToolName = node["tool_name"]?.GetValue<string>() ?? string.Empty;
-        info.SessionId = node["session_id"]?.GetValue<string>() ?? string.Empty;
-        info.Cwd = node["cwd"]?.GetValue<string>() ?? string.Empty;
-        info.PermissionMode = node["permission_mode"]?.GetValue<string>() ?? string.Empty;
+        info.ToolName = node[Fields.ToolName]?.GetValue<string>() ?? string.Empty;
+        info.SessionId = node[Fields.SessionId]?.GetValue<string>() ?? string.Empty;
+        info.Cwd = node[Fields.Cwd]?.GetValue<string>() ?? string.Empty;
+        info.PermissionMode = node[Fields.PermissionMode]?.GetValue<string>() ?? string.Empty;
 
         // Parse tool_input as Dictionary<string, object>
-        var toolInputNode = node["tool_input"];
+        var toolInputNode = node[Fields.ToolInput];
         if (toolInputNode != null)
         {
             info.ToolInput = ParseJsonObjectToDictionary(toolInputNode);
         }
 
         // Parse permission_suggestions
-        var suggestionsNode = node["permission_suggestions"];
+        var suggestionsNode = node[Fields.PermissionSuggestions];
         if (suggestionsNode is JsonArray suggestionsArray)
         {
             foreach (var suggestionNode in suggestionsArray)
@@ -165,11 +166,11 @@ public class PermissionRequestHandler : IHookEventHandler
         switch (result.Decision)
         {
             case PermissionDecision.AlwaysAllow when result.AppliedSuggestion != null:
-                decision["behavior"] = "allow";
+                decision[Response.Behavior] = Response.Allow;
                 var suggestion = new JsonObject
                 {
                     ["type"] = result.AppliedSuggestion.Type,
-                    ["behavior"] = result.AppliedSuggestion.Behavior,
+                    [Response.Behavior] = result.AppliedSuggestion.Behavior,
                     ["destination"] = result.AppliedSuggestion.Destination,
                     ["tool"] = result.AppliedSuggestion.Tool,
                     ["prefix"] = result.AppliedSuggestion.Prefix
@@ -199,19 +200,19 @@ public class PermissionRequestHandler : IHookEventHandler
                     suggestion["directories"] = dirsArr;
                 }
 
-                decision["updatedPermissions"] = new JsonArray { suggestion };
+                decision[Response.UpdatedPermissions] = new JsonArray { suggestion };
                 break;
 
             case PermissionDecision.Allow:
-                decision["behavior"] = "allow";
+                decision[Response.Behavior] = Response.Allow;
                 break;
 
             case PermissionDecision.Deny:
-                decision["behavior"] = "deny";
+                decision[Response.Behavior] = Response.Deny;
                 break;
 
             case PermissionDecision.AlwaysAllow:
-                decision["behavior"] = "allow";
+                decision[Response.Behavior] = Response.Allow;
                 break;
         }
 
@@ -231,18 +232,18 @@ public class PermissionRequestHandler : IHookEventHandler
                         kvp.Value, kvp.Value.GetType());
                 }
             }
-            decision["updatedInput"] = updatedInputNode;
+            decision[Response.UpdatedInput] = updatedInputNode;
         }
 
         var hookOutput = new JsonObject
         {
-            ["hookEventName"] = "PermissionRequest",
-            ["decision"] = decision
+            [Response.HookEventName] = Events.PermissionRequest,
+            [Response.Decision] = decision
         };
 
         var root = new JsonObject
         {
-            ["hookSpecificOutput"] = hookOutput
+            [Response.HookSpecificOutput] = hookOutput
         };
 
         return root.ToJsonString(new JsonSerializerOptions { WriteIndented = false });

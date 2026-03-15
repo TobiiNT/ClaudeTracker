@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.Views;
+using static ClaudeTracker.Utilities.Constants.Hooks;
 
 namespace ClaudeTracker.Services.Handlers;
 
@@ -22,7 +23,7 @@ public class StopHandler : IHookEventHandler
         _notificationService = notificationService;
     }
 
-    public bool CanHandle(string eventName) => eventName == "Stop";
+    public bool CanHandle(string eventName) => eventName == Events.Stop;
 
     public Task<HookResponse> HandleAsync(HookEvent evt)
     {
@@ -67,7 +68,7 @@ public class StopHandler : IHookEventHandler
         try
         {
             var node = JsonNode.Parse(payload);
-            var cwd = node?["cwd"]?.GetValue<string>();
+            var cwd = node?[Fields.Cwd]?.GetValue<string>();
 
             if (string.IsNullOrEmpty(cwd))
                 return string.Empty;

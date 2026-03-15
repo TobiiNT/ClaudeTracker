@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services.Interfaces;
+using static ClaudeTracker.Utilities.Constants.Hooks;
 
 namespace ClaudeTracker.Services.Observers;
 
@@ -22,30 +23,30 @@ public class SessionTracker : IHookEventObserver
         var json = TryParse(evt.Payload);
         if (json == null) return;
 
-        var sessionId = json["session_id"]?.GetValue<string>() ?? "";
+        var sessionId = json[Fields.SessionId]?.GetValue<string>() ?? "";
         if (string.IsNullOrEmpty(sessionId)) return;
 
         switch (evt.EventName)
         {
-            case "SessionStart":
+            case Events.SessionStart:
                 _sessionTracking.RegisterSession(
                     sessionId,
-                    json["cwd"]?.GetValue<string>() ?? "",
-                    json["permission_mode"]?.GetValue<string>() ?? "",
+                    json[Fields.Cwd]?.GetValue<string>() ?? "",
+                    json[Fields.PermissionMode]?.GetValue<string>() ?? "",
                     json["model"]?.GetValue<string>());
                 break;
 
-            case "SessionEnd":
+            case Events.SessionEnd:
                 _sessionTracking.EndSession(sessionId);
                 break;
 
-            case "SubagentStart":
+            case Events.SubagentStart:
                 var agentId = json["agent_id"]?.GetValue<string>() ?? "";
                 if (!string.IsNullOrEmpty(agentId))
-                    _sessionTracking.RegisterSubagent(sessionId, agentId, json["agent_type"]?.GetValue<string>());
+                    _sessionTracking.RegisterSubagent(sessionId, agentId, json[Fields.AgentType]?.GetValue<string>());
                 break;
 
-            case "SubagentStop":
+            case Events.SubagentStop:
                 var endAgentId = json["agent_id"]?.GetValue<string>() ?? "";
                 if (!string.IsNullOrEmpty(endAgentId))
                     _sessionTracking.EndSubagent(sessionId, endAgentId);

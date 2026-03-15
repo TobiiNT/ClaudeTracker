@@ -8,6 +8,7 @@ using System.Windows.Media.Animation;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services;
 using ClaudeTracker.Utilities;
+using static ClaudeTracker.Utilities.Constants.Hooks;
 
 namespace ClaudeTracker.Views;
 
@@ -42,7 +43,7 @@ public partial class PermissionRequestPopup : Window
             : info.Cwd;
 
         ToolNameText.Text = info.ToolName;
-        var desc = GetStringValue(info.ToolInput, "description");
+        var desc = GetStringValue(info.ToolInput, Fields.Description);
         if (!string.IsNullOrEmpty(desc))
         {
             ToolDescText.Text = "\u2013 " + desc;
@@ -51,7 +52,7 @@ public partial class PermissionRequestPopup : Window
         ToolInputText.Text = FormatToolInput(info.ToolName, info.ToolInput);
 
         // Set contextual button labels
-        AllowButton.Content = info.ToolName == "AskUserQuestion" ? "Submit" : $"Allow {info.ToolName}";
+        AllowButton.Content = info.ToolName == Tools.AskUserQuestion ? "Submit" : $"Allow {info.ToolName}";
         AllowButton.ToolTip = $"Allow this {info.ToolName} call once";
 
         // Build "Always Allow" buttons from suggestions
@@ -122,17 +123,17 @@ public partial class PermissionRequestPopup : Window
     {
         switch (toolName)
         {
-            case "Edit" when toolInput.ContainsKey("old_string") && toolInput.ContainsKey("new_string"):
+            case Tools.Edit when toolInput.ContainsKey(Fields.OldString) && toolInput.ContainsKey(Fields.NewString):
                 ShowDiffPreview(
-                    toolInput["old_string"]?.ToString() ?? "",
-                    toolInput["new_string"]?.ToString() ?? "");
+                    toolInput[Fields.OldString]?.ToString() ?? "",
+                    toolInput[Fields.NewString]?.ToString() ?? "");
                 break;
 
-            case "Write" when toolInput.ContainsKey("content"):
-                ShowWritePreview(toolInput["content"]?.ToString() ?? "");
+            case Tools.Write when toolInput.ContainsKey(Fields.Content):
+                ShowWritePreview(toolInput[Fields.Content]?.ToString() ?? "");
                 break;
 
-            case "AskUserQuestion":
+            case Tools.AskUserQuestion:
                 ShowAskPreview(toolInput);
                 break;
         }
@@ -445,7 +446,7 @@ public partial class PermissionRequestPopup : Window
     {
         var result = new List<AskQuestion>();
 
-        if (!toolInput.TryGetValue("questions", out var questionsObj))
+        if (!toolInput.TryGetValue(Fields.Questions, out var questionsObj))
             return result;
 
         string? questionsJson = null;
@@ -556,7 +557,7 @@ public partial class PermissionRequestPopup : Window
 
         // Return as the full updated tool input with answers merged
         var updatedInput = new Dictionary<string, object>(_info.ToolInput);
-        updatedInput["answers"] = answers;
+        updatedInput[Fields.Answers] = answers;
         return updatedInput;
     }
 
@@ -637,7 +638,7 @@ public partial class PermissionRequestPopup : Window
 
     private void Allow_Click(object sender, RoutedEventArgs e)
     {
-        if (_info.ToolName == "AskUserQuestion")
+        if (_info.ToolName == Tools.AskUserQuestion)
         {
             var result = new PermissionDecisionResult
             {
@@ -685,14 +686,14 @@ public partial class PermissionRequestPopup : Window
     {
         return toolName switch
         {
-            "Bash" or "bash" => GetStringValue(toolInput, "command"),
-            "Read" or "read" => GetStringValue(toolInput, "file_path"),
-            "Edit" or "edit" => GetStringValue(toolInput, "file_path"),
-            "Write" or "write" => GetStringValue(toolInput, "file_path"),
-            "Glob" or "glob" => GetStringValue(toolInput, "pattern"),
-            "Grep" or "grep" => $"{GetStringValue(toolInput, "pattern")} in {GetStringValue(toolInput, "path")}",
-            "WebFetch" or "WebSearch" => GetStringValue(toolInput, "url", GetStringValue(toolInput, "query")),
-            "AskUserQuestion" => GetStringValue(toolInput, "question", "(interactive question)"),
+            Tools.Bash => GetStringValue(toolInput, Fields.Command),
+            Tools.Read => GetStringValue(toolInput, Fields.FilePath),
+            Tools.Edit => GetStringValue(toolInput, Fields.FilePath),
+            Tools.Write => GetStringValue(toolInput, Fields.FilePath),
+            Tools.Glob => GetStringValue(toolInput, Fields.Pattern),
+            Tools.Grep => $"{GetStringValue(toolInput, Fields.Pattern)} in {GetStringValue(toolInput, "path")}",
+            Tools.WebFetch or Tools.WebSearch => GetStringValue(toolInput, Fields.Url, GetStringValue(toolInput, Fields.Query)),
+            Tools.AskUserQuestion => GetStringValue(toolInput, Fields.Question, "(interactive question)"),
             _ => FormatDictionaryCompact(toolInput)
         };
     }
