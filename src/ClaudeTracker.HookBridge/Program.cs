@@ -165,12 +165,15 @@ internal static class Program
     {
         try
         {
-            var exePath = Process.GetCurrentProcess().MainModule?.FileName;
-            if (string.IsNullOrEmpty(exePath))
+            var rawPath = Process.GetCurrentProcess().MainModule?.FileName;
+            if (string.IsNullOrEmpty(rawPath))
             {
                 Console.Error.WriteLine("Error: Could not determine executable path.");
                 return 1;
             }
+
+            // Use forward slashes — Claude Code runs hooks via bash, backslashes get eaten
+            var exePath = rawPath.Replace('\\', '/');
 
             var settingsPath = ClaudeSettingsPath;
             var settingsDir = Path.GetDirectoryName(settingsPath)!;
