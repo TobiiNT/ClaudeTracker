@@ -36,4 +36,13 @@ public class ActivityService : IActivityService
     {
         Application.Current?.Dispatcher.Invoke(() => RecentFeed.Clear());
     }
+
+    public void TrimToMax(int max)
+    {
+        Application.Current?.Dispatcher.Invoke(() =>
+        {
+            while (RecentFeed.Count > max)
+                RecentFeed.RemoveAt(RecentFeed.Count - 1);
+        });
+    }
 }

@@ -206,10 +206,10 @@ public partial class App : Application
                     var shouldNotify = entry.EventName switch
                     {
                         Events.PostToolUseFailure => prefs.GetValueOrDefault("toolError", true),
-                        Events.Notification when entry.RawPayload.Contains("permission_prompt") =>
+                        Events.Notification when entry.Summary.Contains("permission", StringComparison.OrdinalIgnoreCase) =>
                             !settingsService.Settings.HookPermissionPopupsEnabled
                             && prefs.GetValueOrDefault("permission", true),
-                        Events.Notification when entry.RawPayload.Contains("idle_prompt") =>
+                        Events.Notification when entry.Summary.Contains("idle", StringComparison.OrdinalIgnoreCase) =>
                             prefs.GetValueOrDefault("idle", true),
                         Events.ConfigChange => prefs.GetValueOrDefault("configChange", false),
                         Events.SessionStart or Events.SessionEnd => prefs.GetValueOrDefault("sessionLifecycle", false),

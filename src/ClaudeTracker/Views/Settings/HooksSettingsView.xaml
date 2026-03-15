@@ -82,13 +82,16 @@
             <!-- Activity Feed -->
             <TextBlock Text="ACTIVITY FEED" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
-                <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
+                <StackPanel VerticalAlignment="Center" Margin="0,0,120,0">
                     <TextBlock Text="Show Activity Feed" FontSize="13" />
                     <TextBlock Text="Display recent hook events in the popover"
                                FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
-                <ToggleButton x:Name="ActivityFeedToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
-                              Style="{StaticResource CompactSwitch}" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="ClearFeedButton" Content="Clear" FontSize="10" Height="24"
+                            Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,8,0" />
+                    <ToggleButton x:Name="ActivityFeedToggle" Style="{StaticResource CompactSwitch}" />
+                </StackPanel>
             </Grid>
             <TextBlock Text="Max Feed Entries" FontSize="13" Margin="0,14,0,4" />
             <Grid Margin="0,0,0,20">

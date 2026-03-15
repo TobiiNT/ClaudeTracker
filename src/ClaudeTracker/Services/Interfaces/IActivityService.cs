@@ -8,4 +8,5 @@ public interface IActivityService
     ObservableCollection<ActivityEntry> RecentFeed { get; }
     void Record(ActivityEntry entry);
     void Clear();
+    void TrimToMax(int max);
 }

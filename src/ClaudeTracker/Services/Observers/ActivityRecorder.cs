@@ -37,8 +37,7 @@ public class ActivityRecorder : IHookEventObserver
             Detail = BuildDetail(evt.EventName, json),
             Icon = GetIcon(evt.EventName),
             ToolName = GetToolName(evt.EventName, json),
-            ProjectName = projectName,
-            RawPayload = evt.Payload
+            ProjectName = projectName
         };
 
         _activityService.Record(entry);

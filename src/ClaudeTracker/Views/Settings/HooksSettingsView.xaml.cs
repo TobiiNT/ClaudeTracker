@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views.Settings;
@@ -65,6 +66,13 @@ public partial class HooksSettingsView : UserControl
         ActivityFeedToggle.Checked += (_, _) => _vm.ActivityFeedEnabled = true;
         ActivityFeedToggle.Unchecked += (_, _) => _vm.ActivityFeedEnabled = false;
 
+        // Clear activity feed
+        ClearFeedButton.Click += (_, _) =>
+        {
+            var activityService = App.Services.GetRequiredService<IActivityService>();
+            activityService.Clear();
+        };
+
         // Max feed entries slider
         MaxFeedSlider.Value = _vm.MaxFeedEntries;
         MaxFeedValueText.Text = $"{_vm.MaxFeedEntries}";
@@ -75,8 +83,8 @@ public partial class HooksSettingsView : UserControl
         };
 
         // Install / Uninstall buttons
-        InstallButton.Click += OnInstallClick;
-        UninstallButton.Click += OnUninstallClick;
+        InstallButton.Click += async (_, _) => { await RunBridgeCommandAsync("install"); _vm.CheckInstallStatus(); UpdateInstallUI(); };
+        UninstallButton.Click += async (_, _) => { await RunBridgeCommandAsync("uninstall"); _vm.CheckInstallStatus(); UpdateInstallUI(); };
 
         // Check installation status on load
         _vm.CheckInstallStatus();
@@ -103,20 +111,6 @@ public partial class HooksSettingsView : UserControl
         UninstallButton.IsEnabled = _vm.IsHooksInstalled;
     }
 
-    private void OnInstallClick(object sender, RoutedEventArgs e)
-    {
-        RunBridgeCommand("install");
-        _vm.CheckInstallStatus();
-        UpdateInstallUI();
-    }
-
-    private void OnUninstallClick(object sender, RoutedEventArgs e)
-    {
-        RunBridgeCommand("uninstall");
-        _vm.CheckInstallStatus();
-        UpdateInstallUI();
-    }
-
     private static string? FindHookBridge()
     {
         var candidates = new[]
@@ -128,7 +122,7 @@ public partial class HooksSettingsView : UserControl
         return candidates.FirstOrDefault(File.Exists);
     }
 
-    private void RunBridgeCommand(string command)
+    private async Task RunBridgeCommandAsync(string command)
     {
         var bridgePath = FindHookBridge();
         if (bridgePath == null)
@@ -136,6 +130,10 @@ public partial class HooksSettingsView : UserControl
             InstallStatusText.Text = "HookBridge not found. Build the ClaudeTracker.HookBridge project first, or place it alongside ClaudeTracker.exe.";
             return;
         }
+
+        InstallButton.IsEnabled = false;
+        UninstallButton.IsEnabled = false;
+        InstallStatusText.Text = $"Running {command}...";
 
         try
         {
@@ -151,9 +149,9 @@ public partial class HooksSettingsView : UserControl
 
             if (process != null)
             {
-                var output = process.StandardOutput.ReadToEnd();
-                var error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
 
                 InstallStatusText.Text = process.ExitCode == 0
                     ? $"Success: {output.Trim()}"

@@ -9,6 +9,7 @@ public partial class HooksSettingsViewModel : ObservableObject
 {
     private readonly ISettingsService _settingsService;
     private readonly IHookIpcService _hookIpcService;
+    private readonly IActivityService _activityService;
 
     [ObservableProperty] private bool _hooksEnabled;
     [ObservableProperty] private bool _permissionPopupsEnabled;
@@ -45,10 +46,12 @@ public partial class HooksSettingsViewModel : ObservableObject
 
     public HooksSettingsViewModel(
         ISettingsService settingsService,
-        IHookIpcService hookIpcService)
+        IHookIpcService hookIpcService,
+        IActivityService activityService)
     {
         _settingsService = settingsService;
         _hookIpcService = hookIpcService;
+        _activityService = activityService;
 
         var settings = _settingsService.Settings;
 
@@ -160,6 +163,7 @@ public partial class HooksSettingsViewModel : ObservableObject
         settings.HookNotificationPreferences["subagent"] = NotifySubagent;
 
         _settingsService.Save();
+        _activityService.TrimToMax(MaxFeedEntries);
 
         // Start or stop IPC service if HooksEnabled changed
         if (hooksEnabledChanged)

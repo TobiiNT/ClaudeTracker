@@ -50,35 +50,15 @@ public enum ActivityIcon
 /// <summary>Universal log record for the activity feed.</summary>
 public class ActivityEntry
 {
-    [JsonPropertyName("id")]
     public string Id { get; set; } = Guid.NewGuid().ToString();
-
-    [JsonPropertyName("sessionId")]
     public string SessionId { get; set; } = string.Empty;
-
-    [JsonPropertyName("eventName")]
     public string EventName { get; set; } = string.Empty;
-
-    [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-
-    [JsonPropertyName("summary")]
     public string Summary { get; set; } = string.Empty;
-
-    [JsonPropertyName("icon")]
     public ActivityIcon Icon { get; set; }
-
-    [JsonPropertyName("toolName")]
     public string? ToolName { get; set; }
-
-    [JsonPropertyName("detail")]
     public string? Detail { get; set; }
-
-    [JsonPropertyName("projectName")]
     public string ProjectName { get; set; } = string.Empty;
-
-    [JsonPropertyName("rawPayload")]
-    public string RawPayload { get; set; } = string.Empty;
 }
 
 // ── Session State ──
@@ -86,30 +66,14 @@ public class ActivityEntry
 /// <summary>Tracks an active Claude Code session with its activity history.</summary>
 public class SessionState
 {
-    [JsonPropertyName("sessionId")]
     public string SessionId { get; set; } = string.Empty;
-
-    [JsonPropertyName("startTime")]
     public DateTime StartTime { get; set; } = DateTime.UtcNow;
-
-    [JsonPropertyName("cwd")]
     public string Cwd { get; set; } = string.Empty;
-
-    [JsonPropertyName("model")]
     public string Model { get; set; } = string.Empty;
-
-    [JsonPropertyName("toolCallCount")]
     public int ToolCallCount { get; set; }
-
-    [JsonPropertyName("subagentCount")]
     public int SubagentCount { get; set; }
-
-    [JsonPropertyName("currentActivity")]
     public string CurrentActivity { get; set; } = string.Empty;
-
     public DateTime LastActivityTime { get; set; } = DateTime.UtcNow;
-
-    [JsonPropertyName("activeSubagents")]
     public List<string> ActiveSubagents { get; set; } = new();
 
     [JsonIgnore]

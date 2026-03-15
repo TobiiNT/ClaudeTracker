@@ -220,29 +220,30 @@ public class PermissionRequestHandler : IHookEventHandler
         return root.ToJsonString(new JsonSerializerOptions { WriteIndented = false });
     }
 
-    private static Dictionary<string, object> ParseJsonObjectToDictionary(JsonNode node)
+    private static Dictionary<string, object> ParseJsonObjectToDictionary(JsonNode node, int depth = 0)
     {
         var dict = new Dictionary<string, object>();
 
-        if (node is JsonObject obj)
+        if (depth > 8 || node is not JsonObject obj)
+            return dict;
+
+        foreach (var kvp in obj)
         {
-            foreach (var kvp in obj)
-            {
-                dict[kvp.Key] = ParseJsonValue(kvp.Value);
-            }
+            dict[kvp.Key] = ParseJsonValue(kvp.Value, depth + 1);
         }
 
         return dict;
     }
 
-    private static object ParseJsonValue(JsonNode? node)
+    private static object ParseJsonValue(JsonNode? node, int depth = 0)
     {
         if (node == null) return string.Empty;
+        if (depth > 8) return node.ToJsonString();
 
         return node switch
         {
-            JsonObject obj => ParseJsonObjectToDictionary(obj),
-            JsonArray arr => arr.Select(ParseJsonValue).ToList(),
+            JsonObject obj => ParseJsonObjectToDictionary(obj, depth),
+            JsonArray arr => arr.Select(n => ParseJsonValue(n, depth + 1)).ToList(),
             JsonValue val => val.TryGetValue<bool>(out var b) ? b
                 : val.TryGetValue<long>(out var l) ? l
                 : val.TryGetValue<double>(out var d) ? d
