@@ -17,6 +17,12 @@ public partial class PermissionRequestPopup : Window
     private readonly TaskCompletionSource<HookResponse> _responseSource;
     private bool _decided;
 
+    // Theme-aware brushes resolved from MaterialDesign resources
+    private Brush FgBrush => (Brush)FindResource("MaterialDesign.Brush.Foreground");
+    private Brush FgLightBrush => (Brush)FindResource("MaterialDesign.Brush.ForegroundLight");
+    private Brush CardBgBrush => (Brush)FindResource("MaterialDesign.Brush.Card.Background");
+    private Brush SurfaceBrush => (Brush)FindResource("MaterialDesign.Brush.Background");
+
     // AskUserQuestion state
     private readonly Dictionary<int, HashSet<int>> _askSelections = new();
     private readonly Dictionary<int, bool> _askMultiSelect = new();
@@ -192,7 +198,7 @@ public partial class PermissionRequestPopup : Window
                 Text = $"{i + 1,4} ",
                 FontFamily = new FontFamily("Consolas"),
                 FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x66, 0x66, 0x66)),
+                Foreground = FgLightBrush,
                 MinWidth = 35
             });
             linePanel.Children.Add(new TextBlock
@@ -200,7 +206,7 @@ public partial class PermissionRequestPopup : Window
                 Text = displayLines[i],
                 FontFamily = new FontFamily("Consolas"),
                 FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xCC)),
+                Foreground = FgBrush,
                 TextWrapping = TextWrapping.Wrap
             });
             WriteContent.Children.Add(linePanel);
@@ -212,7 +218,7 @@ public partial class PermissionRequestPopup : Window
             {
                 Text = $"... {lines.Length - maxLines} more lines",
                 FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x88, 0x88, 0x88)),
+                Foreground = FgLightBrush,
                 Margin = new Thickness(0, 4, 0, 0),
                 FontStyle = FontStyles.Italic
             });
@@ -242,7 +248,7 @@ public partial class PermissionRequestPopup : Window
             {
                 Text = q.Question,
                 FontSize = 12,
-                Foreground = new SolidColorBrush(Color.FromRgb(0xEE, 0xEE, 0xEE)),
+                Foreground = FgBrush,
                 FontWeight = FontWeights.SemiBold,
                 TextWrapping = TextWrapping.Wrap,
                 Margin = new Thickness(0, qIdx > 0 ? 12 : 0, 0, 6)
@@ -254,7 +260,7 @@ public partial class PermissionRequestPopup : Window
                 {
                     Text = "(select multiple)",
                     FontSize = 10,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0x88, 0x88, 0x88)),
+                    Foreground = FgLightBrush,
                     FontStyle = FontStyles.Italic,
                     Margin = new Thickness(0, 0, 0, 4)
                 });
@@ -281,7 +287,7 @@ public partial class PermissionRequestPopup : Window
                 {
                     Text = opt.Label,
                     FontSize = 11,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xCC)),
+                    Foreground = FgBrush,
                     FontWeight = FontWeights.Medium
                 });
 
@@ -291,7 +297,7 @@ public partial class PermissionRequestPopup : Window
                     {
                         Text = opt.Description,
                         FontSize = 10,
-                        Foreground = new SolidColorBrush(Color.FromRgb(0x88, 0x88, 0x88)),
+                        Foreground = FgLightBrush,
                         TextWrapping = TextWrapping.Wrap
                     });
                 }
@@ -325,7 +331,7 @@ public partial class PermissionRequestPopup : Window
                 {
                     Text = "Other...",
                     FontSize = 11,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xCC)),
+                    Foreground = FgBrush,
                     FontWeight = FontWeights.Medium,
                     IsHitTestVisible = false
                 });
