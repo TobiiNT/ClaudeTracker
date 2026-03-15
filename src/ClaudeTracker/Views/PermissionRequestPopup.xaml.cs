@@ -600,6 +600,7 @@ public partial class PermissionRequestPopup : Window
         _decided = true;
 
         var jsonOutput = Services.Handlers.PermissionRequestHandler.BuildResponseJson(result);
+        LoggingService.Instance.Log($"[PermPopup] Decision={result.Decision}, HasUpdatedInput={result.UpdatedInput != null}, JsonOutput={jsonOutput ?? "(null)"}");
         _responseSource.TrySetResult(new HookResponse
         {
             RequestId = _info.ToolName,
