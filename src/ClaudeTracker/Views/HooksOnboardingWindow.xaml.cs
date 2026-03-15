@@ -21,11 +21,9 @@ public partial class HooksOnboardingWindow : Window
 
         SetupButton.Click += async (_, _) =>
         {
-            SetupButton.IsEnabled = false;
-            SkipButton.IsEnabled = false;
+            SetupButtons.Visibility = Visibility.Collapsed;
+            InstallingPanel.Visibility = Visibility.Visible;
             StatusText.Text = "Installing hooks...";
-            StatusText.Visibility = Visibility.Visible;
-            ProgressBar.Visibility = Visibility.Visible;
 
             var success = await InstallHooksAsync();
 
@@ -43,16 +41,21 @@ public partial class HooksOnboardingWindow : Window
                 ipcService.Start();
 
                 MarkSeen();
-                Close();
+
+                // Show success state
+                InstallingPanel.Visibility = Visibility.Collapsed;
+                SuccessPanel.Visibility = Visibility.Visible;
+                DoneButton.Visibility = Visibility.Visible;
             }
             else
             {
                 // Show error, let user retry or skip
-                ProgressBar.Visibility = Visibility.Collapsed;
-                SetupButton.IsEnabled = true;
-                SkipButton.IsEnabled = true;
+                InstallingPanel.Visibility = Visibility.Collapsed;
+                SetupButtons.Visibility = Visibility.Visible;
             }
         };
+
+        DoneButton.Click += (_, _) => Close();
     }
 
     private static void MarkSeen()

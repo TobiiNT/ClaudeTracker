@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="ClaudeTracker — Hooks Integration"
-        Width="420" SizeToContent="Height"
+        Width="450" SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="{DynamicResource MaterialDesign.Brush.Background}">
@@ -27,42 +27,63 @@
 
         <!-- Benefits -->
         <StackPanel Margin="16,0,16,20">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                <materialDesign:PackIcon Kind="ShieldCheck" Width="16" Height="16"
-                                         Foreground="#7C4DFF" VerticalAlignment="Top" Margin="0,1,8,0" />
-                <TextBlock TextWrapping="Wrap" FontSize="12"
-                           Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                    <Run FontWeight="SemiBold">Permission popups</Run> — approve tool calls from any window, no terminal switching
-                </TextBlock>
+            <StackPanel Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                    <materialDesign:PackIcon Kind="ShieldCheck" Width="16" Height="16"
+                                             Foreground="#7C4DFF" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <TextBlock Text="Permission popups" FontSize="13" FontWeight="SemiBold" />
+                </StackPanel>
+                <TextBlock Text="Approve tool calls from any window — no terminal switching"
+                           FontSize="11.5" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                           TextWrapping="Wrap" Margin="22,0,0,0" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                <materialDesign:PackIcon Kind="BellRing" Width="16" Height="16"
-                                         Foreground="#2196F3" VerticalAlignment="Top" Margin="0,1,8,0" />
-                <TextBlock TextWrapping="Wrap" FontSize="12"
-                           Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                    <Run FontWeight="SemiBold">Task notifications</Run> — know when Claude finishes without checking each session
-                </TextBlock>
+            <StackPanel Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                    <materialDesign:PackIcon Kind="BellRing" Width="16" Height="16"
+                                             Foreground="#2196F3" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <TextBlock Text="Task notifications" FontSize="13" FontWeight="SemiBold" />
+                </StackPanel>
+                <TextBlock Text="Know when Claude finishes without checking each session"
+                           FontSize="11.5" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                           TextWrapping="Wrap" Margin="22,0,0,0" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="FormatListBulleted" Width="16" Height="16"
-                                         Foreground="#4CAF50" VerticalAlignment="Top" Margin="0,1,8,0" />
-                <TextBlock TextWrapping="Wrap" FontSize="12"
-                           Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                    <Run FontWeight="SemiBold">Activity feed</Run> — see all sessions at a glance from the tray icon
-                </TextBlock>
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                    <materialDesign:PackIcon Kind="FormatListBulleted" Width="16" Height="16"
+                                             Foreground="#4CAF50" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <TextBlock Text="Activity feed" FontSize="13" FontWeight="SemiBold" />
+                </StackPanel>
+                <TextBlock Text="Live view of what each Claude session is doing right now"
+                           FontSize="11.5" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                           TextWrapping="Wrap" Margin="22,0,0,0" />
             </StackPanel>
         </StackPanel>
 
-        <!-- Status text (hidden by default, shown during install) -->
-        <TextBlock x:Name="StatusText" FontSize="11" TextWrapping="Wrap"
-                   HorizontalAlignment="Center" Margin="0,0,0,8"
-                   Visibility="Collapsed" />
-        <ProgressBar x:Name="ProgressBar" IsIndeterminate="True"
-                     Style="{StaticResource MaterialDesignLinearProgressBar}"
-                     Margin="0,0,0,16" Visibility="Collapsed" />
+        <!-- Installing state -->
+        <StackPanel x:Name="InstallingPanel" Visibility="Collapsed">
+            <TextBlock x:Name="StatusText" FontSize="11" TextWrapping="Wrap"
+                       HorizontalAlignment="Center" Margin="0,0,0,8" />
+            <ProgressBar x:Name="ProgressBar" IsIndeterminate="True"
+                         Style="{StaticResource MaterialDesignLinearProgressBar}"
+                         Margin="0,0,0,16" />
+        </StackPanel>
+
+        <!-- Success state -->
+        <StackPanel x:Name="SuccessPanel" Visibility="Collapsed"
+                    HorizontalAlignment="Center" Margin="0,0,0,8">
+            <materialDesign:PackIcon Kind="CheckCircle" Width="32" Height="32"
+                                     Foreground="#4CAF50" HorizontalAlignment="Center"
+                                     Margin="0,0,0,8" />
+            <TextBlock Text="Hooks enabled successfully!"
+                       FontSize="13" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" Margin="0,0,0,4" />
+            <TextBlock Text="You'll see popups when Claude Code needs permission."
+                       FontSize="11.5" HorizontalAlignment="Center"
+                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+        </StackPanel>
 
         <!-- Buttons -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel x:Name="SetupButtons" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button x:Name="SkipButton" Content="Skip" Margin="0,0,12,0"
                     Style="{StaticResource MaterialDesignFlatButton}"
                     Height="36" FontSize="13" />
@@ -70,5 +91,9 @@
                     Style="{StaticResource MaterialDesignRaisedButton}"
                     Height="36" FontSize="13" />
         </StackPanel>
+        <Button x:Name="DoneButton" Content="Done"
+                Style="{StaticResource MaterialDesignRaisedButton}"
+                HorizontalAlignment="Center"
+                Height="36" FontSize="13" Visibility="Collapsed" />
     </StackPanel>
 </Window>
