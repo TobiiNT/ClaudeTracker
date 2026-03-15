@@ -195,16 +195,13 @@ internal static class Program
                 settings["hooks"] = hooksObj;
             }
 
-            // Quoted path for command
-            var quotedPath = $"\"{exePath}\"";
-
             // Register each event
             foreach (var eventName in AllEvents)
             {
                 var hookConfig = new JsonObject
                 {
                     ["type"] = "command",
-                    ["command"] = quotedPath
+                    ["command"] = exePath
                 };
 
                 // Add async flag for async events
@@ -238,7 +235,11 @@ internal static class Program
             }
 
             // Write settings with indentation
-            var writeOptions = new JsonSerializerOptions { WriteIndented = true };
+            var writeOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
             var outputJson = settings.ToJsonString(writeOptions);
             File.WriteAllText(settingsPath, outputJson);
 
@@ -304,7 +305,11 @@ internal static class Program
             }
 
             // Write back
-            var writeOptions = new JsonSerializerOptions { WriteIndented = true };
+            var writeOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
             var outputJson = settings.ToJsonString(writeOptions);
             File.WriteAllText(settingsPath, outputJson);
 
