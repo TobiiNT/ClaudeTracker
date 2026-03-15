@@ -26,7 +26,7 @@
                     <TextBlock Text="Permission Request" FontSize="14" FontWeight="SemiBold"
                                Foreground="{DynamicResource MaterialDesign.Brush.Foreground}" />
                     <TextBlock x:Name="ProjectText" FontSize="11"
-                               Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                               Foreground="{DynamicResource MaterialDesign.Brush.Foreground}" Opacity="0.65"
                                TextTrimming="CharacterEllipsis" />
                 </StackPanel>
             </DockPanel>
@@ -37,7 +37,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                         <TextBlock x:Name="ToolNameText" FontSize="12" FontWeight="SemiBold" Foreground="#BB86FC" />
                         <TextBlock x:Name="ToolDescText" FontSize="12"
-                                   Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                                   Foreground="{DynamicResource MaterialDesign.Brush.Foreground}" Opacity="0.7"
                                    Margin="6,0,0,0" TextTrimming="CharacterEllipsis"
                                    Visibility="Collapsed" />
                     </StackPanel>
@@ -155,7 +155,7 @@
                 <DockPanel>
                     <Button DockPanel.Dock="Right" Content="Terminal" Click="Terminal_Click"
                             Height="28" FontSize="11"
-                            Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                            Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
                             Cursor="Hand" ToolTip="Handle in terminal">
                         <Button.Style>
                             <Style TargetType="Button">
