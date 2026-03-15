@@ -42,7 +42,7 @@ public partial class PermissionRequestPopup : Window
             ? "Unknown project"
             : info.Cwd;
 
-        ToolNameText.Text = info.ToolName;
+        ToolNameText.Text = FormatDisplayToolName(info.ToolName);
         var desc = FormatToolDescription(info.ToolName, info.ToolInput);
         if (!string.IsNullOrEmpty(desc))
         {
@@ -52,8 +52,9 @@ public partial class PermissionRequestPopup : Window
         ToolInputText.Text = FormatToolInput(info.ToolName, info.ToolInput);
 
         // Set contextual button labels
-        AllowButton.Content = info.ToolName == Tools.AskUserQuestion ? "Submit" : $"Allow {info.ToolName}";
-        AllowButton.ToolTip = $"Allow this {info.ToolName} call once";
+        var displayName = FormatDisplayToolName(info.ToolName);
+        AllowButton.Content = info.ToolName == Tools.AskUserQuestion ? "Submit" : $"Allow {displayName}";
+        AllowButton.ToolTip = $"Allow this {displayName} call once";
 
         // Build "Always Allow" buttons from suggestions
         BuildAlwaysAllowButtons(info.PermissionSuggestions);
@@ -681,6 +682,30 @@ public partial class PermissionRequestPopup : Window
         }
 
         base.OnClosed(e);
+    }
+
+    /// <summary>Formats MCP tool names for display: "mcp__Database__execute_sql_DataGame" → "Database: execute_sql"</summary>
+    private static string FormatDisplayToolName(string toolName)
+    {
+        if (!toolName.StartsWith("mcp__"))
+            return toolName;
+
+        var parts = toolName[5..].Split("__", 2);
+        if (parts.Length == 2)
+        {
+            var server = parts[0];
+            var action = parts[1];
+            // Strip target suffix (e.g., "execute_sql_DataGame" → "execute_sql")
+            var lastUnderscore = action.LastIndexOf('_');
+            if (lastUnderscore > 0)
+            {
+                var suffix = action[(lastUnderscore + 1)..];
+                if (suffix.Length > 0 && char.IsUpper(suffix[0]))
+                    action = action[..lastUnderscore];
+            }
+            return $"{server}: {action}";
+        }
+        return parts[0];
     }
 
     private static string FormatToolInput(string toolName, Dictionary<string, object> toolInput)

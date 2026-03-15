@@ -142,21 +142,30 @@ public class PermissionSuggestion
     {
         get
         {
-            // For Bash rules, extract the command name and show as "command:*" pattern
-            if (Rules.Count > 0 && !string.IsNullOrEmpty(Rules[0].RuleContent))
+            if (Rules.Count > 0)
             {
                 var rule = Rules[0];
-                if (rule.ToolName == "Bash")
+
+                // Bash rules with ruleContent — show "command:*" pattern
+                if (!string.IsNullOrEmpty(rule.RuleContent))
                 {
-                    var cmd = rule.RuleContent.TrimStart();
-                    var firstWord = cmd.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? cmd;
-                    return $"Always allow {firstWord}:*";
+                    if (rule.ToolName == "Bash")
+                    {
+                        var cmd = rule.RuleContent.TrimStart();
+                        var firstWord = cmd.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? cmd;
+                        return $"Always allow {firstWord}:*";
+                    }
+                    var content = rule.RuleContent.Length > 40
+                        ? rule.RuleContent[..37] + "..."
+                        : rule.RuleContent;
+                    return $"Always allow {content}";
                 }
-                // Truncate long rule content
-                var content = rule.RuleContent.Length > 40
-                    ? rule.RuleContent[..37] + "..."
-                    : rule.RuleContent;
-                return $"Always allow {content}";
+
+                // MCP tools — toolName set but ruleContent empty (e.g., mcp__Database__execute_sql_DataGame)
+                if (!string.IsNullOrEmpty(rule.ToolName))
+                {
+                    return $"Always allow {FormatMcpToolName(rule.ToolName)}";
+                }
             }
             if (!string.IsNullOrEmpty(Prefix))
                 return $"Always allow {Prefix}";
@@ -164,6 +173,32 @@ public class PermissionSuggestion
                 return $"Always allow {Tool}";
             return "Always allow";
         }
+    }
+
+    /// <summary>Formats MCP tool names like "mcp__Database__execute_sql_DataGame" → "Database: execute_sql"</summary>
+    private static string FormatMcpToolName(string toolName)
+    {
+        if (!toolName.StartsWith("mcp__"))
+            return toolName;
+
+        // mcp__Server__action_Target → ["Server", "action_Target"]
+        var parts = toolName[5..].Split("__", 2);
+        if (parts.Length == 2)
+        {
+            var server = parts[0];
+            // Strip the target suffix from action (e.g., "execute_sql_DataGame" → "execute_sql")
+            var action = parts[1];
+            var lastUnderscore = action.LastIndexOf('_');
+            if (lastUnderscore > 0)
+            {
+                // Check if the part after last underscore looks like a target name (starts with uppercase)
+                var suffix = action[(lastUnderscore + 1)..];
+                if (suffix.Length > 0 && char.IsUpper(suffix[0]))
+                    action = action[..lastUnderscore];
+            }
+            return $"{server}: {action}";
+        }
+        return parts[0];
     }
 }
 
