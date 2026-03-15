@@ -44,6 +44,10 @@ public partial class PermissionRequestPopup : Window
         }
         ToolInputText.Text = FormatToolInput(info.ToolName, info.ToolInput);
 
+        // Set contextual button labels
+        AllowButton.Content = info.ToolName == "AskUserQuestion" ? "Submit" : $"Allow {info.ToolName}";
+        AllowButton.ToolTip = $"Allow this {info.ToolName} call once";
+
         // Build "Always Allow" buttons from suggestions
         BuildAlwaysAllowButtons(info.PermissionSuggestions);
 
@@ -554,6 +558,7 @@ public partial class PermissionRequestPopup : Window
     {
         foreach (var suggestion in suggestions)
         {
+            LoggingService.Instance.Log($"[PermPopup] Suggestion: type={suggestion.Type}, behavior={suggestion.Behavior}, tool={suggestion.Tool}, prefix={suggestion.Prefix}, rules={suggestion.Rules.Count}{(suggestion.Rules.Count > 0 ? $" [{suggestion.Rules[0].ToolName}:{suggestion.Rules[0].RuleContent}]" : "")}, dirs={suggestion.Directories.Count}");
             var label = suggestion.DisplayLabel;
             if (string.IsNullOrWhiteSpace(label)) continue;
 
@@ -565,7 +570,9 @@ public partial class PermissionRequestPopup : Window
                 Foreground = new SolidColorBrush(Colors.White),
                 Cursor = Cursors.Hand,
                 Margin = new Thickness(0, 0, 4, 0),
-                ToolTip = $"Always allow: {label}"
+                ToolTip = suggestion.Rules.Count > 0
+                    ? $"Always allow {suggestion.Rules[0].ToolName}({suggestion.Rules[0].RuleContent})"
+                    : $"Always allow: {label}"
             };
 
             var style = new Style(typeof(Button));

@@ -168,9 +168,33 @@ public class PermissionSuggestion
     public string Prefix { get; set; } = string.Empty;
 
     [JsonIgnore]
-    public string DisplayLabel => string.IsNullOrEmpty(Prefix)
-        ? $"{Behavior} {Tool}"
-        : $"{Behavior} {Tool} ({Prefix})";
+    public string DisplayLabel
+    {
+        get
+        {
+            // For Bash rules, extract the command name and show as "command:*" pattern
+            if (Rules.Count > 0 && !string.IsNullOrEmpty(Rules[0].RuleContent))
+            {
+                var rule = Rules[0];
+                if (rule.ToolName == "Bash")
+                {
+                    var cmd = rule.RuleContent.TrimStart();
+                    var firstWord = cmd.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? cmd;
+                    return $"Always allow {firstWord}:*";
+                }
+                // Truncate long rule content
+                var content = rule.RuleContent.Length > 40
+                    ? rule.RuleContent[..37] + "..."
+                    : rule.RuleContent;
+                return $"Always allow {content}";
+            }
+            if (!string.IsNullOrEmpty(Prefix))
+                return $"Always allow {Prefix}";
+            if (!string.IsNullOrEmpty(Tool))
+                return $"Always allow {Tool}";
+            return "Always allow";
+        }
+    }
 }
 
 /// <summary>A single permission rule entry.</summary>
