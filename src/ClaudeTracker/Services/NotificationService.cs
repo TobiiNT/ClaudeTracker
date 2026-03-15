@@ -134,8 +134,6 @@ public class NotificationService : INotificationService
             var sound = profile.NotificationSettings.SoundName switch
             {
                 "Hand" => System.Media.SystemSounds.Hand,
-                "Asterisk" => System.Media.SystemSounds.Asterisk,
-                "Question" => System.Media.SystemSounds.Question,
                 "Beep" => System.Media.SystemSounds.Beep,
                 "None" => (System.Media.SystemSound?)null,
                 _ => System.Media.SystemSounds.Exclamation

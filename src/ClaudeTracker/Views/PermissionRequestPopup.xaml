@@ -1,0 +1,182 @@
+<Window x:Class="ClaudeTracker.Views.PermissionRequestPopup"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" Topmost="True"
+        ShowActivated="False"
+        SizeToContent="Height" Width="400"
+        ResizeMode="NoResize">
+    <Border CornerRadius="10" Padding="16,14"
+            Background="{DynamicResource MaterialDesign.Brush.Card.Background}"
+            BorderThickness="1" BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.HoverBackground}">
+        <Border.Effect>
+            <DropShadowEffect ShadowDepth="3" Opacity="0.4" BlurRadius="16" Direction="270" />
+        </Border.Effect>
+        <ScrollViewer MaxHeight="600" Style="{StaticResource ModernScrollViewer}"
+                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+            <!-- Header -->
+            <DockPanel Margin="0,0,0,10">
+                <Border Width="32" Height="32" CornerRadius="6"
+                        Background="{DynamicResource MaterialDesign.Brush.TextBox.HoverBackground}"
+                        VerticalAlignment="Top" Margin="0,0,10,0">
+                    <TextBlock Text="&#x1F510;" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Permission Request" FontSize="14" FontWeight="SemiBold"
+                               Foreground="{DynamicResource MaterialDesign.Brush.Foreground}" />
+                    <TextBlock x:Name="ProjectText" FontSize="11"
+                               Foreground="{DynamicResource MaterialDesign.Brush.Foreground}" Opacity="0.65"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </DockPanel>
+            <!-- Tool info -->
+            <Border Background="{DynamicResource MaterialDesign.Brush.Background}"
+                    CornerRadius="6" Padding="10,8" Margin="0,0,0,10">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock x:Name="ToolNameText" FontSize="12" FontWeight="SemiBold" Foreground="#BB86FC" />
+                        <TextBlock x:Name="ToolDescText" FontSize="12"
+                                   Foreground="{DynamicResource MaterialDesign.Brush.Foreground}" Opacity="0.7"
+                                   Margin="6,0,0,0" TextTrimming="CharacterEllipsis"
+                                   Visibility="Collapsed" />
+                    </StackPanel>
+                    <ScrollViewer MaxHeight="120" Style="{StaticResource ModernScrollViewer}"
+                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <TextBlock x:Name="ToolInputText" FontSize="11"
+                                   Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                                   TextWrapping="Wrap" FontFamily="Segoe UI, Consolas" />
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+            <!-- Diff panel (Edit tool) -->
+            <Grid x:Name="DiffPanel" Margin="0,0,0,10" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="4" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Background="{DynamicResource MaterialDesign.Brush.Background}"
+                        CornerRadius="6" Padding="6,6">
+                    <StackPanel>
+                        <TextBlock Text="Old" FontSize="10" Foreground="#FF8A80" Margin="0,0,0,4" FontWeight="SemiBold" />
+                        <ScrollViewer x:Name="OldScroll" MaxHeight="200" Style="{StaticResource ModernScrollViewer}"
+                                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel x:Name="OldContent" />
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Background="{DynamicResource MaterialDesign.Brush.Background}"
+                        CornerRadius="6" Padding="6,6">
+                    <StackPanel>
+                        <TextBlock Text="New" FontSize="10" Foreground="#69F0AE" Margin="0,0,0,4" FontWeight="SemiBold" />
+                        <ScrollViewer x:Name="NewScroll" MaxHeight="200" Style="{StaticResource ModernScrollViewer}"
+                                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel x:Name="NewContent" />
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <!-- Ask panel (AskUserQuestion) -->
+            <Border x:Name="AskPanel" Background="{DynamicResource MaterialDesign.Brush.Background}"
+                    CornerRadius="6" Padding="10,8" Margin="0,0,0,10" Visibility="Collapsed">
+                <ScrollViewer MaxHeight="250" Style="{StaticResource ModernScrollViewer}" VerticalScrollBarVisibility="Auto">
+                    <StackPanel x:Name="AskContent" />
+                </ScrollViewer>
+            </Border>
+            <!-- Write panel -->
+            <Border x:Name="WritePanel" Background="{DynamicResource MaterialDesign.Brush.Background}"
+                    CornerRadius="6" Padding="10,8" Margin="0,0,0,10" Visibility="Collapsed">
+                <ScrollViewer MaxHeight="200" Style="{StaticResource ModernScrollViewer}"
+                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="WriteContent" />
+                </ScrollViewer>
+            </Border>
+            <!-- Queue badge -->
+            <TextBlock x:Name="QueueText" FontSize="11"
+                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                       Margin="0,0,0,8" Visibility="Collapsed" HorizontalAlignment="Center" />
+            <!-- Buttons -->
+            <StackPanel>
+                <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="AllowButton" Grid.Column="0" Content="Allow" Click="Allow_Click"
+                            Height="32" FontSize="12" FontWeight="SemiBold" Foreground="White" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bd" Background="#388E3C" CornerRadius="6" Padding="12,0">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#43A047" />
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#2E5930" />
+                                                    <Setter Property="Foreground" Value="#66FFFFFF" />
+                                                    <Setter Property="Cursor" Value="Arrow" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Grid.Column="2" Content="Deny" Click="Deny_Click"
+                            Height="32" FontSize="12" FontWeight="SemiBold" Foreground="White" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bd" Background="#D32F2F" CornerRadius="6" Padding="12,0">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#E53935" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="Terminal" Click="Terminal_Click"
+                            Height="28" FontSize="11"
+                            Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                            Cursor="Hand" ToolTip="Handle in terminal">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bd"
+                                                    Background="{DynamicResource MaterialDesign.Brush.TextBox.HoverBackground}"
+                                                    CornerRadius="6" Padding="12,0">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <WrapPanel x:Name="AlwaysAllowPanel" Margin="0,0,8,0" VerticalAlignment="Center" />
+                </DockPanel>
+            </StackPanel>
+        </StackPanel>
+        </ScrollViewer>
+    </Border>
+</Window>

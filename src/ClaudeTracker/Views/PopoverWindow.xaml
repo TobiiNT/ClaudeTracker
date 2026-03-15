@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:localization="clr-namespace:ClaudeTracker.Localization"
+        xmlns:views="clr-namespace:ClaudeTracker.Views"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -13,6 +14,11 @@
         Width="330"
         MaxHeight="560">
 
+    <Window.Resources>
+        <views:ActivityIconConverter x:Key="ActivityIconConverter" />
+        <views:NullToCollapsedConverter x:Key="NullToCollapsedConverter" />
+    </Window.Resources>
+
     <Border Style="{StaticResource PopoverBorderStyle}" ClipToBounds="True">
         <Grid>
             <Grid.RowDefinitions>
@@ -22,7 +28,9 @@
             </Grid.RowDefinitions>
 
             <!-- ═══ Content body ═══ -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+            <ScrollViewer Grid.Row="1" Style="{StaticResource ModernScrollViewer}"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
                           Padding="16,10,16,6">
                 <StackPanel x:Name="UsageCardsPanel">
 
@@ -199,6 +207,116 @@
                                 <TextBlock x:Name="ApiRemainingText" HorizontalAlignment="Right"
                                            FontSize="12" Foreground="#999" />
                             </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ── Active Claude Code Sessions ── -->
+                    <Border x:Name="SessionsCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,6">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Console" Width="15" Height="15"
+                                                             Foreground="#888" VerticalAlignment="Center"
+                                                             Margin="0,0,5,0" />
+                                    <TextBlock Text="Active Sessions" FontSize="13" FontWeight="Medium" Foreground="#666"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock x:Name="SessionCountText" HorizontalAlignment="Right"
+                                           FontSize="13" FontWeight="SemiBold" Foreground="#444"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                            <ItemsControl x:Name="SessionsList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#08000000" CornerRadius="4" Padding="8,5" Margin="0,2"
+                                                Cursor="Hand">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding ProjectName}" FontSize="12"
+                                                               FontWeight="Medium" Foreground="#555"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding CurrentActivity}" FontSize="10.5"
+                                                               Foreground="#999" TextTrimming="CharacterEllipsis"
+                                                               Margin="0,1,0,0" />
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" FontSize="11" Foreground="#888"
+                                                           VerticalAlignment="Center" Margin="0,0,6,0">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0}">
+                                                            <Binding Path="ToolCallCount" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                <Ellipse Grid.Column="2" Width="7" Height="7"
+                                                         Fill="#4CAF50" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ── Recent Activity Feed (collapsible) ── -->
+                    <Border x:Name="ActivityFeedCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
+                        <StackPanel>
+                            <!-- Clickable header to toggle collapse -->
+                            <Grid Margin="0,2,0,2" Cursor="Hand"
+                                  MouseLeftButtonDown="ActivityFeedHeader_Click">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <materialDesign:PackIcon x:Name="ActivityChevron"
+                                                         Kind="ChevronDown" Width="16" Height="16"
+                                                         Foreground="#888" VerticalAlignment="Center"
+                                                         Margin="0,0,4,0" />
+                                <TextBlock Grid.Column="1" Text="Recent Activity" FontSize="13"
+                                           FontWeight="Medium" Foreground="#666"
+                                           VerticalAlignment="Center" />
+                                <TextBlock x:Name="ActivityCountText" Grid.Column="2"
+                                           FontSize="11" Foreground="#999"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                            <!-- Collapsible content -->
+                            <ItemsControl x:Name="ActivityFeedList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock FontSize="10" Width="16"
+                                                       FontFamily="Segoe UI Emoji"
+                                                       Foreground="#888" VerticalAlignment="Top"
+                                                       Margin="0,1,0,0"
+                                                       Text="{Binding Icon, Converter={StaticResource ActivityIconConverter}}" />
+                                            <StackPanel Grid.Column="1" Margin="2,0,0,0">
+                                                <TextBlock Text="{Binding Summary}"
+                                                           FontSize="11" Foreground="#666"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Detail}"
+                                                           FontSize="10" Foreground="#555"
+                                                           FontFamily="Consolas, Segoe UI"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Visibility="{Binding Detail, Converter={StaticResource NullToCollapsedConverter}}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2" Text="{Binding ProjectName}"
+                                                       FontSize="10" Foreground="#999"
+                                                       VerticalAlignment="Top" Margin="6,1,0,0"
+                                                       FontStyle="Italic" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Border>
 

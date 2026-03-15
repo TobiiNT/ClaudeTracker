@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +9,35 @@ using ClaudeTracker.Services;
 using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views;
+
+public class NullToCollapsedConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is string s && !string.IsNullOrEmpty(s) ? Visibility.Visible : Visibility.Collapsed;
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
+public class ActivityIconConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return value is ActivityIcon icon ? icon switch
+        {
+            ActivityIcon.Tool => "\u26A1",         // ⚡
+            ActivityIcon.Permission => "\uD83D\uDD10", // 🔐
+            ActivityIcon.Session => "\uD83D\uDCBB",    // 💻
+            ActivityIcon.Subagent => "\u25B6\uFE0F",   // ▶️
+            ActivityIcon.Notification => "\uD83D\uDD14", // 🔔
+            ActivityIcon.System => "\u2699\uFE0F",     // ⚙️
+            _ => "\u26A1"
+        } : "\u26A1";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
 
 public partial class PopoverWindow : Window
 {
@@ -42,6 +73,9 @@ public partial class PopoverWindow : Window
                 _viewModel.SwitchProfileCommand.Execute(id);
         };
 
+        SessionsList.ItemsSource = _viewModel.ActiveSessions;
+        ActivityFeedList.ItemsSource = _viewModel.ActivityFeed;
+
         // Debounce: batch rapid property changes into one UI update
         var uiDebounce = new System.Windows.Threading.DispatcherTimer
         {
@@ -49,6 +83,7 @@ public partial class PopoverWindow : Window
         };
         uiDebounce.Tick += (_, _) => { uiDebounce.Stop(); UpdateUI(); };
         _viewModel.PropertyChanged += (_, _) => { uiDebounce.Stop(); uiDebounce.Start(); };
+        _viewModel.ActivityFeed.CollectionChanged += (_, _) => { uiDebounce.Stop(); uiDebounce.Start(); };
 
         SizeChanged += (_, e) =>
         {
@@ -172,6 +207,22 @@ public partial class PopoverWindow : Window
 
             LastUpdatedText.Text = _viewModel.LastUpdatedText;
 
+            // Sessions card
+            SessionsCard.Visibility = _viewModel.HasActiveSessions ? Visibility.Visible : Visibility.Collapsed;
+            if (_viewModel.HasActiveSessions)
+                SessionCountText.Text = _viewModel.ActiveSessionCount.ToString();
+
+            // Activity feed
+            ActivityFeedCard.Visibility = _viewModel.ShowActivityFeed && _viewModel.ActivityFeed.Count > 0
+                ? Visibility.Visible : Visibility.Collapsed;
+            ActivityFeedList.Visibility = _viewModel.IsActivityFeedExpanded
+                ? Visibility.Visible : Visibility.Collapsed;
+            ActivityChevron.Kind = _viewModel.IsActivityFeedExpanded
+                ? MaterialDesignThemes.Wpf.PackIconKind.ChevronDown
+                : MaterialDesignThemes.Wpf.PackIconKind.ChevronRight;
+            ActivityCountText.Text = _viewModel.ActivityFeed.Count > 0
+                ? $"({_viewModel.ActivityFeed.Count})" : "";
+
             UpdateProgressBars();
         });
     }
@@ -238,6 +289,16 @@ public partial class PopoverWindow : Window
                 "https://status.claude.com") { UseShellExecute = true });
         }
         catch { }
+    }
+
+    private void ActivityFeedHeader_Click(object sender, MouseButtonEventArgs e)
+    {
+        _viewModel.IsActivityFeedExpanded = !_viewModel.IsActivityFeedExpanded;
+        ActivityFeedList.Visibility = _viewModel.IsActivityFeedExpanded
+            ? Visibility.Visible : Visibility.Collapsed;
+        ActivityChevron.Kind = _viewModel.IsActivityFeedExpanded
+            ? MaterialDesignThemes.Wpf.PackIconKind.ChevronDown
+            : MaterialDesignThemes.Wpf.PackIconKind.ChevronRight;
     }
 
     private static SolidColorBrush BrushFromHex(string hex) => Utilities.BrushHelper.FromHex(hex);

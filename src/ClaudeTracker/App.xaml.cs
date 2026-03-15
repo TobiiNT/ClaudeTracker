@@ -7,6 +7,9 @@ using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.ViewModels;
 using ClaudeTracker.TrayIcon;
+using ClaudeTracker.Services.Handlers;
+using ClaudeTracker.Services.Observers;
+using static ClaudeTracker.Utilities.Constants.Hooks;
 
 namespace ClaudeTracker;
 
@@ -53,6 +56,13 @@ public partial class App : Application
             wizard.ShowDialog();
         }
 
+        // Show hooks onboarding if not yet seen
+        if (!settingsService.Settings.HooksOnboardingSeen && settingsService.Settings.HasCompletedSetup)
+        {
+            var onboarding = new Views.HooksOnboardingWindow();
+            onboarding.ShowDialog();
+        }
+
         // Initialize theme
         InitializeTheme();
 
@@ -77,6 +87,164 @@ public partial class App : Application
         var networkMonitor = _services.GetRequiredService<INetworkMonitorService>();
         networkMonitor.NetworkRestored += (_, _) => refreshCoordinator.RefreshNow();
         networkMonitor.Start();
+
+        // Start hooks integration
+        if (settingsService.Settings.HooksEnabled)
+        {
+            var hookDispatcher = _services.GetRequiredService<IHookEventDispatcher>();
+            hookDispatcher.Initialize();
+
+            var hookIpcService = _services.GetRequiredService<IHookIpcService>();
+            hookIpcService.Start();
+
+            // Wire PermissionRequestHandler to show popup UI
+            // Track pending popup TCS keyed by request ID so we can resolve on disconnect
+            var pendingPopups = new System.Collections.Concurrent.ConcurrentDictionary<string, TaskCompletionSource<Models.HookResponse>>();
+            var popupOpenedAt = DateTime.MinValue;
+
+            var permHandler = _services.GetServices<IHookEventHandler>()
+                .OfType<PermissionRequestHandler>().FirstOrDefault();
+            if (permHandler != null)
+            {
+                permHandler.PermissionRequested += (_, args) =>
+                {
+                    // Track this TCS for disconnect auto-close
+                    pendingPopups[args.Info.SessionId] = args.ResponseSource;
+                    popupOpenedAt = DateTime.UtcNow;
+                    args.ResponseSource.Task.ContinueWith(_ =>
+                    {
+                        pendingPopups.TryRemove(args.Info.SessionId, out var _ignored);
+                    });
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        try
+                        {
+                            var popup = new Views.PermissionRequestPopup(args.Info, args.ResponseSource);
+                            popup.Show();
+                        }
+                        catch (Exception ex)
+                        {
+                            LoggingService.Instance.LogError("Failed to show permission popup", ex);
+                            args.ResponseSource.TrySetResult(new Models.HookResponse
+                            {
+                                RequestId = "",
+                                Success = true
+                            });
+                        }
+                    });
+                };
+            }
+
+            // When pipe disconnects (user answered in terminal), close any pending popup
+            hookIpcService.PipeDisconnected += (_, requestId) =>
+            {
+                LoggingService.Instance.Log($"[Hooks] PipeDisconnected: closing {pendingPopups.Count} pending popup(s)");
+                foreach (var kvp in pendingPopups)
+                {
+                    kvp.Value.TrySetResult(new Models.HookResponse
+                    {
+                        RequestId = requestId,
+                        Success = true,
+                        JsonOutput = null
+                    });
+                }
+                pendingPopups.Clear();
+            };
+
+            // When a post-execution event arrives while a popup is pending, the user
+            // already answered in terminal and Claude Code moved on.
+            // Only close popups from the SAME session (other sessions shouldn't interfere).
+            hookIpcService.EventArrived += (_, evt) =>
+            {
+                if (pendingPopups.Count == 0) return;
+
+                // PostToolUse = tool executed (allowed), Stop = session ended,
+                // UserPromptSubmit = user sent next prompt (denied/completed)
+                if (evt.EventName is not (Events.PostToolUse or Events.PostToolUseFailure
+                    or Events.Stop or Events.UserPromptSubmit))
+                    return;
+
+                // Extract session_id from the event payload to match against pending popups
+                var evtSessionId = "";
+                try
+                {
+                    var payloadNode = System.Text.Json.Nodes.JsonNode.Parse(evt.Payload);
+                    evtSessionId = payloadNode?[Fields.SessionId]?.GetValue<string>() ?? "";
+                }
+                catch { }
+
+                // Only close popups from the same session
+                if (!string.IsNullOrEmpty(evtSessionId) && pendingPopups.TryRemove(evtSessionId, out var tcs))
+                {
+                    LoggingService.Instance.Log($"[Hooks] Event '{evt.EventName}' from session '{evtSessionId}' — auto-closing popup");
+                    tcs.TrySetResult(new Models.HookResponse
+                    {
+                        RequestId = evt.RequestId,
+                        Success = true,
+                        JsonOutput = null
+                    });
+                }
+            };
+
+            // Start stale session pruning timer
+            var sessionTracking = _services.GetRequiredService<ISessionTrackingService>();
+            var pruneTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromMinutes(5)
+            };
+            pruneTimer.Tick += (_, _) => sessionTracking.PruneStale();
+            pruneTimer.Start();
+
+            // Wire configurable notifications from hook events
+            var activityServiceForNotifications = _services.GetRequiredService<IActivityService>();
+            var notificationServiceForHooks = _services.GetRequiredService<INotificationService>();
+
+            activityServiceForNotifications.RecentFeed.CollectionChanged += (_, e) =>
+            {
+                if (e.NewItems == null) return;
+                foreach (Models.ActivityEntry entry in e.NewItems)
+                {
+                    // Suppress notifications while a permission popup is active
+                    if (pendingPopups.Count > 0)
+                        continue;
+
+                    var prefs = settingsService.Settings.HookNotificationPreferences;
+                    var shouldNotify = entry.EventName switch
+                    {
+                        Events.PostToolUseFailure => prefs.GetValueOrDefault("toolError", true),
+                        Events.Notification when entry.Summary.Contains("permission", StringComparison.OrdinalIgnoreCase) =>
+                            !settingsService.Settings.HookPermissionPopupsEnabled
+                            && prefs.GetValueOrDefault("permission", true),
+                        Events.Notification when entry.Summary.Contains("idle", StringComparison.OrdinalIgnoreCase) =>
+                            prefs.GetValueOrDefault("idle", true),
+                        Events.Notification => true, // catch-all for other notification types
+                        Events.TaskCompleted => prefs.GetValueOrDefault("stop", true),
+                        Events.ConfigChange => prefs.GetValueOrDefault("configChange", false),
+                        Events.SessionStart or Events.SessionEnd => prefs.GetValueOrDefault("sessionLifecycle", false),
+                        Events.SubagentStart or Events.SubagentStop => prefs.GetValueOrDefault("subagent", false),
+                        _ => false
+                    };
+
+                    if (shouldNotify)
+                    {
+                        var level = entry.EventName == Events.PostToolUseFailure
+                            ? Views.NotificationPopup.NotificationLevel.Warning
+                            : Views.NotificationPopup.NotificationLevel.Info;
+
+                        var title = entry.EventName == Events.PostToolUseFailure
+                            ? "Tool Error" : entry.EventName;
+                        var body = !string.IsNullOrEmpty(entry.Detail)
+                            ? $"{entry.Summary}\n{entry.Detail}" : entry.Summary;
+
+                        ((NotificationService)notificationServiceForHooks).SendNotification(
+                            title, body, level);
+                    }
+                }
+            };
+
+            LoggingService.Instance.Log("Hooks integration initialized");
+        }
 
         // Engagement prompts (delayed to not block startup)
         _ = Task.Delay(5000).ContinueWith(_ =>
@@ -186,6 +354,7 @@ public partial class App : Application
         services.AddTransient<GeneralSettingsViewModel>();
         services.AddTransient<ProfilesViewModel>();
 
+        services.AddTransient<HooksSettingsViewModel>();
         services.AddTransient<AboutViewModel>();
 
         // HttpClient
@@ -194,6 +363,27 @@ public partial class App : Application
             client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
+
+        // ── Hooks Integration ──
+        services.AddSingleton<IHookIpcService, HookIpcService>();
+        services.AddSingleton<IHookEventDispatcher, HookEventDispatcher>();
+
+        // Interactive handlers
+        services.AddSingleton<IHookEventHandler, PermissionRequestHandler>();
+        services.AddSingleton<IHookEventHandler, PreToolUseHandler>();
+        services.AddSingleton<IHookEventHandler, ElicitationHandler>();
+        services.AddSingleton<IHookEventHandler, UserPromptHandler>();
+        services.AddSingleton<IHookEventHandler, StopHandler>();
+        services.AddSingleton<IHookEventHandler, SubagentStopHandler>();
+        services.AddSingleton<IHookEventHandler, ConfigChangeHandler>();
+
+        // Observers
+        services.AddSingleton<IHookEventObserver, ActivityRecorder>();
+        services.AddSingleton<IHookEventObserver, SessionTracker>();
+
+        // Services
+        services.AddSingleton<IActivityService, ActivityService>();
+        services.AddSingleton<ISessionTrackingService, SessionTrackingService>();
     }
 
     private void InitializeTheme()

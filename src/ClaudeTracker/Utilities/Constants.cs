@@ -1,4 +1,5 @@
 using System.IO;
+using System.Collections.Generic;
 
 namespace ClaudeTracker.Utilities;
 
@@ -85,6 +86,134 @@ public static class Constants
     {
         public const string StatusUrl = "https://status.claude.com/api/v2/status.json";
         public const double RefreshIntervalMinutes = 5.0;
+    }
+
+    public static class Hooks
+    {
+        public static string PipeName => $"ClaudeTracker-Hooks-{Environment.UserName}";
+        public const int MaxConcurrentConnections = 10;
+        public const int MaxMessageSize = 5 * 1024 * 1024; // 5 MB
+        public const int ConnectionTimeoutMs = 3000;
+        public const int ResponseTimeoutMs = 310_000; // Above Claude's 300s permission timeout
+        public const int StaleSessionMinutes = 15;
+        public const int DefaultMaxActivityEntries = 200;
+        public const int DefaultMaxFeedEntries = 10;
+
+        public static string ClaudeSettingsPath =>
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude", "settings.json");
+
+        // ── Hook Event Names ──
+        public static class Events
+        {
+            public const string PreToolUse = "PreToolUse";
+            public const string PostToolUse = "PostToolUse";
+            public const string PostToolUseFailure = "PostToolUseFailure";
+            public const string PermissionRequest = "PermissionRequest";
+            public const string Notification = "Notification";
+            public const string Stop = "Stop";
+            public const string SessionStart = "SessionStart";
+            public const string SessionEnd = "SessionEnd";
+            public const string UserPromptSubmit = "UserPromptSubmit";
+            public const string SubagentStart = "SubagentStart";
+            public const string SubagentStop = "SubagentStop";
+            public const string PreCompact = "PreCompact";
+            public const string PostCompact = "PostCompact";
+            public const string WorktreeCreate = "WorktreeCreate";
+            public const string WorktreeRemove = "WorktreeRemove";
+            public const string InstructionsLoaded = "InstructionsLoaded";
+            public const string ConfigChange = "ConfigChange";
+            public const string Elicitation = "Elicitation";
+            public const string ElicitationResult = "ElicitationResult";
+            public const string TeammateIdle = "TeammateIdle";
+            public const string TaskCompleted = "TaskCompleted";
+        }
+
+        // ── Claude Code Tool Names ──
+        public static class Tools
+        {
+            public const string Bash = "Bash";
+            public const string Read = "Read";
+            public const string Edit = "Edit";
+            public const string Write = "Write";
+            public const string Glob = "Glob";
+            public const string Grep = "Grep";
+            public const string WebFetch = "WebFetch";
+            public const string WebSearch = "WebSearch";
+            public const string AskUserQuestion = "AskUserQuestion";
+        }
+
+        // ── Claude Code JSON Payload Fields ──
+        public static class Fields
+        {
+            public const string HookEventName = "hook_event_name";
+            public const string ToolName = "tool_name";
+            public const string ToolInput = "tool_input";
+            public const string SessionId = "session_id";
+            public const string Cwd = "cwd";
+            public const string Command = "command";
+            public const string Description = "description";
+            public const string FilePath = "file_path";
+            public const string Pattern = "pattern";
+            public const string Query = "query";
+            public const string Url = "url";
+            public const string Question = "question";
+            public const string Questions = "questions";
+            public const string Answers = "answers";
+            public const string PermissionSuggestions = "permission_suggestions";
+            public const string PermissionMode = "permission_mode";
+            public const string Source = "source";
+            public const string Reason = "reason";
+            public const string Message = "message";
+            public const string AgentType = "agent_type";
+            public const string Model = "model";
+            public const string AgentId = "agent_id";
+            public const string OldString = "old_string";
+            public const string NewString = "new_string";
+            public const string Content = "content";
+            public const string Prompt = "prompt";
+        }
+
+        // ── Hook Response Fields ──
+        public static class Response
+        {
+            public const string HookSpecificOutput = "hookSpecificOutput";
+            public const string HookEventName = "hookEventName";
+            public const string Decision = "decision";
+            public const string Behavior = "behavior";
+            public const string UpdatedInput = "updatedInput";
+            public const string UpdatedPermissions = "updatedPermissions";
+            public const string Allow = "allow";
+            public const string Deny = "deny";
+        }
+
+        public static readonly string[] AllEvents =
+        {
+            Events.PreToolUse, Events.PostToolUse, Events.PostToolUseFailure,
+            Events.PermissionRequest, Events.Notification, Events.Stop,
+            Events.SessionStart, Events.SessionEnd, Events.UserPromptSubmit,
+            Events.SubagentStart, Events.SubagentStop,
+            Events.PreCompact, Events.PostCompact,
+            Events.WorktreeCreate, Events.WorktreeRemove,
+            Events.InstructionsLoaded, Events.ConfigChange,
+            Events.Elicitation, Events.ElicitationResult,
+            Events.TeammateIdle, Events.TaskCompleted
+        };
+
+        public static readonly HashSet<string> AsyncEvents = new()
+        {
+            Events.PostToolUse, Events.PostToolUseFailure,
+            Events.SessionStart, Events.SessionEnd,
+            Events.SubagentStart, Events.InstructionsLoaded,
+            Events.PreCompact, Events.PostCompact,
+            Events.WorktreeRemove, Events.ElicitationResult
+        };
+
+        public static readonly HashSet<string> InteractiveEvents = new()
+        {
+            Events.PermissionRequest, Events.PreToolUse,
+            Events.Elicitation, Events.UserPromptSubmit,
+            Events.Stop, Events.SubagentStop, Events.ConfigChange
+        };
     }
 
     public static string AppDataPath =>

@@ -39,6 +39,9 @@
                     <RadioButton x:Name="NavAppearance" Content="Appearance"
                                  Style="{StaticResource SidebarButton}"
                                  GroupName="SettingsNav" />
+                    <RadioButton x:Name="NavHooks" Content="Hooks"
+                                 Style="{StaticResource SidebarButton}"
+                                 GroupName="SettingsNav" />
 
 
                     <!-- Other Section -->
