@@ -50,9 +50,11 @@ public class PermissionRequestHandler : IHookEventHandler
             var tcs = new TaskCompletionSource<HookResponse>();
             var args = new HookInteractiveEventArgs<PermissionRequestInfo>(info, tcs);
 
-            PermissionRequested?.Invoke(this, args);
+            // Capture delegate to avoid TOCTOU race (subscriber could unsubscribe between invoke and null check)
+            var handler = PermissionRequested;
+            handler?.Invoke(this, args);
 
-            if (PermissionRequested == null)
+            if (handler == null)
             {
                 LoggingService.Instance.Log("PermissionRequestHandler: No UI handler subscribed, falling back to terminal");
                 return new HookResponse
@@ -167,52 +169,21 @@ public class PermissionRequestHandler : IHookEventHandler
         {
             case PermissionDecision.AlwaysAllow when result.AppliedSuggestion != null:
                 decision[Response.Behavior] = Response.Allow;
-                var suggestion = new JsonObject
+                var permEntry = new JsonObject
                 {
-                    ["type"] = result.AppliedSuggestion.Type,
-                    [Response.Behavior] = result.AppliedSuggestion.Behavior,
-                    ["destination"] = result.AppliedSuggestion.Destination,
-                    ["tool"] = result.AppliedSuggestion.Tool,
-                    ["prefix"] = result.AppliedSuggestion.Prefix
+                    ["type"] = "toolAlwaysAllow",
+                    ["tool"] = result.AppliedSuggestion.Tool
                 };
-
-                if (result.AppliedSuggestion.Rules.Count > 0)
-                {
-                    var rulesArr = new JsonArray();
-                    foreach (var rule in result.AppliedSuggestion.Rules)
-                    {
-                        rulesArr.Add(new JsonObject
-                        {
-                            ["toolName"] = rule.ToolName,
-                            ["ruleContent"] = rule.RuleContent
-                        });
-                    }
-                    suggestion["rules"] = rulesArr;
-                }
-
-                if (result.AppliedSuggestion.Directories.Count > 0)
-                {
-                    var dirsArr = new JsonArray();
-                    foreach (var dir in result.AppliedSuggestion.Directories)
-                    {
-                        dirsArr.Add(dir);
-                    }
-                    suggestion["directories"] = dirsArr;
-                }
-
-                decision[Response.UpdatedPermissions] = new JsonArray { suggestion };
+                decision[Response.UpdatedPermissions] = new JsonArray { permEntry };
                 break;
 
             case PermissionDecision.Allow:
+            case PermissionDecision.AlwaysAllow: // no suggestion — degrade to one-time allow
                 decision[Response.Behavior] = Response.Allow;
                 break;
 
             case PermissionDecision.Deny:
                 decision[Response.Behavior] = Response.Deny;
-                break;
-
-            case PermissionDecision.AlwaysAllow:
-                decision[Response.Behavior] = Response.Allow;
                 break;
         }
 

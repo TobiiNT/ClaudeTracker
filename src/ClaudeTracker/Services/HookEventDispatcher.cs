@@ -26,12 +26,16 @@ public class HookEventDispatcher : IHookEventDispatcher
     }
 
     private bool _initialized;
+    private readonly object _initLock = new();
 
     public void Initialize()
     {
-        if (_initialized) return;
-        _initialized = true;
-        _ipcService.EventReceived += OnEventReceived;
+        lock (_initLock)
+        {
+            if (_initialized) return;
+            _initialized = true;
+            _ipcService.EventReceived += OnEventReceived;
+        }
     }
 
     private async Task<HookResponse> OnEventReceived(HookEvent evt)

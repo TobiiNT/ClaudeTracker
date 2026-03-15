@@ -107,6 +107,8 @@ public class SessionState
     [JsonPropertyName("currentActivity")]
     public string CurrentActivity { get; set; } = string.Empty;
 
+    public DateTime LastActivityTime { get; set; } = DateTime.UtcNow;
+
     [JsonPropertyName("activeSubagents")]
     public List<string> ActiveSubagents { get; set; } = new();
 

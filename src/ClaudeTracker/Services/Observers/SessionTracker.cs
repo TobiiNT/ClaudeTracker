@@ -33,7 +33,7 @@ public class SessionTracker : IHookEventObserver
                     sessionId,
                     json[Fields.Cwd]?.GetValue<string>() ?? "",
                     json[Fields.PermissionMode]?.GetValue<string>() ?? "",
-                    json["model"]?.GetValue<string>());
+                    json[Fields.Model]?.GetValue<string>());
                 break;
 
             case Events.SessionEnd:
@@ -41,13 +41,13 @@ public class SessionTracker : IHookEventObserver
                 break;
 
             case Events.SubagentStart:
-                var agentId = json["agent_id"]?.GetValue<string>() ?? "";
+                var agentId = json[Fields.AgentId]?.GetValue<string>() ?? "";
                 if (!string.IsNullOrEmpty(agentId))
                     _sessionTracking.RegisterSubagent(sessionId, agentId, json[Fields.AgentType]?.GetValue<string>());
                 break;
 
             case Events.SubagentStop:
-                var endAgentId = json["agent_id"]?.GetValue<string>() ?? "";
+                var endAgentId = json[Fields.AgentId]?.GetValue<string>() ?? "";
                 if (!string.IsNullOrEmpty(endAgentId))
                     _sessionTracking.EndSubagent(sessionId, endAgentId);
                 break;

@@ -68,6 +68,7 @@ public class HookIpcService : IHookIpcService
 
     public void Stop()
     {
+        List<Task> tasksToAwait;
         lock (_lock)
         {
             if (!IsRunning) return;
@@ -77,8 +78,22 @@ public class HookIpcService : IHookIpcService
             _cts?.Cancel();
             IsRunning = false;
 
-            // Don't block on listener tasks — they will exit on their own
+            tasksToAwait = new List<Task>(_listeners);
             _listeners.Clear();
+        }
+
+        // Await outside lock to avoid holding lock during shutdown
+        try
+        {
+            Task.WhenAll(tasksToAwait).Wait(TimeSpan.FromSeconds(3));
+        }
+        catch (AggregateException)
+        {
+            // Expected — tasks cancelled
+        }
+
+        lock (_lock)
+        {
             _cts?.Dispose();
             _cts = null;
         }

@@ -563,11 +563,12 @@ public partial class PermissionRequestPopup : Window
 
     private void BuildAlwaysAllowButtons(List<PermissionSuggestion> suggestions)
     {
+        var seenLabels = new HashSet<string>();
         foreach (var suggestion in suggestions)
         {
             LoggingService.Instance.Log($"[PermPopup] Suggestion: type={suggestion.Type}, behavior={suggestion.Behavior}, tool={suggestion.Tool}, prefix={suggestion.Prefix}, rules={suggestion.Rules.Count}{(suggestion.Rules.Count > 0 ? $" [{suggestion.Rules[0].ToolName}:{suggestion.Rules[0].RuleContent}]" : "")}, dirs={suggestion.Directories.Count}");
             var label = suggestion.DisplayLabel;
-            if (string.IsNullOrWhiteSpace(label)) continue;
+            if (string.IsNullOrWhiteSpace(label) || !seenLabels.Add(label)) continue;
 
             var btn = new Button
             {

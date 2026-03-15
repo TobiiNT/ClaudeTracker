@@ -165,6 +165,8 @@ public static class Constants
             public const string Reason = "reason";
             public const string Message = "message";
             public const string AgentType = "agent_type";
+            public const string Model = "model";
+            public const string AgentId = "agent_id";
             public const string OldString = "old_string";
             public const string NewString = "new_string";
             public const string Content = "content";

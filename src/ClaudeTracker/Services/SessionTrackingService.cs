@@ -8,8 +8,8 @@ namespace ClaudeTracker.Services;
 
 /// <summary>
 /// Manages active Claude Code sessions with thread-safe locking.
-/// Tracks session lifecycle, tool call counts, subagents, and per-session activity history.
-/// All ObservableCollection mutations are dispatched to the UI thread.
+/// All methods use dispatch-then-lock pattern to prevent deadlocks:
+/// Dispatcher.Invoke(() => { lock (_lock) { ... } })
 /// </summary>
 public class SessionTrackingService : ISessionTrackingService
 {
@@ -21,26 +21,26 @@ public class SessionTrackingService : ISessionTrackingService
 
     public void RegisterSession(string sessionId, string projectDirectory, string permissionMode, string? model)
     {
-        lock (_lock)
-        {
-            var existing = ActiveSessions.FirstOrDefault(s => s.SessionId == sessionId);
-            if (existing != null)
-            {
-                existing.CurrentActivity = "Resumed";
-                return;
-            }
-        }
-
-        var session = new SessionState
-        {
-            SessionId = sessionId,
-            Cwd = projectDirectory,
-            Model = model ?? ""
-        };
-
         Application.Current?.Dispatcher.Invoke(() =>
         {
-            lock (_lock) { ActiveSessions.Add(session); }
+            lock (_lock)
+            {
+                var existing = ActiveSessions.FirstOrDefault(s => s.SessionId == sessionId);
+                if (existing != null)
+                {
+                    existing.CurrentActivity = "Resumed";
+                    existing.LastActivityTime = DateTime.UtcNow;
+                    return;
+                }
+
+                var session = new SessionState
+                {
+                    SessionId = sessionId,
+                    Cwd = projectDirectory,
+                    Model = model ?? ""
+                };
+                ActiveSessions.Add(session);
+            }
             SessionsChanged?.Invoke(this, EventArgs.Empty);
         });
     }
@@ -55,56 +55,62 @@ public class SessionTrackingService : ISessionTrackingService
                 if (session != null)
                 {
                     ActiveSessions.Remove(session);
-                    SessionsChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
+            SessionsChanged?.Invoke(this, EventArgs.Empty);
         });
     }
 
     public void RecordActivity(string sessionId, ActivityEntry entry)
     {
-        lock (_lock)
+        Application.Current?.Dispatcher.Invoke(() =>
         {
-            var session = ActiveSessions.FirstOrDefault(s => s.SessionId == sessionId);
-            if (session == null) return;
-
-            session.CurrentActivity = entry.Summary;
-            if (entry.ToolName != null) session.ToolCallCount++;
-
-            Application.Current?.Dispatcher.Invoke(() =>
+            lock (_lock)
             {
+                var session = ActiveSessions.FirstOrDefault(s => s.SessionId == sessionId);
+                if (session == null) return;
+
+                session.CurrentActivity = entry.Summary;
+                session.LastActivityTime = DateTime.UtcNow;
+                if (entry.ToolName != null) session.ToolCallCount++;
+
                 session.Activities.Insert(0, entry);
                 while (session.Activities.Count > Constants.Hooks.DefaultMaxActivityEntries)
                     session.Activities.RemoveAt(session.Activities.Count - 1);
-            });
-
+            }
             SessionsChanged?.Invoke(this, EventArgs.Empty);
-        }
+        });
     }
 
     public void RegisterSubagent(string sessionId, string agentId, string? agentType)
     {
-        lock (_lock)
+        Application.Current?.Dispatcher.Invoke(() =>
         {
-            var session = ActiveSessions.FirstOrDefault(s => s.SessionId == sessionId);
-            if (session == null) return;
-            if (!session.ActiveSubagents.Contains(agentId))
+            lock (_lock)
             {
-                session.ActiveSubagents.Add(agentId);
-                session.SubagentCount++;
-                SessionsChanged?.Invoke(this, EventArgs.Empty);
+                var session = ActiveSessions.FirstOrDefault(s => s.SessionId == sessionId);
+                if (session == null) return;
+                if (!session.ActiveSubagents.Contains(agentId))
+                {
+                    session.ActiveSubagents.Add(agentId);
+                    session.SubagentCount++;
+                }
             }
-        }
+            SessionsChanged?.Invoke(this, EventArgs.Empty);
+        });
     }
 
     public void EndSubagent(string sessionId, string agentId)
     {
-        lock (_lock)
+        Application.Current?.Dispatcher.Invoke(() =>
         {
-            var session = ActiveSessions.FirstOrDefault(s => s.SessionId == sessionId);
-            session?.ActiveSubagents.Remove(agentId);
+            lock (_lock)
+            {
+                var session = ActiveSessions.FirstOrDefault(s => s.SessionId == sessionId);
+                session?.ActiveSubagents.Remove(agentId);
+            }
             SessionsChanged?.Invoke(this, EventArgs.Empty);
-        }
+        });
     }
 
     public void PruneStale()
@@ -115,7 +121,7 @@ public class SessionTrackingService : ISessionTrackingService
             lock (_lock)
             {
                 var stale = ActiveSessions
-                    .Where(s => s.StartTime < cutoff && string.IsNullOrEmpty(s.CurrentActivity))
+                    .Where(s => s.LastActivityTime < cutoff)
                     .ToList();
                 foreach (var s in stale) ActiveSessions.Remove(s);
                 if (stale.Count > 0) SessionsChanged?.Invoke(this, EventArgs.Empty);
