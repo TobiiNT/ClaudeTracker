@@ -119,7 +119,8 @@ public class PermissionRequestHandler : IHookEventHandler
                     Behavior = suggestionNode["behavior"]?.GetValue<string>() ?? string.Empty,
                     Destination = suggestionNode["destination"]?.GetValue<string>() ?? string.Empty,
                     Tool = suggestionNode["tool"]?.GetValue<string>() ?? string.Empty,
-                    Prefix = suggestionNode["prefix"]?.GetValue<string>() ?? string.Empty
+                    Prefix = suggestionNode["prefix"]?.GetValue<string>() ?? string.Empty,
+                    RawJson = suggestionNode.ToJsonString()
                 };
 
                 // Parse rules
@@ -169,12 +170,23 @@ public class PermissionRequestHandler : IHookEventHandler
         {
             case PermissionDecision.AlwaysAllow when result.AppliedSuggestion != null:
                 decision[Response.Behavior] = Response.Allow;
-                var permEntry = new JsonObject
+                if (result.AppliedSuggestion.RawJson != null)
                 {
-                    ["type"] = "toolAlwaysAllow",
-                    ["tool"] = result.AppliedSuggestion.Tool
-                };
-                decision[Response.UpdatedPermissions] = new JsonArray { permEntry };
+                    // Echo back the original suggestion verbatim — preserves all fields
+                    // Claude Code expects its own suggestion format back in updatedPermissions
+                    var rawNode = JsonNode.Parse(result.AppliedSuggestion.RawJson);
+                    decision[Response.UpdatedPermissions] = new JsonArray { rawNode };
+                }
+                else
+                {
+                    // Fallback: simple tool permission
+                    var permEntry = new JsonObject
+                    {
+                        ["type"] = "toolAlwaysAllow",
+                        ["tool"] = result.AppliedSuggestion.Tool
+                    };
+                    decision[Response.UpdatedPermissions] = new JsonArray { permEntry };
+                }
                 break;
 
             case PermissionDecision.Allow:

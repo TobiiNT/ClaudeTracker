@@ -83,6 +83,7 @@ public partial class PopoverWindow : Window
         };
         uiDebounce.Tick += (_, _) => { uiDebounce.Stop(); UpdateUI(); };
         _viewModel.PropertyChanged += (_, _) => { uiDebounce.Stop(); uiDebounce.Start(); };
+        _viewModel.ActivityFeed.CollectionChanged += (_, _) => { uiDebounce.Stop(); uiDebounce.Start(); };
 
         SizeChanged += (_, e) =>
         {

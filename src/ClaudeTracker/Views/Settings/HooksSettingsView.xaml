@@ -10,7 +10,7 @@
                        Margin="0,0,0,20" />
 
             <!-- Enable Hooks -->
-            <Grid Margin="0,0,0,20">
+            <Grid Margin="0,0,0,12">
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="Enable Hooks Integration" FontSize="13" />
                     <TextBlock Text="When enabled, ClaudeTracker receives real-time events from Claude Code"
@@ -19,6 +19,25 @@
                 <ToggleButton x:Name="HooksEnabledToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
             </Grid>
+
+            <!-- Installation (shown only when hooks enabled) -->
+            <StackPanel x:Name="InstallationPanel" Margin="0,0,0,20">
+                <TextBlock Text="Install or remove the HookBridge relay into Claude Code's hooks configuration"
+                           FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,0,0,8" />
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <Button x:Name="InstallButton" Content="Install Hooks"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Height="34" FontSize="12" Margin="0,0,8,0" />
+                    <Button x:Name="UninstallButton" Content="Uninstall Hooks"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Height="34" FontSize="12" />
+                </StackPanel>
+                <TextBlock x:Name="InstallStatusText" FontSize="11" Foreground="#999"
+                           TextWrapping="Wrap" Margin="0,4,0,0" />
+            </StackPanel>
+
+            <!-- Settings (shown only when hooks enabled) -->
+            <StackPanel x:Name="HooksSettingsPanel">
 
             <!-- Popups -->
             <TextBlock Text="POPUPS" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
@@ -106,20 +125,7 @@
                            VerticalAlignment="Center" HorizontalAlignment="Center" />
             </Grid>
 
-            <!-- Installation -->
-            <TextBlock Text="INSTALLATION" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
-            <TextBlock Text="Install or remove the HookBridge relay into Claude Code's hooks configuration"
-                       FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,0,0,8" />
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                <Button x:Name="InstallButton" Content="Install Hooks"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Height="34" FontSize="12" Margin="0,0,8,0" />
-                <Button x:Name="UninstallButton" Content="Uninstall Hooks"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Height="34" FontSize="12" />
             </StackPanel>
-            <TextBlock x:Name="InstallStatusText" FontSize="11" Foreground="#999"
-                       TextWrapping="Wrap" Margin="0,4,0,0" />
 
             <!-- Save -->
             <Button x:Name="SaveButton" Content="Save Changes"

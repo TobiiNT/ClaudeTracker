@@ -73,6 +73,9 @@ public class AppSettings
 
     // ── Hooks Integration ──
 
+    [JsonPropertyName("hooksOnboardingSeen")]
+    public bool HooksOnboardingSeen { get; set; }
+
     [JsonPropertyName("hooksEnabled")]
     public bool HooksEnabled { get; set; }
 

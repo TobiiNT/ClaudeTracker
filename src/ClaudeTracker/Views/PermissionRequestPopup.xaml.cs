@@ -43,7 +43,7 @@ public partial class PermissionRequestPopup : Window
             : info.Cwd;
 
         ToolNameText.Text = info.ToolName;
-        var desc = GetStringValue(info.ToolInput, Fields.Description);
+        var desc = FormatToolDescription(info.ToolName, info.ToolInput);
         if (!string.IsNullOrEmpty(desc))
         {
             ToolDescText.Text = "\u2013 " + desc;
@@ -696,6 +696,16 @@ public partial class PermissionRequestPopup : Window
             Tools.WebFetch or Tools.WebSearch => GetStringValue(toolInput, Fields.Url, GetStringValue(toolInput, Fields.Query)),
             Tools.AskUserQuestion => GetStringValue(toolInput, Fields.Question, "(interactive question)"),
             _ => FormatDictionaryCompact(toolInput)
+        };
+    }
+
+    private static string FormatToolDescription(string toolName, Dictionary<string, object> toolInput)
+    {
+        return toolName switch
+        {
+            Tools.Bash => GetStringValue(toolInput, Fields.Description),
+            Tools.Write => string.Empty,
+            _ => string.Empty
         };
     }
 

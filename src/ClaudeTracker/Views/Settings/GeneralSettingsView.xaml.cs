@@ -88,7 +88,7 @@ public partial class GeneralSettingsView : UserControl
         SoundToggle.Unchecked += (_, _) => { _vm.SoundEnabled = false; SoundPickerPanel.Visibility = Visibility.Collapsed; };
         SoundPickerPanel.Visibility = _vm.SoundEnabled ? Visibility.Visible : Visibility.Collapsed;
 
-        SoundCombo.ItemsSource = new[] { "Default", "Hand", "Asterisk", "Question", "Beep", "None" };
+        SoundCombo.ItemsSource = new[] { "Default", "Hand", "Beep", "None" };
         SoundCombo.SelectedItem = _vm.SoundName;
         SoundCombo.SelectionChanged += (_, _) =>
         {
@@ -97,10 +97,24 @@ public partial class GeneralSettingsView : UserControl
 
         TestAlertButton.Click += (_, _) =>
         {
-            var notificationService = App.Services.GetRequiredService<INotificationService>();
-            notificationService.SendNotification(
+            // Play the currently selected sound from the dropdown (not the saved profile sound)
+            if (_vm.SoundEnabled)
+            {
+                var sound = _vm.SoundName switch
+                {
+                    "Hand" => System.Media.SystemSounds.Hand,
+                    "Beep" => System.Media.SystemSounds.Beep,
+                    "None" => (System.Media.SystemSound?)null,
+                    _ => System.Media.SystemSounds.Exclamation
+                };
+                sound?.Play();
+            }
+
+            // Show popup directly to avoid double-sound from SendNotification
+            var popup = new NotificationPopup(
                 "ClaudeTracker - Test Alert",
                 "This is a sample notification. Alerts will appear like this when usage thresholds are reached.");
+            popup.Show();
         };
 
         // Save button

@@ -56,6 +56,13 @@ public partial class App : Application
             wizard.ShowDialog();
         }
 
+        // Show hooks onboarding if not yet seen
+        if (!settingsService.Settings.HooksOnboardingSeen && settingsService.Settings.HasCompletedSetup)
+        {
+            var onboarding = new Views.HooksOnboardingWindow();
+            onboarding.ShowDialog();
+        }
+
         // Initialize theme
         InitializeTheme();
 

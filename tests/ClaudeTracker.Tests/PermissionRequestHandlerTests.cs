@@ -8,8 +8,9 @@ namespace ClaudeTracker.Tests;
 public class PermissionRequestHandlerTests
 {
     [Fact]
-    public void BuildResponseJson_AlwaysAllow_EmitsToolAlwaysAllowFormat()
+    public void BuildResponseJson_AlwaysAllow_EchoesRawSuggestionVerbatim()
     {
+        var rawJson = """{"type":"prefix","behavior":"allow","destination":"session","tool":"Edit","prefix":"src/"}""";
         var result = new PermissionDecisionResult
         {
             Decision = PermissionDecision.AlwaysAllow,
@@ -19,7 +20,8 @@ public class PermissionRequestHandlerTests
                 Behavior = "allow",
                 Destination = "session",
                 Tool = "Edit",
-                Prefix = "src/"
+                Prefix = "src/",
+                RawJson = rawJson
             }
         };
 
@@ -35,11 +37,11 @@ public class PermissionRequestHandlerTests
         var perms = decision.GetProperty("updatedPermissions");
         Assert.Equal(1, perms.GetArrayLength());
         var perm = perms[0];
-        Assert.Equal("toolAlwaysAllow", perm.GetProperty("type").GetString());
+        // Echoes back the original suggestion verbatim
+        Assert.Equal("prefix", perm.GetProperty("type").GetString());
         Assert.Equal("Edit", perm.GetProperty("tool").GetString());
-        Assert.False(perm.TryGetProperty("destination", out _));
-        Assert.False(perm.TryGetProperty("prefix", out _));
-        Assert.False(perm.TryGetProperty("behavior", out _));
+        Assert.Equal("session", perm.GetProperty("destination").GetString());
+        Assert.Equal("src/", perm.GetProperty("prefix").GetString());
     }
 
     [Fact]
@@ -111,6 +113,45 @@ public class PermissionRequestHandlerTests
             .GetProperty("decision");
         var updatedInput = decision.GetProperty("updatedInput");
         Assert.Equal("npm run lint", updatedInput.GetProperty("command").GetString());
+    }
+
+    [Fact]
+    public void BuildResponseJson_AlwaysAllow_BashRule_EchoesRawJson()
+    {
+        var rawJson = """{"type":"prefix","behavior":"allow","tool":"Bash","rules":[{"toolName":"Bash","ruleContent":"mkdir"}],"directories":["/projects/test"]}""";
+        var result = new PermissionDecisionResult
+        {
+            Decision = PermissionDecision.AlwaysAllow,
+            AppliedSuggestion = new PermissionSuggestion
+            {
+                Type = "prefix",
+                Behavior = "allow",
+                Tool = "Bash",
+                RawJson = rawJson,
+                Rules = new List<PermissionRule>
+                {
+                    new() { ToolName = "Bash", RuleContent = "mkdir" }
+                },
+                Directories = new List<string> { "/projects/test" }
+            }
+        };
+
+        var json = PermissionRequestHandler.BuildResponseJson(result);
+
+        Assert.NotNull(json);
+        using var doc = JsonDocument.Parse(json!);
+        var decision = doc.RootElement
+            .GetProperty("hookSpecificOutput")
+            .GetProperty("decision");
+
+        var perms = decision.GetProperty("updatedPermissions");
+        var perm = perms[0];
+        // Echoes raw JSON verbatim — preserves all fields including rules and directories
+        Assert.Equal("prefix", perm.GetProperty("type").GetString());
+        Assert.Equal("Bash", perm.GetProperty("tool").GetString());
+        var rules = perm.GetProperty("rules");
+        Assert.Equal("mkdir", rules[0].GetProperty("ruleContent").GetString());
+        Assert.True(perm.TryGetProperty("directories", out _));
     }
 
     [Fact]

@@ -20,8 +20,9 @@ public partial class HooksSettingsView : UserControl
 
         // Enable hooks
         HooksEnabledToggle.IsChecked = _vm.HooksEnabled;
-        HooksEnabledToggle.Checked += (_, _) => _vm.HooksEnabled = true;
-        HooksEnabledToggle.Unchecked += (_, _) => _vm.HooksEnabled = false;
+        UpdateHooksEnabledVisibility(_vm.HooksEnabled);
+        HooksEnabledToggle.Checked += (_, _) => { _vm.HooksEnabled = true; UpdateHooksEnabledVisibility(true); };
+        HooksEnabledToggle.Unchecked += (_, _) => { _vm.HooksEnabled = false; UpdateHooksEnabledVisibility(false); };
 
         // Popups
         PermissionPopupsToggle.IsChecked = _vm.PermissionPopupsEnabled;
@@ -90,11 +91,20 @@ public partial class HooksSettingsView : UserControl
         _vm.CheckInstallStatus();
         UpdateInstallUI();
 
-        // Save button
-        SaveButton.Click += (_, _) =>
+        // Save button (auto-uninstall when disabling hooks)
+        SaveButton.Click += async (_, _) =>
         {
+            var wasEnabled = _vm.IsHooksInstalled;
             _vm.SaveCommand.Execute(null);
             SaveButton.Visibility = Visibility.Collapsed;
+
+            // Auto-uninstall hooks when user disables and saves
+            if (wasEnabled && !_vm.HooksEnabled)
+            {
+                await RunBridgeCommandAsync("uninstall");
+                _vm.CheckInstallStatus();
+                UpdateInstallUI();
+            }
         };
         _vm.PropertyChanged += (_, args) =>
         {
@@ -102,6 +112,13 @@ public partial class HooksSettingsView : UserControl
                 Dispatcher.Invoke(() => SaveButton.Visibility = _vm.HasUnsavedChanges
                     ? Visibility.Visible : Visibility.Collapsed);
         };
+    }
+
+    private void UpdateHooksEnabledVisibility(bool enabled)
+    {
+        var vis = enabled ? Visibility.Visible : Visibility.Collapsed;
+        InstallationPanel.Visibility = vis;
+        HooksSettingsPanel.Visibility = vis;
     }
 
     private void UpdateInstallUI()

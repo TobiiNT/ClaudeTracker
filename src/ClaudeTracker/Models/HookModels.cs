@@ -133,6 +133,10 @@ public class PermissionSuggestion
     [JsonPropertyName("prefix")]
     public string Prefix { get; set; } = string.Empty;
 
+    /// <summary>Original JSON from Claude Code, used to echo back verbatim for updatedPermissions.</summary>
+    [JsonIgnore]
+    public string? RawJson { get; set; }
+
     [JsonIgnore]
     public string DisplayLabel
     {
