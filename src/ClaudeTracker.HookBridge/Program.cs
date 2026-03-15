@@ -226,7 +226,7 @@ internal static class Program
                 settings["hooks"] = hooksObj;
             }
 
-            // Register each event
+            // Register each event — preserve existing hooks from other tools
             foreach (var eventName in AllEvents)
             {
                 var hookConfig = new JsonObject
@@ -259,10 +259,25 @@ internal static class Program
                     hookEntry["matcher"] = "startup|resume";
                 }
 
-                // Wrap in array
-                var hookArray = new JsonArray { hookEntry };
+                // Get or create the array for this event
+                if (hooksObj[eventName] is JsonArray existingArray)
+                {
+                    // Remove any existing ClaudeTracker entries first (avoid duplicates on re-install)
+                    for (int i = existingArray.Count - 1; i >= 0; i--)
+                    {
+                        var entryJson = existingArray[i]?.ToJsonString() ?? "";
+                        if (entryJson.Contains("ClaudeTracker.HookBridge", StringComparison.OrdinalIgnoreCase))
+                            existingArray.RemoveAt(i);
+                    }
 
-                hooksObj[eventName] = hookArray;
+                    // Append our entry to existing hooks
+                    existingArray.Add(hookEntry);
+                }
+                else
+                {
+                    // No existing hooks for this event — create new array
+                    hooksObj[eventName] = new JsonArray { hookEntry };
+                }
             }
 
             // Write settings with indentation
@@ -313,27 +328,35 @@ internal static class Program
                 return 0;
             }
 
-            // Remove only entries whose JSON contains "ClaudeTracker.HookBridge"
-            var keysToRemove = new List<string>();
+            // Remove only ClaudeTracker entries within each event, preserving other tools' hooks
+            var removedCount = 0;
+            var emptyKeys = new List<string>();
+
             foreach (var kvp in hooksObj)
             {
-                var hookJson = kvp.Value?.ToJsonString() ?? "";
-                if (hookJson.Contains("ClaudeTracker.HookBridge", StringComparison.OrdinalIgnoreCase))
+                if (kvp.Value is not JsonArray eventArray) continue;
+
+                for (int i = eventArray.Count - 1; i >= 0; i--)
                 {
-                    keysToRemove.Add(kvp.Key);
+                    var entryJson = eventArray[i]?.ToJsonString() ?? "";
+                    if (entryJson.Contains("ClaudeTracker.HookBridge", StringComparison.OrdinalIgnoreCase))
+                    {
+                        eventArray.RemoveAt(i);
+                        removedCount++;
+                    }
                 }
+
+                if (eventArray.Count == 0)
+                    emptyKeys.Add(kvp.Key);
             }
 
-            foreach (var key in keysToRemove)
-            {
+            // Remove event keys that have no hooks left
+            foreach (var key in emptyKeys)
                 hooksObj.Remove(key);
-            }
 
             // If hooks object is empty, remove it entirely
             if (hooksObj.Count == 0)
-            {
                 settings.Remove("hooks");
-            }
 
             // Write back
             var writeOptions = new JsonSerializerOptions
@@ -344,7 +367,7 @@ internal static class Program
             var outputJson = settings.ToJsonString(writeOptions);
             File.WriteAllText(settingsPath, outputJson);
 
-            Console.WriteLine($"ClaudeTracker hooks uninstalled successfully. Removed {keysToRemove.Count} event(s).");
+            Console.WriteLine($"ClaudeTracker hooks uninstalled successfully. Removed {removedCount} hook(s).");
             return 0;
         }
         catch (Exception ex)
