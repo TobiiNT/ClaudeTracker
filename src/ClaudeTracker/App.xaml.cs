@@ -56,8 +56,8 @@ public partial class App : Application
             wizard.ShowDialog();
         }
 
-        // Show hooks onboarding if not yet seen
-        if (!settingsService.Settings.HooksOnboardingSeen && settingsService.Settings.HasCompletedSetup)
+        // Show hooks onboarding if hooks not enabled and not permanently dismissed
+        if (!settingsService.Settings.HooksEnabled && !settingsService.Settings.HooksOnboardingDismissed && settingsService.Settings.HasCompletedSetup)
         {
             var onboarding = new Views.HooksOnboardingWindow();
             onboarding.ShowDialog();

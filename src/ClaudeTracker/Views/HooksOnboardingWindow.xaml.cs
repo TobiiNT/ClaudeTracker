@@ -15,7 +15,16 @@ public partial class HooksOnboardingWindow : Window
 
         SkipButton.Click += (_, _) =>
         {
-            MarkSeen();
+            // Shows again next launch
+            Close();
+        };
+
+        DismissButton.Click += (_, _) =>
+        {
+            // Never shows again
+            var settingsService = App.Services.GetRequiredService<ISettingsService>();
+            settingsService.Settings.HooksOnboardingDismissed = true;
+            settingsService.Save();
             Close();
         };
 

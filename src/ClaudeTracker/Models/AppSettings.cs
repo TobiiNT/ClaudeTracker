@@ -76,6 +76,9 @@ public class AppSettings
     [JsonPropertyName("hooksOnboardingSeen")]
     public bool HooksOnboardingSeen { get; set; }
 
+    [JsonPropertyName("hooksOnboardingDismissed")]
+    public bool HooksOnboardingDismissed { get; set; }
+
     [JsonPropertyName("hooksEnabled")]
     public bool HooksEnabled { get; set; }
 

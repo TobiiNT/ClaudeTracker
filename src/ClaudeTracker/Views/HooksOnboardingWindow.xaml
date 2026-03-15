@@ -83,13 +83,19 @@
         </StackPanel>
 
         <!-- Buttons -->
-        <StackPanel x:Name="SetupButtons" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button x:Name="SkipButton" Content="Skip" Margin="0,0,12,0"
-                    Style="{StaticResource MaterialDesignFlatButton}"
-                    Height="36" FontSize="13" />
+        <StackPanel x:Name="SetupButtons" HorizontalAlignment="Center">
             <Button x:Name="SetupButton" Content="Enable &amp; Install"
                     Style="{StaticResource MaterialDesignRaisedButton}"
-                    Height="36" FontSize="13" />
+                    HorizontalAlignment="Center"
+                    Height="36" FontSize="13" Margin="0,0,0,8" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="SkipButton" Content="Skip"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Height="30" FontSize="11" Margin="0,0,8,0" />
+                <Button x:Name="DismissButton" Content="Don't show again"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Height="30" FontSize="11" />
+            </StackPanel>
         </StackPanel>
         <Button x:Name="DoneButton" Content="Done"
                 Style="{StaticResource MaterialDesignRaisedButton}"
