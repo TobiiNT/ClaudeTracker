@@ -149,7 +149,13 @@ internal static class Program
             if (responseDoc.RootElement.TryGetProperty("jsonOutput", out var jsonOutput) &&
                 jsonOutput.ValueKind != JsonValueKind.Null)
             {
-                Console.Write(jsonOutput.GetRawText());
+                // jsonOutput is a JSON string containing the response JSON —
+                // use GetString() to unwrap, not GetRawText() which includes quotes
+                var output = jsonOutput.ValueKind == JsonValueKind.String
+                    ? jsonOutput.GetString()
+                    : jsonOutput.GetRawText();
+                if (!string.IsNullOrEmpty(output))
+                    Console.Write(output);
             }
         }
         catch
