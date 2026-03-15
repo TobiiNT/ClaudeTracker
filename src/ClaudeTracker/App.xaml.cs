@@ -92,6 +92,7 @@ public partial class App : Application
             // Wire PermissionRequestHandler to show popup UI
             // Track pending popup TCS keyed by request ID so we can resolve on disconnect
             var pendingPopups = new System.Collections.Concurrent.ConcurrentDictionary<string, TaskCompletionSource<Models.HookResponse>>();
+            var popupOpenedAt = DateTime.MinValue;
 
             var permHandler = _services.GetServices<IHookEventHandler>()
                 .OfType<PermissionRequestHandler>().FirstOrDefault();
@@ -101,6 +102,7 @@ public partial class App : Application
                 {
                     // Track this TCS for disconnect auto-close
                     pendingPopups[args.Info.SessionId] = args.ResponseSource;
+                    popupOpenedAt = DateTime.UtcNow;
                     args.ResponseSource.Task.ContinueWith(_ =>
                     {
                         pendingPopups.TryRemove(args.Info.SessionId, out var _ignored);
@@ -130,7 +132,7 @@ public partial class App : Application
             // When pipe disconnects (user answered in terminal), close any pending popup
             hookIpcService.PipeDisconnected += (_, requestId) =>
             {
-                // Resolve all pending popups — the user answered in terminal
+                LoggingService.Instance.Log($"[Hooks] PipeDisconnected: closing {pendingPopups.Count} pending popup(s)");
                 foreach (var kvp in pendingPopups)
                 {
                     kvp.Value.TrySetResult(new Models.HookResponse
@@ -141,6 +143,41 @@ public partial class App : Application
                     });
                 }
                 pendingPopups.Clear();
+            };
+
+            // When a post-execution event arrives while a popup is pending, the user
+            // already answered in terminal and Claude Code moved on.
+            // Only close popups from the SAME session (other sessions shouldn't interfere).
+            hookIpcService.EventArrived += (_, evt) =>
+            {
+                if (pendingPopups.Count == 0) return;
+
+                // PostToolUse = tool executed (allowed), Stop = session ended,
+                // UserPromptSubmit = user sent next prompt (denied/completed)
+                if (evt.EventName is not ("PostToolUse" or "PostToolUseFailure"
+                    or "Stop" or "UserPromptSubmit"))
+                    return;
+
+                // Extract session_id from the event payload to match against pending popups
+                var evtSessionId = "";
+                try
+                {
+                    var payloadNode = System.Text.Json.Nodes.JsonNode.Parse(evt.Payload);
+                    evtSessionId = payloadNode?["session_id"]?.GetValue<string>() ?? "";
+                }
+                catch { }
+
+                // Only close popups from the same session
+                if (!string.IsNullOrEmpty(evtSessionId) && pendingPopups.TryRemove(evtSessionId, out var tcs))
+                {
+                    LoggingService.Instance.Log($"[Hooks] Event '{evt.EventName}' from session '{evtSessionId}' — auto-closing popup");
+                    tcs.TrySetResult(new Models.HookResponse
+                    {
+                        RequestId = evt.RequestId,
+                        Success = true,
+                        JsonOutput = null
+                    });
+                }
             };
 
             // Start stale session pruning timer
@@ -161,12 +198,17 @@ public partial class App : Application
                 if (e.NewItems == null) return;
                 foreach (Models.ActivityEntry entry in e.NewItems)
                 {
+                    // Suppress notifications while a permission popup is active
+                    if (pendingPopups.Count > 0)
+                        continue;
+
                     var prefs = settingsService.Settings.HookNotificationPreferences;
                     var shouldNotify = entry.EventName switch
                     {
                         "PostToolUseFailure" => prefs.GetValueOrDefault("toolError", true),
                         "Notification" when entry.RawPayload.Contains("permission_prompt") =>
-                            prefs.GetValueOrDefault("permission", true),
+                            !settingsService.Settings.HookPermissionPopupsEnabled
+                            && prefs.GetValueOrDefault("permission", true),
                         "Notification" when entry.RawPayload.Contains("idle_prompt") =>
                             prefs.GetValueOrDefault("idle", true),
                         "ConfigChange" => prefs.GetValueOrDefault("configChange", false),

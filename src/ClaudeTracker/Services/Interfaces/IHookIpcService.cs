@@ -11,4 +11,7 @@ public interface IHookIpcService : IDisposable
 
     /// <summary>Fired when a HookBridge client disconnects (user answered in terminal).</summary>
     event EventHandler<string>? PipeDisconnected;
+
+    /// <summary>Fired when any hook event is received, before dispatching. Used to detect stale popups.</summary>
+    event EventHandler<HookEvent>? EventArrived;
 }

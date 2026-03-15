@@ -502,6 +502,8 @@ public partial class PermissionRequestPopup : Window
         var answers = new Dictionary<string, object>();
         var questions = ParseAskQuestions(_info.ToolInput);
 
+        LoggingService.Instance.Log($"[PermPopup] BuildAskUserAnswers: {questions.Count} questions, selections={string.Join(",", _askSelections.Select(kv => $"q{kv.Key}:[{string.Join(",", kv.Value)}]"))}");
+
         for (int qIdx = 0; qIdx < questions.Count; qIdx++)
         {
             var q = questions[qIdx];
@@ -513,12 +515,14 @@ public partial class PermissionRequestPopup : Window
                 if (idx < q.Options.Count)
                 {
                     selectedLabels.Add(q.Options[idx].Label);
+                    LoggingService.Instance.Log($"[PermPopup] Q{qIdx}: selected option {idx} = '{q.Options[idx].Label}'");
                 }
                 else
                 {
                     // "Other" option
                     var textBox = _askOtherTextBoxes.GetValueOrDefault(qIdx);
                     var otherText = textBox?.Text?.Trim();
+                    LoggingService.Instance.Log($"[PermPopup] Q{qIdx}: Other option, textBox={textBox != null}, text='{otherText}'");
                     if (!string.IsNullOrEmpty(otherText))
                         selectedLabels.Add(otherText);
                 }
@@ -530,6 +534,8 @@ public partial class PermissionRequestPopup : Window
                 answers[key] = string.Join(", ", selectedLabels);
             else
                 answers[key] = selectedLabels.FirstOrDefault() ?? "";
+
+            LoggingService.Instance.Log($"[PermPopup] Q{qIdx}: answer['{key}'] = '{answers[key]}'");
         }
 
         // Return as the full updated tool input with answers merged

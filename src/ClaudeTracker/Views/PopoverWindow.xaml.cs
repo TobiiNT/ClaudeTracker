@@ -205,6 +205,13 @@ public partial class PopoverWindow : Window
             // Activity feed
             ActivityFeedCard.Visibility = _viewModel.ShowActivityFeed && _viewModel.ActivityFeed.Count > 0
                 ? Visibility.Visible : Visibility.Collapsed;
+            ActivityFeedList.Visibility = _viewModel.IsActivityFeedExpanded
+                ? Visibility.Visible : Visibility.Collapsed;
+            ActivityChevron.Kind = _viewModel.IsActivityFeedExpanded
+                ? MaterialDesignThemes.Wpf.PackIconKind.ChevronDown
+                : MaterialDesignThemes.Wpf.PackIconKind.ChevronRight;
+            ActivityCountText.Text = _viewModel.ActivityFeed.Count > 0
+                ? $"({_viewModel.ActivityFeed.Count})" : "";
 
             UpdateProgressBars();
         });
@@ -272,6 +279,16 @@ public partial class PopoverWindow : Window
                 "https://status.claude.com") { UseShellExecute = true });
         }
         catch { }
+    }
+
+    private void ActivityFeedHeader_Click(object sender, MouseButtonEventArgs e)
+    {
+        _viewModel.IsActivityFeedExpanded = !_viewModel.IsActivityFeedExpanded;
+        ActivityFeedList.Visibility = _viewModel.IsActivityFeedExpanded
+            ? Visibility.Visible : Visibility.Collapsed;
+        ActivityChevron.Kind = _viewModel.IsActivityFeedExpanded
+            ? MaterialDesignThemes.Wpf.PackIconKind.ChevronDown
+            : MaterialDesignThemes.Wpf.PackIconKind.ChevronRight;
     }
 
     private static SolidColorBrush BrushFromHex(string hex) => Utilities.BrushHelper.FromHex(hex);

@@ -215,13 +215,21 @@ public class PermissionRequestHandler : IHookEventHandler
                 break;
         }
 
-        // Include updated input if set
+        // Include updated input if set (use runtime types to avoid object serialization issues)
         if (result.UpdatedInput != null && result.UpdatedInput.Count > 0)
         {
             var updatedInputNode = new JsonObject();
             foreach (var kvp in result.UpdatedInput)
             {
-                updatedInputNode[kvp.Key] = JsonSerializer.SerializeToNode(kvp.Value);
+                if (kvp.Value == null)
+                {
+                    updatedInputNode[kvp.Key] = null;
+                }
+                else
+                {
+                    updatedInputNode[kvp.Key] = JsonSerializer.SerializeToNode(
+                        kvp.Value, kvp.Value.GetType());
+                }
             }
             decision["updatedInput"] = updatedInputNode;
         }

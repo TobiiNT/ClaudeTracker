@@ -28,6 +28,9 @@ public class HookIpcService : IHookIpcService
     /// <summary>Fired when a HookBridge client disconnects (user answered in terminal).</summary>
     public event EventHandler<string>? PipeDisconnected;
 
+    /// <summary>Fired when any hook event is received, before dispatching.</summary>
+    public event EventHandler<HookEvent>? EventArrived;
+
     private void OnPipeDisconnected(string requestId)
     {
         PipeDisconnected?.Invoke(this, requestId);
@@ -139,6 +142,10 @@ public class HookIpcService : IHookIpcService
         }
 
         LoggingService.Instance.Log($"[HookIpc] Received event: {evt.EventName} (requestId={evt.RequestId})");
+
+        // Notify that an event arrived (used to close stale popups)
+        try { EventArrived?.Invoke(this, evt); }
+        catch (Exception ex) { LoggingService.Instance.LogError("[HookIpc] EventArrived handler error", ex); }
 
         // 2. Build default response
         var defaultResponse = new HookResponse

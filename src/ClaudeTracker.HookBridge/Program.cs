@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -11,6 +12,24 @@ internal static class Program
     // --- Constants ---
     private const int ConnectionTimeoutMs = 3000;
     private const int ResponseTimeoutMs = 310_000;
+
+    // --- Win32 interop for parent process monitoring ---
+    [DllImport("ntdll.dll")]
+    private static extern int NtQueryInformationProcess(
+        IntPtr hProcess, int processInformationClass,
+        ref PROCESS_BASIC_INFORMATION pbi, int processInformationLength,
+        out int returnLength);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct PROCESS_BASIC_INFORMATION
+    {
+        public IntPtr Reserved1;
+        public IntPtr PebBaseAddress;
+        public IntPtr Reserved2_0;
+        public IntPtr Reserved2_1;
+        public IntPtr UniqueProcessId;
+        public IntPtr InheritedFromUniqueProcessId;
+    }
 
     private static string PipeName => $"ClaudeTracker-Hooks-{Environment.UserName}";
 
@@ -74,6 +93,9 @@ internal static class Program
     // --- Hook Event Relay ---
     private static async Task<int> HandleHookEvent()
     {
+        // Monitor parent process (bash) — exit if it dies so the pipe disconnects
+        MonitorParentProcess();
+
         // 1. Read all stdin
         var rawInput = await Console.In.ReadToEndAsync();
         if (string.IsNullOrWhiteSpace(rawInput))
@@ -408,6 +430,65 @@ internal static class Program
         Console.WriteLine("  ClaudeTracker.HookBridge uninstall    Remove ClaudeTracker hooks from settings");
         Console.WriteLine("  ClaudeTracker.HookBridge status       Check installation and connection status");
         Console.WriteLine("  ClaudeTracker.HookBridge help         Show this help message");
+    }
+
+    // --- Parent Process Monitor ---
+    /// <summary>
+    /// Monitors the parent process (typically bash spawned by Claude Code).
+    /// When the parent exits, this process exits too — ensuring the named pipe
+    /// disconnects and ClaudeTracker can detect the user answered in terminal.
+    /// </summary>
+    private static void MonitorParentProcess()
+    {
+        try
+        {
+            var parentPid = GetParentProcessId();
+            if (parentPid <= 0) return;
+
+            var parent = Process.GetProcessById(parentPid);
+            if (parent.HasExited)
+            {
+                Environment.Exit(0);
+                return;
+            }
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await parent.WaitForExitAsync();
+                    // Parent died — exit so pipe disconnects
+                    Environment.Exit(0);
+                }
+                catch
+                {
+                    // Process already exited or access denied
+                }
+            });
+        }
+        catch
+        {
+            // Non-critical — just means we can't monitor parent
+        }
+    }
+
+    private static int GetParentProcessId()
+    {
+        try
+        {
+            using var current = Process.GetCurrentProcess();
+            var pbi = new PROCESS_BASIC_INFORMATION();
+            int status = NtQueryInformationProcess(
+                current.Handle, 0, ref pbi,
+                Marshal.SizeOf(pbi), out _);
+            return status == 0
+                ? pbi.InheritedFromUniqueProcessId.ToInt32()
+                : -1;
+        }
+        catch
+        {
+            return -1;
+        }
     }
 
     // --- Helpers ---

@@ -61,6 +61,7 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private int _activeSessionCount;
     [ObservableProperty] private bool _hasActiveSessions;
     [ObservableProperty] private bool _showActivityFeed;
+    [ObservableProperty] private bool _isActivityFeedExpanded = true;
 
     public ObservableCollection<Profile> Profiles { get; } = new();
     public ObservableCollection<SessionState> ActiveSessions { get; } = new();

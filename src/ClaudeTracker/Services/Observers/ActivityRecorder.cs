@@ -24,6 +24,9 @@ public class ActivityRecorder : IHookEventObserver
         var json = TryParse(evt.Payload);
         var sessionId = json?["session_id"]?.GetValue<string>() ?? "";
 
+        var cwd = json?["cwd"]?.GetValue<string>() ?? "";
+        var projectName = string.IsNullOrEmpty(cwd) ? "" : System.IO.Path.GetFileName(cwd) ?? cwd;
+
         var entry = new ActivityEntry
         {
             SessionId = sessionId,
@@ -32,6 +35,7 @@ public class ActivityRecorder : IHookEventObserver
             Summary = BuildSummary(evt.EventName, json),
             Icon = GetIcon(evt.EventName),
             ToolName = GetToolName(evt.EventName, json),
+            ProjectName = projectName,
             RawPayload = evt.Payload
         };
 
