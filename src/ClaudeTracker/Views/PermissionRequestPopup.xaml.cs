@@ -266,7 +266,7 @@ public partial class PermissionRequestPopup : Window
                     Cursor = Cursors.Hand
                 };
 
-                var optionStack = new StackPanel();
+                var optionStack = new StackPanel { IsHitTestVisible = false };
                 optionStack.Children.Add(new TextBlock
                 {
                     Text = opt.Label,
@@ -288,7 +288,7 @@ public partial class PermissionRequestPopup : Window
 
                 optionBorder.Child = optionStack;
 
-                optionBorder.MouseLeftButtonDown += (_, _) =>
+                optionBorder.PreviewMouseLeftButtonDown += (_, _) =>
                 {
                     ToggleAskOption(questionIndex, optionIndex, optionBorder);
                 };
@@ -316,7 +316,8 @@ public partial class PermissionRequestPopup : Window
                     Text = "Other...",
                     FontSize = 11,
                     Foreground = new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xCC)),
-                    FontWeight = FontWeights.Medium
+                    FontWeight = FontWeights.Medium,
+                    IsHitTestVisible = false
                 });
 
                 var otherTextBox = new TextBox
@@ -348,8 +349,12 @@ public partial class PermissionRequestPopup : Window
                     }
                 };
 
-                otherBorder.MouseLeftButtonDown += (_, _) =>
+                otherBorder.PreviewMouseLeftButtonDown += (_, e) =>
                 {
+                    // Don't toggle when clicking inside the TextBox
+                    if (e.OriginalSource is System.Windows.Controls.Primitives.TextBoxBase)
+                        return;
+
                     ToggleAskOption(questionIndex, otherIndex, otherBorder);
                     otherTextBox.Visibility = _askSelections[questionIndex].Contains(otherIndex)
                         ? Visibility.Visible
