@@ -10,6 +10,7 @@
         <Border.Effect>
             <DropShadowEffect ShadowDepth="3" Opacity="0.4" BlurRadius="16" Direction="270" />
         </Border.Effect>
+        <ScrollViewer MaxHeight="600" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
             <!-- Header -->
             <DockPanel Margin="0,0,0,10">
@@ -25,7 +26,9 @@
             <Border Background="#1E1E1E" CornerRadius="6" Padding="10,8" Margin="0,0,0,10">
                 <StackPanel>
                     <TextBlock x:Name="ToolNameText" FontSize="12" FontWeight="SemiBold" Foreground="#BB86FC" Margin="0,0,0,4" />
-                    <TextBlock x:Name="ToolInputText" FontSize="11" Foreground="#CCCCCC" TextWrapping="Wrap" MaxHeight="120" FontFamily="Consolas" />
+                    <ScrollViewer MaxHeight="120" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <TextBlock x:Name="ToolInputText" FontSize="11" Foreground="#CCCCCC" TextWrapping="Wrap" FontFamily="Consolas" />
+                    </ScrollViewer>
                 </StackPanel>
             </Border>
             <!-- Diff panel (Edit tool) -->
@@ -150,5 +153,6 @@
                 </DockPanel>
             </StackPanel>
         </StackPanel>
+        </ScrollViewer>
     </Border>
 </Window>
