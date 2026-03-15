@@ -14,6 +14,7 @@ public partial class HooksSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _hooksEnabled;
     [ObservableProperty] private bool _permissionPopupsEnabled;
     [ObservableProperty] private bool _elicitationPopupsEnabled;
+    [ObservableProperty] private string _popupPosition = "BottomRight";
     [ObservableProperty] private bool _activityFeedEnabled;
     [ObservableProperty] private int _maxFeedEntries;
     [ObservableProperty] private bool _notifyStop;
@@ -33,6 +34,7 @@ public partial class HooksSettingsViewModel : ObservableObject
     private bool _initialHooksEnabled;
     private bool _initialPermissionPopups;
     private bool _initialElicitationPopups;
+    private string _initialPopupPosition = "BottomRight";
     private bool _initialActivityFeed;
     private int _initialMaxFeedEntries;
     private bool _initialNotifyStop;
@@ -58,6 +60,7 @@ public partial class HooksSettingsViewModel : ObservableObject
         HooksEnabled = settings.HooksEnabled;
         PermissionPopupsEnabled = settings.HookPermissionPopupsEnabled;
         ElicitationPopupsEnabled = settings.HookElicitationPopupsEnabled;
+        PopupPosition = settings.HookPopupPosition;
         ActivityFeedEnabled = settings.HookActivityFeedEnabled;
         MaxFeedEntries = settings.HookMaxFeedEntries;
 
@@ -74,6 +77,7 @@ public partial class HooksSettingsViewModel : ObservableObject
         _initialHooksEnabled = HooksEnabled;
         _initialPermissionPopups = PermissionPopupsEnabled;
         _initialElicitationPopups = ElicitationPopupsEnabled;
+        _initialPopupPosition = PopupPosition;
         _initialActivityFeed = ActivityFeedEnabled;
         _initialMaxFeedEntries = MaxFeedEntries;
         _initialNotifyStop = NotifyStop;
@@ -114,6 +118,7 @@ public partial class HooksSettingsViewModel : ObservableObject
     partial void OnHooksEnabledChanged(bool value) => DetectChanges();
     partial void OnPermissionPopupsEnabledChanged(bool value) => DetectChanges();
     partial void OnElicitationPopupsEnabledChanged(bool value) => DetectChanges();
+    partial void OnPopupPositionChanged(string value) => DetectChanges();
     partial void OnActivityFeedEnabledChanged(bool value) => DetectChanges();
     partial void OnMaxFeedEntriesChanged(int value) => DetectChanges();
     partial void OnNotifyStopChanged(bool value) => DetectChanges();
@@ -131,6 +136,7 @@ public partial class HooksSettingsViewModel : ObservableObject
             HooksEnabled != _initialHooksEnabled ||
             PermissionPopupsEnabled != _initialPermissionPopups ||
             ElicitationPopupsEnabled != _initialElicitationPopups ||
+            PopupPosition != _initialPopupPosition ||
             ActivityFeedEnabled != _initialActivityFeed ||
             MaxFeedEntries != _initialMaxFeedEntries ||
             NotifyStop != _initialNotifyStop ||
@@ -151,6 +157,7 @@ public partial class HooksSettingsViewModel : ObservableObject
         settings.HooksEnabled = HooksEnabled;
         settings.HookPermissionPopupsEnabled = PermissionPopupsEnabled;
         settings.HookElicitationPopupsEnabled = ElicitationPopupsEnabled;
+        settings.HookPopupPosition = PopupPosition;
         settings.HookActivityFeedEnabled = ActivityFeedEnabled;
         settings.HookMaxFeedEntries = MaxFeedEntries;
 
@@ -185,6 +192,7 @@ public partial class HooksSettingsViewModel : ObservableObject
         _initialHooksEnabled = HooksEnabled;
         _initialPermissionPopups = PermissionPopupsEnabled;
         _initialElicitationPopups = ElicitationPopupsEnabled;
+        _initialPopupPosition = PopupPosition;
         _initialActivityFeed = ActivityFeedEnabled;
         _initialMaxFeedEntries = MaxFeedEntries;
         _initialNotifyStop = NotifyStop;
