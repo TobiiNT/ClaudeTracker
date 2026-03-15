@@ -170,6 +170,7 @@ public static class Constants
             public const string OldString = "old_string";
             public const string NewString = "new_string";
             public const string Content = "content";
+            public const string Prompt = "prompt";
         }
 
         // ── Hook Response Fields ──

@@ -704,7 +704,8 @@ public partial class PermissionRequestPopup : Window
         return toolName switch
         {
             Tools.Bash => GetStringValue(toolInput, Fields.Description),
-            Tools.Write => string.Empty,
+            Tools.WebFetch => GetStringValue(toolInput, Fields.Prompt),
+            Tools.WebSearch => GetStringValue(toolInput, Fields.Query),
             _ => string.Empty
         };
     }

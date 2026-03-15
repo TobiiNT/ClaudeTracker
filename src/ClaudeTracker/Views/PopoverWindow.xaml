@@ -266,7 +266,7 @@
                     <Border x:Name="ActivityFeedCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
                         <StackPanel>
                             <!-- Clickable header to toggle collapse -->
-                            <Grid Margin="0,0,0,2" Cursor="Hand"
+                            <Grid Margin="0,2,0,2" Cursor="Hand"
                                   MouseLeftButtonDown="ActivityFeedHeader_Click">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />

@@ -64,8 +64,9 @@ public partial class HooksSettingsView : UserControl
 
         // Activity feed
         ActivityFeedToggle.IsChecked = _vm.ActivityFeedEnabled;
-        ActivityFeedToggle.Checked += (_, _) => _vm.ActivityFeedEnabled = true;
-        ActivityFeedToggle.Unchecked += (_, _) => _vm.ActivityFeedEnabled = false;
+        MaxFeedPanel.Visibility = _vm.ActivityFeedEnabled ? Visibility.Visible : Visibility.Collapsed;
+        ActivityFeedToggle.Checked += (_, _) => { _vm.ActivityFeedEnabled = true; MaxFeedPanel.Visibility = Visibility.Visible; };
+        ActivityFeedToggle.Unchecked += (_, _) => { _vm.ActivityFeedEnabled = false; MaxFeedPanel.Visibility = Visibility.Collapsed; };
 
         // Clear activity feed
         ClearFeedButton.Click += (_, _) =>

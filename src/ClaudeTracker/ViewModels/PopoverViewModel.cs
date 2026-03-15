@@ -130,6 +130,9 @@ public partial class PopoverViewModel : ObservableObject
 
     public void RefreshData()
     {
+        // Re-read activity feed setting (may have changed in settings)
+        ShowActivityFeed = _settingsService.Settings.HookActivityFeedEnabled;
+
         var profile = _profileService.ActiveProfile;
         if (profile == null) return;
 
