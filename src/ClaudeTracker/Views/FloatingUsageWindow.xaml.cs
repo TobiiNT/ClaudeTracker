@@ -49,6 +49,20 @@ public partial class FloatingUsageWindow : Window
         _isDocked = _settingsService.Settings.IsFloatingWidgetDocked;
         UpdateDockVisual();
 
+        // Refresh "Updated X ago" text every 30 seconds
+        var lastUpdatedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+        lastUpdatedTimer.Tick += (_, _) =>
+        {
+            if (_viewModel.HasClaudeUsage && !_viewModel.IsRefreshing)
+            {
+                var profile = App.Services.GetRequiredService<Services.Interfaces.IProfileService>().ActiveProfile;
+                var usage = profile?.ClaudeUsage;
+                if (usage != null)
+                    LastUpdatedText.Text = $"Updated {Utilities.FormatterHelper.FormatTimeAgo(usage.LastUpdated)}";
+            }
+        };
+        lastUpdatedTimer.Start();
+
         UpdateUI();
     }
 
