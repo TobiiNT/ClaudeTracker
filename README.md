@@ -16,7 +16,7 @@
   <img src="docs/widget.png" width="280" alt="Floating widget" />
 </p>
 
-### [⬇️ Download Latest Release (v1.2.0)](https://github.com/TobiiNT/ClaudeTracker/releases/latest)
+### [⬇️ Download Latest Release](https://github.com/TobiiNT/ClaudeTracker/releases/latest)
 > **Note**: Windows may show a SmartScreen warning on first run. Click "More info" → "Run anyway" — this is expected for unsigned apps.
 ---
 
