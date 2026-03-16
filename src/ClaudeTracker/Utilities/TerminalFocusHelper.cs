@@ -25,6 +25,9 @@ public static class TerminalFocusHelper
     private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
     [DllImport("user32.dll")]
+    private static extern bool IsIconic(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
     private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
@@ -71,7 +74,9 @@ public static class TerminalFocusHelper
 
         if (found != IntPtr.Zero)
         {
-            ShowWindow(found, 9); // SW_RESTORE
+            // Only restore if minimized — otherwise just bring to front without resizing
+            if (IsIconic(found))
+                ShowWindow(found, 9); // SW_RESTORE
             SetForegroundWindow(found);
         }
     }

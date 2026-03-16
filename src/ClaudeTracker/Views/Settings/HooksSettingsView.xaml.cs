@@ -42,6 +42,15 @@ public partial class HooksSettingsView : UserControl
                 _vm.PopupPosition = v.Replace(" ", "");
         };
 
+        // Popup monitor
+        var monitorNames = Utilities.PopupStackManager.GetMonitorNames();
+        PopupMonitorCombo.ItemsSource = monitorNames;
+        PopupMonitorCombo.SelectedIndex = Math.Min(_vm.PopupMonitor, monitorNames.Length - 1);
+        PopupMonitorCombo.SelectionChanged += (_, _) =>
+        {
+            _vm.PopupMonitor = PopupMonitorCombo.SelectedIndex;
+        };
+
         // Notifications
         NotifyStopToggle.IsChecked = _vm.NotifyStop;
         NotifyStopToggle.Checked += (_, _) => _vm.NotifyStop = true;

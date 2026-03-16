@@ -40,15 +40,21 @@ public partial class NotificationPopup : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Position at bottom-right of work area
-        var workArea = SystemParameters.WorkArea;
-        Left = workArea.Right - ActualWidth - 16;
-        Top = workArea.Bottom - ActualHeight - 16;
+        // Position using configured monitor + position
+        var workArea = Utilities.PopupStackManager.GetWorkArea();
+        var pos = Utilities.PopupStackManager.GetPosition();
+        Left = pos.Contains("Left")
+            ? workArea.Left + 16
+            : workArea.Right - ActualWidth - 16;
+        Top = pos.Contains("Bottom")
+            ? workArea.Bottom - ActualHeight - 16
+            : workArea.Top + 16;
 
         // Slide-in animation
+        var isBottom = pos.Contains("Bottom");
         var slideAnim = new DoubleAnimation
         {
-            From = Top + 40,
+            From = isBottom ? Top + 40 : Top - 40,
             To = Top,
             Duration = TimeSpan.FromMilliseconds(250),
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }

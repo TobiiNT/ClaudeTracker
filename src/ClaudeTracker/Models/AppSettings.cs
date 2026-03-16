@@ -82,6 +82,9 @@ public class AppSettings
     [JsonPropertyName("hookPopupPosition")]
     public string HookPopupPosition { get; set; } = "BottomRight";
 
+    [JsonPropertyName("hookPopupMonitor")]
+    public int HookPopupMonitor { get; set; } = 0;
+
     [JsonPropertyName("hooksEnabled")]
     public bool HooksEnabled { get; set; }
 

@@ -22,14 +22,62 @@ public static class PopupStackManager
         try
         {
             var settings = App.Services.GetRequiredService<ISettingsService>();
-            return settings.Settings.HookPopupPosition ?? "TopRight";
+            return settings.Settings.HookPopupPosition ?? "BottomRight";
         }
         catch { return "BottomRight"; }
     }
 
+    /// <summary>Returns the work area for the configured monitor (WPF device-independent units).</summary>
+    public static Rect GetWorkArea()
+    {
+        try
+        {
+            var settings = App.Services.GetRequiredService<ISettingsService>();
+            var monitorIndex = settings.Settings.HookPopupMonitor;
+
+            var screens = System.Windows.Forms.Screen.AllScreens;
+            if (monitorIndex >= 0 && monitorIndex < screens.Length)
+            {
+                var screen = screens[monitorIndex];
+                var wa = screen.WorkingArea;
+                // Convert from physical pixels to WPF device-independent units
+                var dpi = GetDpiScale();
+                return new Rect(wa.X / dpi, wa.Y / dpi, wa.Width / dpi, wa.Height / dpi);
+            }
+        }
+        catch { /* fall through */ }
+
+        return SystemParameters.WorkArea; // primary monitor fallback
+    }
+
+    /// <summary>Returns the list of monitor display names for settings UI.</summary>
+    public static string[] GetMonitorNames()
+    {
+        var screens = System.Windows.Forms.Screen.AllScreens;
+        var names = new string[screens.Length];
+        for (int i = 0; i < screens.Length; i++)
+        {
+            var s = screens[i];
+            names[i] = s.Primary ? $"Monitor {i + 1} (Primary)" : $"Monitor {i + 1}";
+        }
+        return names;
+    }
+
+    private static double GetDpiScale()
+    {
+        try
+        {
+            var source = PresentationSource.FromVisual(Application.Current.MainWindow);
+            if (source?.CompositionTarget != null)
+                return source.CompositionTarget.TransformToDevice.M11;
+        }
+        catch { /* fall through */ }
+        return 1.0;
+    }
+
     public static void PositionWindow(Window popup)
     {
-        var workArea = SystemParameters.WorkArea;
+        var workArea = GetWorkArea();
         var pos = GetPosition();
 
         popup.Left = pos.Contains("Left")
@@ -43,7 +91,7 @@ public static class PopupStackManager
 
     public static void RepositionAll()
     {
-        var workArea = SystemParameters.WorkArea;
+        var workArea = GetWorkArea();
         var pos = GetPosition();
         var isBottom = pos.Contains("Bottom");
         var isLeft = pos.Contains("Left");

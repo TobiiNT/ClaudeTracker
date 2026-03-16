@@ -354,14 +354,14 @@ public partial class PermissionRequestPopup : Window
                 var otherTextBox = new TextBox
                 {
                     FontSize = 11,
-                    Background = new SolidColorBrush(Color.FromRgb(0x1E, 0x1E, 0x1E)),
-                    Foreground = new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xCC)),
-                    BorderBrush = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)),
+                    Background = SurfaceBrush,
+                    Foreground = FgBrush,
+                    BorderBrush = FgLightBrush,
                     BorderThickness = new Thickness(1),
                     Padding = new Thickness(4, 2, 4, 2),
                     Margin = new Thickness(0, 4, 0, 0),
                     Visibility = Visibility.Collapsed,
-                    CaretBrush = new SolidColorBrush(Colors.White)
+                    CaretBrush = FgBrush
                 };
                 otherStack.Children.Add(otherTextBox);
 
