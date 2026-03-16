@@ -108,12 +108,24 @@ public partial class PopoverViewModel : ObservableObject
 
         activityService.RecentFeed.CollectionChanged += (_, _) =>
         {
+            // Don't track new events if feed is disabled
+            if (!_settingsService.Settings.HookActivityFeedEnabled) return;
             System.Windows.Application.Current?.Dispatcher.Invoke(() =>
             {
                 ActivityFeed.Clear();
                 foreach (var e in activityService.RecentFeed)
                     ActivityFeed.Add(e);
             });
+        };
+
+        // Listen for settings changes to update feed visibility immediately
+        settingsService.SettingsChanged += (_, _) =>
+        {
+            ShowActivityFeed = settingsService.Settings.HookActivityFeedEnabled;
+            if (!ShowActivityFeed)
+            {
+                System.Windows.Application.Current?.Dispatcher.Invoke(() => ActivityFeed.Clear());
+            }
         };
 
         ShowActivityFeed = settingsService.Settings.HookActivityFeedEnabled;
@@ -165,28 +177,40 @@ public partial class PopoverViewModel : ObservableObject
             WeeklyResetText = FormatResetText(usage.WeeklyResetTime, timeDisplay, use24Hour);
             WeeklyStatus = UsageStatusCalculator.CalculateStatus(usage.WeeklyPercentage, showRemaining);
 
-            // Pace calculation
+            // Pace calculation — hide when at limit (100%)
             TimeSpan? sessionEta = null;
-            var sessionElapsed = PaceStatusCalculator.CalculateSessionElapsed(usage.SessionResetTime);
-            SessionElapsedFraction = sessionElapsed;
-            SessionPaceStatus = PaceStatusCalculator.Calculate(usage.EffectiveSessionPercentage, sessionElapsed);
-            if (SessionPaceStatus.HasValue)
+            if (usage.EffectiveSessionPercentage >= 99.5)
             {
-                SessionPaceLabel = FormatPaceLabel(SessionPaceStatus.Value);
-                SessionPaceColorHex = PaceStatusCalculator.GetColorHex(SessionPaceStatus.Value);
-                sessionEta = PaceStatusCalculator.EstimateTimeToLimit(
-                    usage.EffectiveSessionPercentage, sessionElapsed, usage.SessionResetTime);
-                var sessionWillExceed = PaceStatusCalculator.WillExceedBeforeReset(sessionEta, usage.SessionResetTime);
-                SessionEstimateText = ShouldShowEstimateInline(SessionPaceStatus.Value, sessionWillExceed)
-                    ? FormatEstimate(sessionEta) : "";
-                SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta,
-                    usage.SessionResetTime, isWeekly: false);
+                // At limit — show critical indicator, hide pace estimate
+                SessionPaceLabel = "Limit reached";
+                SessionPaceColorHex = "#F44336";
+                SessionEstimateText = "";
+                SessionPaceTooltip = $"Usage limit reached. Resets at {usage.SessionResetTime:HH:mm}";
+                SessionPaceStatus = null;
             }
             else
             {
-                SessionPaceLabel = "";
-                SessionPaceTooltip = "";
-                SessionEstimateText = "";
+                var sessionElapsed = PaceStatusCalculator.CalculateSessionElapsed(usage.SessionResetTime);
+                SessionElapsedFraction = sessionElapsed;
+                SessionPaceStatus = PaceStatusCalculator.Calculate(usage.EffectiveSessionPercentage, sessionElapsed);
+                if (SessionPaceStatus.HasValue)
+                {
+                    SessionPaceLabel = FormatPaceLabel(SessionPaceStatus.Value);
+                    SessionPaceColorHex = PaceStatusCalculator.GetColorHex(SessionPaceStatus.Value);
+                    sessionEta = PaceStatusCalculator.EstimateTimeToLimit(
+                        usage.EffectiveSessionPercentage, sessionElapsed, usage.SessionResetTime);
+                    var sessionWillExceed = PaceStatusCalculator.WillExceedBeforeReset(sessionEta, usage.SessionResetTime);
+                    SessionEstimateText = ShouldShowEstimateInline(SessionPaceStatus.Value, sessionWillExceed)
+                        ? FormatEstimate(sessionEta) : "";
+                    SessionPaceTooltip = FormatPaceTooltip(SessionPaceStatus.Value, sessionEta,
+                        usage.SessionResetTime, isWeekly: false);
+                }
+                else
+                {
+                    SessionPaceLabel = "";
+                    SessionPaceTooltip = "";
+                    SessionEstimateText = "";
+                }
             }
 
             var weeklyElapsed = PaceStatusCalculator.CalculateWeeklyElapsed(usage.WeeklyResetTime);

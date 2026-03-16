@@ -13,6 +13,7 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     private readonly INotificationService _notificationService;
     private readonly IClaudeStatusService _statusService;
     private DispatcherTimer? _timer;
+    private DispatcherTimer? _resetTimer;
     private ClaudeStatus _cachedStatus = ClaudeStatus.Unknown;
     private DateTime _lastStatusFetch = DateTime.MinValue;
     private bool _isRefreshing;
@@ -110,6 +111,9 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
                 var usage = await _apiService.FetchUsageData();
                 _profileService.UpdateUsageData(profile.Id, claudeUsage: usage);
                 _notificationService.CheckAndNotify(profile, usage);
+
+                // Schedule auto-refresh when session resets (limit lifts)
+                ScheduleResetRefresh(usage.SessionResetTime);
             }
 
             _notificationService.CheckKeyExpiry(profile);
@@ -147,6 +151,25 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
         {
             _isRefreshing = false;
         }
+    }
+
+    private void ScheduleResetRefresh(DateTime resetTime)
+    {
+        var delay = resetTime - DateTime.UtcNow;
+        if (delay.TotalSeconds <= 0 || delay.TotalHours > 6) return; // already passed or too far out
+
+        // Cancel any existing reset timer
+        _resetTimer?.Stop();
+
+        _resetTimer = new DispatcherTimer { Interval = delay + TimeSpan.FromSeconds(2) }; // 2s buffer
+        _resetTimer.Tick += async (_, _) =>
+        {
+            _resetTimer?.Stop();
+            LoggingService.Instance.Log("Session reset time reached — auto-refreshing");
+            await RefreshAsync();
+        };
+        _resetTimer.Start();
+        LoggingService.Instance.Log($"Scheduled auto-refresh at session reset ({resetTime:HH:mm:ss} UTC)");
     }
 
     private async void OnPowerModeChanged(object sender, Microsoft.Win32.PowerModeChangedEventArgs e)

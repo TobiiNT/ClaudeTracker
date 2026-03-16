@@ -35,14 +35,15 @@ public class StopHandler : IHookEventHandler
             var prefs = _settingsService.Settings.HookNotificationPreferences;
             if (prefs.TryGetValue("stop", out var enabled) && enabled)
             {
-                var projectName = ParseProjectName(evt.Payload);
+                var cwd = ParseCwd(evt.Payload);
+                var projectName = string.IsNullOrEmpty(cwd) ? "" : Path.GetFileName(cwd) ?? cwd;
                 var title = "Task Complete";
                 var message = string.IsNullOrEmpty(projectName)
                     ? "Claude Code has finished processing."
                     : $"Claude Code has finished processing in {projectName}.";
 
                 ((NotificationService)_notificationService).SendNotification(
-                    title, message, NotificationPopup.NotificationLevel.Info);
+                    title, message, NotificationPopup.NotificationLevel.Info, cwd: cwd);
 
                 LoggingService.Instance.Log($"StopHandler: Sent completion notification for project '{projectName}'");
             }
@@ -60,7 +61,7 @@ public class StopHandler : IHookEventHandler
         });
     }
 
-    private static string ParseProjectName(string payload)
+    private static string ParseCwd(string payload)
     {
         if (string.IsNullOrWhiteSpace(payload))
             return string.Empty;
@@ -68,12 +69,7 @@ public class StopHandler : IHookEventHandler
         try
         {
             var node = JsonNode.Parse(payload);
-            var cwd = node?[Fields.Cwd]?.GetValue<string>();
-
-            if (string.IsNullOrEmpty(cwd))
-                return string.Empty;
-
-            return Path.GetFileName(cwd) ?? cwd;
+            return node?[Fields.Cwd]?.GetValue<string>() ?? string.Empty;
         }
         catch
         {

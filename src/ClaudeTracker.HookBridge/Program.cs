@@ -36,17 +36,26 @@ internal static class Program
     private static string ClaudeSettingsPath =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude", "settings.json");
 
-    private static readonly string[] AllEvents =
+    // Pre-v2.1.37: core hook events (existed from early hooks support)
+    private static readonly string[] CoreEvents =
     {
         "PreToolUse", "PostToolUse", "PostToolUseFailure",
         "PermissionRequest", "Notification", "Stop",
         "SessionStart", "SessionEnd", "UserPromptSubmit",
         "SubagentStart", "SubagentStop",
-        "PreCompact", "PostCompact",
-        "WorktreeCreate", "WorktreeRemove",
-        "InstructionsLoaded", "ConfigChange",
-        "Elicitation", "ElicitationResult",
         "TeammateIdle", "TaskCompleted"
+    };
+
+    // Version-gated events with the version they were introduced
+    private static readonly (string Event, int Major, int Minor, int Patch)[] VersionedEvents =
+    {
+        ("ConfigChange",      2, 1, 49),
+        ("WorktreeCreate",    2, 1, 50),
+        ("WorktreeRemove",    2, 1, 50),
+        ("InstructionsLoaded",2, 1, 69),
+        ("PostCompact",       2, 1, 76),
+        ("Elicitation",       2, 1, 76),
+        ("ElicitationResult", 2, 1, 76),
     };
 
     private static readonly HashSet<string> AsyncEvents = new()
@@ -190,6 +199,69 @@ internal static class Program
         return 0;
     }
 
+    private static string? DetectClaudeCodeVersion()
+    {
+        try
+        {
+            var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = "claude",
+                Arguments = "--version",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            });
+            if (process == null) return null;
+            var output = process.StandardOutput.ReadToEnd().Trim();
+            process.WaitForExit(3000);
+            return output;
+        }
+        catch { return null; }
+    }
+
+    private static bool VersionAtLeast(int major, int minor, int patch, int reqMajor, int reqMinor, int reqPatch)
+    {
+        if (major != reqMajor) return major > reqMajor;
+        if (minor != reqMinor) return minor > reqMinor;
+        return patch >= reqPatch;
+    }
+
+    private static string[] GetSupportedEvents()
+    {
+        var version = DetectClaudeCodeVersion();
+        var events = new List<string>(CoreEvents);
+
+        if (version == null)
+        {
+            Console.WriteLine("  Could not detect Claude Code version — installing core events only");
+            return events.ToArray();
+        }
+
+        Console.WriteLine($"  Claude Code version: {version}");
+
+        try
+        {
+            var parts = version.Split('.');
+            if (parts.Length >= 3 && int.TryParse(parts[0], out var major)
+                && int.TryParse(parts[1], out var minor)
+                && int.TryParse(parts[2], out var patch))
+            {
+                foreach (var (evt, reqMajor, reqMinor, reqPatch) in VersionedEvents)
+                {
+                    if (VersionAtLeast(major, minor, patch, reqMajor, reqMinor, reqPatch))
+                        events.Add(evt);
+                    else
+                        Console.WriteLine($"  Skipping {evt} (requires v{reqMajor}.{reqMinor}.{reqPatch})");
+                }
+                return events.ToArray();
+            }
+        }
+        catch { /* fall through */ }
+
+        Console.WriteLine("  Could not parse version — installing core events only");
+        return events.ToArray();
+    }
+
     // --- Install ---
     private static int Install()
     {
@@ -228,8 +300,10 @@ internal static class Program
                 settings["hooks"] = hooksObj;
             }
 
+            var eventsToInstall = GetSupportedEvents();
+
             // Register each event — preserve existing hooks from other tools
-            foreach (var eventName in AllEvents)
+            foreach (var eventName in eventsToInstall)
             {
                 var hookConfig = new JsonObject
                 {
@@ -294,7 +368,7 @@ internal static class Program
             Console.WriteLine($"ClaudeTracker hooks installed successfully.");
             Console.WriteLine($"  Settings: {settingsPath}");
             Console.WriteLine($"  Bridge:   {exePath}");
-            Console.WriteLine($"  Events:   {AllEvents.Length} registered");
+            Console.WriteLine($"  Events:   {eventsToInstall.Length} registered");
             return 0;
         }
         catch (Exception ex)

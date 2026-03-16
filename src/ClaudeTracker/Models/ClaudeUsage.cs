@@ -58,6 +58,10 @@ public class ClaudeUsage
     [JsonPropertyName("costCurrency")]
     public string? CostCurrency { get; set; }
 
+    /// <summary>Error message if cost data fetch failed (e.g., no permission in org).</summary>
+    [JsonIgnore]
+    public string? CostFetchError { get; set; }
+
     // Metadata
     [JsonPropertyName("lastUpdated")]
     public DateTime LastUpdated { get; set; }
