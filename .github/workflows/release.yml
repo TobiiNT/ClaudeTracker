@@ -108,7 +108,6 @@ jobs:
           Compress-Archive -Path ./publish-hookbridge-framework-dependent/* -DestinationPath ./HookBridge-${{ github.ref_name }}-framework-dependent-win-x64.zip
 
       - name: Generate release notes from merged PR
-        id: release_notes
         shell: bash
         run: |
           # Find the PR that was merged for this tag's commit
@@ -116,22 +115,18 @@ jobs:
           PR_BODY=$(gh api repos/TobiiNT/ClaudeTracker/commits/$COMMIT_SHA/pulls --jq '.[0].body // empty' 2>/dev/null || echo "")
           if [ -z "$PR_BODY" ]; then
             # Fallback: auto-generate from commits
-            echo "notes<<NOTES_EOF" >> $GITHUB_OUTPUT
-            echo "## What's Changed" >> $GITHUB_OUTPUT
-            gh api repos/TobiiNT/ClaudeTracker/compare/$(git describe --tags --abbrev=0 ${{ github.ref_name }}^)...${{ github.ref_name }} --jq '.commits[].commit.message' | head -20 | while read msg; do echo "- $msg"; done >> $GITHUB_OUTPUT
-            echo "NOTES_EOF" >> $GITHUB_OUTPUT
+            echo "## What's Changed" > release-notes.md
+            gh api repos/TobiiNT/ClaudeTracker/compare/$(git describe --tags --abbrev=0 ${{ github.ref_name }}^)...${{ github.ref_name }} --jq '.commits[].commit.message' | head -20 | while read msg; do echo "- $msg"; done >> release-notes.md
           else
-            # Strip test plan and everything after it
-            CLEAN_BODY=$(echo "$PR_BODY" | sed '/^## Test plan/,$d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
-            echo "notes<<NOTES_EOF" >> $GITHUB_OUTPUT
-            echo "$CLEAN_BODY" >> $GITHUB_OUTPUT
-            echo "NOTES_EOF" >> $GITHUB_OUTPUT
+            # Strip test plan and everything after it, write to file
+            echo "$PR_BODY" | sed '/^## Test plan/,$d' | sed -e :a -e '/^\n*$/{$d;N;ba}' > release-notes.md
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
-        run: gh release create ${{ github.ref_name }} --title "Claude Tracker ${{ github.ref_name }}" --notes "${{ steps.release_notes.outputs.notes }}"
+        shell: bash
+        run: gh release create ${{ github.ref_name }} --title "Claude Tracker ${{ github.ref_name }}" --notes-file release-notes.md
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
