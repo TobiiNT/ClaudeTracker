@@ -1,4 +1,6 @@
 using System.Media;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -681,6 +683,8 @@ public partial class PermissionRequestPopup : Window
 
     private void Terminal_Click(object sender, RoutedEventArgs e)
     {
+        // Try to bring the matching terminal window to foreground
+        BringTerminalToFront(_info.Cwd);
         SetDecision(new PermissionDecisionResult { Decision = PermissionDecision.HandleInTerminal });
     }
 
@@ -775,6 +779,77 @@ public partial class PermissionRequestPopup : Window
             return $"{kvp.Key}: {val}";
         });
         return string.Join("\n", parts);
+    }
+
+    // ── Bring terminal window to foreground ──
+
+    [DllImport("user32.dll")]
+    private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+    [DllImport("user32.dll")]
+    private static extern bool IsWindowVisible(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
+    private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+    // Terminal process names that could host Claude Code
+    private static readonly HashSet<string> TerminalProcesses = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "WindowsTerminal", "cmd", "powershell", "pwsh",
+        "Code",       // VS Code
+        "Hyper", "Alacritty", "wezterm-gui", "ConEmu", "ConEmu64"
+    };
+
+    private static void BringTerminalToFront(string cwd)
+    {
+        if (string.IsNullOrEmpty(cwd)) return;
+
+        var projectName = System.IO.Path.GetFileName(cwd) ?? cwd;
+        IntPtr found = IntPtr.Zero;
+
+        EnumWindows((hWnd, _) =>
+        {
+            if (!IsWindowVisible(hWnd)) return true;
+
+            // Only consider terminal processes
+            try
+            {
+                GetWindowThreadProcessId(hWnd, out uint pid);
+                var proc = System.Diagnostics.Process.GetProcessById((int)pid);
+                if (!TerminalProcesses.Contains(proc.ProcessName))
+                    return true;
+            }
+            catch { return true; }
+
+            var sb = new StringBuilder(512);
+            GetWindowText(hWnd, sb, sb.Capacity);
+            var title = sb.ToString();
+
+            if (title.Contains(cwd, StringComparison.OrdinalIgnoreCase) ||
+                title.Contains(projectName, StringComparison.OrdinalIgnoreCase))
+            {
+                found = hWnd;
+                return false;
+            }
+            return true;
+        }, IntPtr.Zero);
+
+        if (found != IntPtr.Zero)
+        {
+            ShowWindow(found, 9); // SW_RESTORE
+            SetForegroundWindow(found);
+        }
     }
 
     // Helper types for AskUserQuestion parsing
