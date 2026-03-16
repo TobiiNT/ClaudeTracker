@@ -200,7 +200,16 @@ public class ClaudeApiService : IClaudeApiService
                             claudeUsage.CostCurrency = overage.Currency;
                         }
                     }
-                    catch { /* overage is optional */ }
+                    catch (HttpRequestException ex) when (ex.Message.Contains("Unauthorized"))
+                    {
+                        claudeUsage.CostFetchError = "No permission to access cost data";
+                        LoggingService.Instance.LogWarning("Cost data fetch: no permission (organization restriction)");
+                    }
+                    catch (Exception ex)
+                    {
+                        claudeUsage.CostFetchError = ex.Message;
+                        LoggingService.Instance.LogWarning($"Cost data fetch failed: {ex.Message}");
+                    }
                 }
 
                 return claudeUsage;
