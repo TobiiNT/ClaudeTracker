@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Windows.Threading;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services.Interfaces;
@@ -14,6 +15,8 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     private DispatcherTimer? _timer;
     private ClaudeStatus _cachedStatus = ClaudeStatus.Unknown;
     private DateTime _lastStatusFetch = DateTime.MinValue;
+    private bool _isRefreshing;
+    private DateTime _rateLimitedUntil = DateTime.MinValue;
 
     public bool IsRunning => _timer?.IsEnabled ?? false;
     public ClaudeStatus CurrentStatus => _cachedStatus;
@@ -79,9 +82,21 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
 
     private async Task RefreshAsync()
     {
+        if (_isRefreshing) return; // Prevent overlapping requests
+
+        // Skip if rate-limited — don't make requests that extend the limit
+        if (DateTime.UtcNow < _rateLimitedUntil)
+        {
+            LoggingService.Instance.Log($"Skipping refresh — rate limited until {_rateLimitedUntil:HH:mm:ss}");
+            return;
+        }
+
+        _isRefreshing = true;
+
         var profile = _profileService.ActiveProfile;
         if (profile == null || !profile.HasUsageCredentials)
         {
+            _isRefreshing = false;
             return;
         }
 
@@ -116,10 +131,21 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
 
             RefreshCompleted?.Invoke(this, EventArgs.Empty);
         }
+        catch (HttpRequestException ex) when (ex.Message.Contains("Rate limited"))
+        {
+            // Back off for 5 minutes on rate limit — don't extend it with retries
+            _rateLimitedUntil = DateTime.UtcNow.AddMinutes(5);
+            LoggingService.Instance.LogWarning($"Rate limited — backing off until {_rateLimitedUntil:HH:mm:ss}");
+            RefreshFailed?.Invoke(this, "Rate limited — retrying in 5 minutes");
+        }
         catch (Exception ex)
         {
             LoggingService.Instance.LogError("Usage refresh failed", ex);
             RefreshFailed?.Invoke(this, ex.Message);
+        }
+        finally
+        {
+            _isRefreshing = false;
         }
     }
 

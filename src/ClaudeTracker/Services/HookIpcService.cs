@@ -327,7 +327,7 @@ public class HookIpcService : IHookIpcService
         {
             while (!ct.IsCancellationRequested && !disconnectTcs.Task.IsCompleted)
             {
-                await Task.Delay(500, ct);
+                await Task.Delay(100, ct);
 
                 if (!pipe.IsConnected)
                 {
