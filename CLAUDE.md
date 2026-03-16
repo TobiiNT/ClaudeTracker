@@ -1,6 +1,6 @@
 # ClaudeTracker
 
-Windows system tray application for real-time Claude AI usage monitoring. Port of the macOS Claude Usage Tracker.
+Windows system tray application for real-time Claude AI usage monitoring and Claude Code hooks integration.
 
 ## Tech Stack
 
@@ -18,15 +18,18 @@ Windows system tray application for real-time Claude AI usage monitoring. Port o
 src/ClaudeTracker/
 ├── Models/          # Data models (Profile, ClaudeUsage, APIUsage, AppSettings, etc.)
 ├── Services/        # Business logic with interfaces in Services/Interfaces/
+│   ├── Handlers/    # 7 interactive hook event handlers
+│   └── Observers/   # ActivityRecorder, SessionTracker (fire-and-forget)
 ├── ViewModels/      # MVVM ViewModels (CommunityToolkit.Mvvm)
 ├── Views/           # WPF XAML windows and user controls
 │   ├── Controls/    # Reusable UI controls
-│   └── Settings/    # Settings tab views (8 tabs)
+│   └── Settings/    # Settings tab views (9 tabs, incl. Hooks)
 ├── TrayIcon/        # TrayIconManager + TrayIconRenderer (SkiaSharp)
-├── Utilities/       # Constants, FormatterHelper, SessionKeyValidator, etc.
+├── Utilities/       # Constants, FormatterHelper, PopupStackManager, TerminalFocusHelper, etc.
 ├── Themes/          # SharedStyles.xaml (Material Design)
 ├── Localization/    # Strings.resx (i18n)
 └── Assets/          # app_icon.ico
+src/ClaudeTracker.HookBridge/  # CLI relay: stdin → named pipe → ClaudeTracker
 tests/ClaudeTracker.Tests/  # xUnit tests
 ```
 
@@ -45,18 +48,35 @@ tests/ClaudeTracker.Tests/  # xUnit tests
 | `ProfileService` | Multi-profile CRUD, active profile switching |
 | `SettingsService` | JSON settings persistence (`%APPDATA%\ClaudeTracker\settings.json`) |
 | `CredentialService` | CLI credentials (`~/.claude/.credentials.json`) |
-| `NotificationService` | Usage alerts at 75%/90%/95% thresholds |
-| `UsageRefreshCoordinator` | DispatcherTimer-based polling (default 30s, 10-300s range) |
+| `NotificationService` | Usage alerts at 75%/90%/95% thresholds, hook event notifications |
+| `UsageRefreshCoordinator` | DispatcherTimer-based polling (default 60s), rate-limit backoff, auto-refresh on session reset |
 | `ClaudeCodeSyncService` | CLI OAuth token sync from Windows Credential Manager |
 | `AutoStartSessionService` | Auto-start session when usage resets to 0% |
 | `TrayIconManager` | System tray lifecycle, popover positioning, context menu |
 | `TrayIconRenderer` | SkiaSharp rendering for 5 icon styles (Battery, ProgressBar, Percentage, Ring, Compact) |
+| `HookIpcService` | Named pipe server (IPC) receiving events from HookBridge |
+| `HookEventDispatcher` | Routes events to handlers + broadcasts to observers |
+| `ActivityService` | Recent activity feed (ObservableCollection, UI-thread dispatched) |
+| `SessionTrackingService` | Active session lifecycle, tool counts, subagent tracking |
+| `PermissionRequestHandler` | Parses permission events, shows popup, returns decision to Claude Code |
+| `ElicitationHandler` | MCP server input request popup |
 
 ### Authentication (3-tier fallback in ClaudeApiService)
 
 1. Claude.ai session key (cookie-based)
 2. CLI OAuth token (Bearer, from saved profile or `~/.claude/.credentials.json`)
 3. API Console session key (billing only)
+
+### Hooks Integration (v2.0.0+)
+
+- **IPC**: Named pipe (`ClaudeTracker-Hooks-{UserName}`), 4-byte length-prefix + UTF-8 JSON
+- **HookBridge**: Standalone .exe relayed by Claude Code → reads stdin → sends to pipe → writes stdout
+- **Event flow**: Claude Code → HookBridge (stdin) → Named Pipe → HookIpcService → HookEventDispatcher → Handlers + Observers
+- **21 hook events** covered, 7 interactive (PermissionRequest, PreToolUse, Elicitation, etc.)
+- **Version-gated install**: HookBridge detects `claude --version` and skips unsupported events
+- **Always Allow response**: echoes raw suggestion JSON verbatim (don't reconstruct — fields get lost)
+- **Popup positioning**: PopupStackManager reads monitor + corner from settings, DPI-aware
+- **Thread safety**: SessionTrackingService uses dispatch-then-lock pattern (never lock-then-dispatch — causes WPF deadlock)
 
 ## Build & Test
 
@@ -72,6 +92,12 @@ dotnet publish src/ClaudeTracker/ClaudeTracker.csproj -c Release -r win-x64 --se
 
 # Publish (framework-dependent, smaller)
 dotnet publish src/ClaudeTracker/ClaudeTracker.csproj -c Release -r win-x64 --no-self-contained
+
+# Install hooks into Claude Code
+src/ClaudeTracker.HookBridge/bin/Release/net8.0/ClaudeTracker.HookBridge.exe install
+
+# Check hook installation status
+src/ClaudeTracker.HookBridge/bin/Release/net8.0/ClaudeTracker.HookBridge.exe status
 ```
 
 Note: Debug build will fail if the app is running (file lock). Use Release config or close the app first.
@@ -81,6 +107,7 @@ Note: Debug build will fail if the app is running (file lock). Use Release confi
 - Settings: `%APPDATA%\ClaudeTracker\settings.json`
 - Logs: `%APPDATA%\ClaudeTracker\logs\claudetracker-.log`
 - CLI Credentials: `%USERPROFILE%\.claude\.credentials.json`
+- Claude Code hooks config: `%USERPROFILE%\.claude\settings.json`
 
 ## Conventions
 
@@ -90,11 +117,17 @@ Note: Debug build will fail if the app is running (file lock). Use Release confi
 - Tray icon rendering is DPI-aware (Win32 `GetDpiForSystem`)
 - Usage status levels: Safe (green, >20% remaining), Moderate (orange, 10-20%), Critical (red, <10%)
 - Constants centralized in `Utilities/Constants.cs`
+- HookBridge must use `Console.InputEncoding = Encoding.UTF8` for non-ASCII (Vietnamese, CJK)
+- Permission popup fonts: Segoe UI primary (Unicode support), Consolas fallback for code
+- `BuildResponseJson` for AlwaysAllow: use raw JSON echo for rule-based (Bash), `toolAlwaysAllow` only if no rules
+- `UsageRefreshCoordinator` has `_isRefreshing` guard + 5-min rate-limit backoff — don't remove these
+- Notification `SendNotification` accepts optional `cwd` param — when set, click focuses terminal instead of popover
+- MCP tool names: `mcp__Server__action_Target` format — `FormatMcpToolName` strips prefix for display
 
 ## CI/CD
 
 - **build.yml**: Push to main / PR → restore → build → test
-- **release.yml**: Tag push `v*` → test → publish (self-contained + framework-dependent) → GitHub Release
+- **release.yml**: Tag push `v*` → test → publish ClaudeTracker + HookBridge → bundle HookBridge into portable/installer → GitHub Release with PR-body notes (strips `## Test plan` section)
 
 ## Reference Project
 
