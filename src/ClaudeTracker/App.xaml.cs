@@ -237,8 +237,12 @@ public partial class App : Application
                         var body = !string.IsNullOrEmpty(entry.Detail)
                             ? $"{entry.Summary}\n{entry.Detail}" : entry.Summary;
 
+                        // Find cwd from session so clicking notification focuses the right terminal
+                        var sessionCwd = sessionTracking.ActiveSessions
+                            .FirstOrDefault(s => s.SessionId == entry.SessionId)?.Cwd;
+
                         ((NotificationService)notificationServiceForHooks).SendNotification(
-                            title, body, level);
+                            title, body, level, cwd: sessionCwd);
                     }
                 }
             };
@@ -262,6 +266,9 @@ public partial class App : Application
                 }
             });
         });
+
+        // Check Claude Code version for update notification
+        _ = Task.Run(() => CheckClaudeCodeVersion(settingsService));
 
         // Listen for system theme changes
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
@@ -400,6 +407,77 @@ public partial class App : Application
         var mdTheme = paletteHelper.GetTheme();
         mdTheme.SetBaseTheme(isDark ? BaseTheme.Dark : BaseTheme.Light);
         paletteHelper.SetTheme(mdTheme);
+    }
+
+    private void CheckClaudeCodeVersion(ISettingsService settingsService)
+    {
+        try
+        {
+            var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "claude",
+                Arguments = "--version",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            });
+            if (process == null) return;
+            var output = process.StandardOutput.ReadToEnd().Trim();
+            process.WaitForExit(3000);
+
+            if (string.IsNullOrEmpty(output)) return;
+
+            LoggingService.Instance.Log($"Claude Code version detected: {output}");
+
+            // Check if there's a newer version available via WebFetch to GitHub releases API
+            var latestVersion = GetLatestClaudeCodeVersion();
+            if (latestVersion != null && latestVersion != output && IsNewerVersion(latestVersion, output))
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    var notificationService = _services!.GetRequiredService<INotificationService>();
+                    ((NotificationService)notificationService).SendNotification(
+                        "Claude Code Update Available",
+                        $"Version {latestVersion} is available (current: {output}). Run 'npm update -g @anthropic-ai/claude-code' to update.",
+                        Views.NotificationPopup.NotificationLevel.Info);
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.LogWarning($"Claude Code version check failed: {ex.Message}");
+        }
+    }
+
+    private static string? GetLatestClaudeCodeVersion()
+    {
+        try
+        {
+            using var client = new System.Net.Http.HttpClient();
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("ClaudeTracker");
+            var response = client.GetAsync("https://registry.npmjs.org/@anthropic-ai/claude-code/latest").Result;
+            if (!response.IsSuccessStatusCode) return null;
+            var json = response.Content.ReadAsStringAsync().Result;
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            return doc.RootElement.GetProperty("version").GetString();
+        }
+        catch { return null; }
+    }
+
+    private static bool IsNewerVersion(string latest, string current)
+    {
+        try
+        {
+            var l = latest.Split('.').Select(int.Parse).ToArray();
+            var c = current.Split('.').Select(int.Parse).ToArray();
+            for (int i = 0; i < Math.Min(l.Length, c.Length); i++)
+            {
+                if (l[i] > c[i]) return true;
+                if (l[i] < c[i]) return false;
+            }
+            return false;
+        }
+        catch { return false; }
     }
 
     private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)

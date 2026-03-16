@@ -104,14 +104,21 @@ public class NotificationService : INotificationService
     }
 
     public void SendNotification(string title, string message,
-        NotificationPopup.NotificationLevel level = NotificationPopup.NotificationLevel.Warning)
+        NotificationPopup.NotificationLevel level = NotificationPopup.NotificationLevel.Warning,
+        string? cwd = null)
     {
         try
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var popup = new NotificationPopup(title, message, level);
-                popup.NotificationClicked += (_, _) => NotificationClicked?.Invoke(this, EventArgs.Empty);
+                popup.NotificationClicked += (_, _) =>
+                {
+                    if (!string.IsNullOrEmpty(cwd))
+                        Utilities.TerminalFocusHelper.BringToFront(cwd);
+                    else
+                        NotificationClicked?.Invoke(this, EventArgs.Empty);
+                };
                 popup.Show();
             });
 
