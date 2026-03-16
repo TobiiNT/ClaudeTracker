@@ -1,6 +1,4 @@
 using System.Media;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -169,7 +167,7 @@ public partial class PermissionRequestPopup : Window
                 Text = line,
                 FontFamily = new FontFamily("Cascadia Code, Consolas, Segoe UI"),
                 FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x8A, 0x80)),
+                Foreground = new SolidColorBrush(Color.FromRgb(0xE5, 0x73, 0x73)),
                 TextWrapping = TextWrapping.Wrap
             });
         }
@@ -181,7 +179,7 @@ public partial class PermissionRequestPopup : Window
                 Text = line,
                 FontFamily = new FontFamily("Cascadia Code, Consolas, Segoe UI"),
                 FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x69, 0xF0, 0xAE)),
+                Foreground = new SolidColorBrush(Color.FromRgb(0x66, 0xBB, 0x6A)),
                 TextWrapping = TextWrapping.Wrap
             });
         }
@@ -585,12 +583,14 @@ public partial class PermissionRequestPopup : Window
 
     private void BuildAlwaysAllowButtons(List<PermissionSuggestion> suggestions)
     {
-        var seenLabels = new HashSet<string>();
+        var seenKeys = new HashSet<string>();
         foreach (var suggestion in suggestions)
         {
             LoggingService.Instance.Log($"[PermPopup] Suggestion: type={suggestion.Type}, behavior={suggestion.Behavior}, tool={suggestion.Tool}, prefix={suggestion.Prefix}, rules={suggestion.Rules.Count}{(suggestion.Rules.Count > 0 ? $" [{suggestion.Rules[0].ToolName}:{suggestion.Rules[0].RuleContent}]" : "")}, dirs={suggestion.Directories.Count}");
             var label = suggestion.DisplayLabel;
-            if (string.IsNullOrWhiteSpace(label) || !seenLabels.Add(label)) continue;
+            // Dedup by label + tool + first rule to catch different suggestion types that display identically
+            var dedupKey = $"{label}|{suggestion.Tool}|{(suggestion.Rules.Count > 0 ? suggestion.Rules[0].ToolName : "")}";
+            if (string.IsNullOrWhiteSpace(label) || !seenKeys.Add(dedupKey)) continue;
 
             var btn = new Button
             {
@@ -683,9 +683,11 @@ public partial class PermissionRequestPopup : Window
 
     private void Terminal_Click(object sender, RoutedEventArgs e)
     {
-        // Try to bring the matching terminal window to foreground
-        BringTerminalToFront(_info.Cwd);
+        var cwd = _info.Cwd;
         SetDecision(new PermissionDecisionResult { Decision = PermissionDecision.HandleInTerminal });
+        // Bring terminal to front AFTER popup closes to avoid focus fight
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background,
+            () => TerminalFocusHelper.BringToFront(cwd));
     }
 
     protected override void OnClosed(EventArgs e)
@@ -779,77 +781,6 @@ public partial class PermissionRequestPopup : Window
             return $"{kvp.Key}: {val}";
         });
         return string.Join("\n", parts);
-    }
-
-    // ── Bring terminal window to foreground ──
-
-    [DllImport("user32.dll")]
-    private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
-
-    [DllImport("user32.dll")]
-    private static extern bool IsWindowVisible(IntPtr hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
-
-    private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
-
-    // Terminal process names that could host Claude Code
-    private static readonly HashSet<string> TerminalProcesses = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "WindowsTerminal", "cmd", "powershell", "pwsh",
-        "Code",       // VS Code
-        "Hyper", "Alacritty", "wezterm-gui", "ConEmu", "ConEmu64"
-    };
-
-    private static void BringTerminalToFront(string cwd)
-    {
-        if (string.IsNullOrEmpty(cwd)) return;
-
-        var projectName = System.IO.Path.GetFileName(cwd) ?? cwd;
-        IntPtr found = IntPtr.Zero;
-
-        EnumWindows((hWnd, _) =>
-        {
-            if (!IsWindowVisible(hWnd)) return true;
-
-            // Only consider terminal processes
-            try
-            {
-                GetWindowThreadProcessId(hWnd, out uint pid);
-                var proc = System.Diagnostics.Process.GetProcessById((int)pid);
-                if (!TerminalProcesses.Contains(proc.ProcessName))
-                    return true;
-            }
-            catch { return true; }
-
-            var sb = new StringBuilder(512);
-            GetWindowText(hWnd, sb, sb.Capacity);
-            var title = sb.ToString();
-
-            if (title.Contains(cwd, StringComparison.OrdinalIgnoreCase) ||
-                title.Contains(projectName, StringComparison.OrdinalIgnoreCase))
-            {
-                found = hWnd;
-                return false;
-            }
-            return true;
-        }, IntPtr.Zero);
-
-        if (found != IntPtr.Zero)
-        {
-            ShowWindow(found, 9); // SW_RESTORE
-            SetForegroundWindow(found);
-        }
     }
 
     // Helper types for AskUserQuestion parsing
