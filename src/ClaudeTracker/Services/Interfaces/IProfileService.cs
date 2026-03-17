@@ -20,6 +20,8 @@ public interface IProfileService
     void ActivateProfile(Guid profileId);
     /// <summary>Updates cached usage data for a specific profile.</summary>
     void UpdateUsageData(Guid profileId, ClaudeUsage? claudeUsage = null, APIUsage? apiUsage = null);
+    /// <summary>Updates personal Claude Code metrics for a specific profile.</summary>
+    void UpdatePersonalMetrics(Guid profileId, ClaudeCodeUserMetrics? metrics);
     /// <summary>Sets the Claude organization ID for a profile.</summary>
     void UpdateOrganizationId(string? orgId, Guid profileId);
     /// <summary>Saves credentials (session keys, org IDs) for a profile.</summary>

@@ -27,7 +27,7 @@
             <StackPanel x:Name="SetupPanel">
                 <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"
                            Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                    <Run Text="1. Open " /><Run Text="console.anthropic.com" FontWeight="SemiBold" />
+                    <Run Text="1. Open " /><Run Text="platform.claude.com" FontWeight="SemiBold" />
                     <LineBreak />
                     <Run Text="2. Open DevTools (F12) → Application → Cookies" />
                     <LineBreak />

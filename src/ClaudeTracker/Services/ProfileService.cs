@@ -141,6 +141,21 @@ public class ProfileService : IProfileService
         }
     }
 
+    public void UpdatePersonalMetrics(Guid profileId, ClaudeCodeUserMetrics? metrics)
+    {
+        var profile = _settingsService.Settings.Profiles.FirstOrDefault(p => p.Id == profileId);
+        if (profile == null) return;
+
+        profile.PersonalMetrics = metrics;
+        _settingsService.Save();
+
+        if (_activeProfile?.Id == profileId)
+        {
+            _activeProfile = profile;
+            ActiveProfileChanged?.Invoke(this, _activeProfile);
+        }
+    }
+
     public void UpdateOrganizationId(string? orgId, Guid profileId)
     {
         var profile = _settingsService.Settings.Profiles.FirstOrDefault(p => p.Id == profileId);

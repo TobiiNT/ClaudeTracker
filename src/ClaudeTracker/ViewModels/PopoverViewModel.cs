@@ -33,6 +33,11 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private string _apiUsedText = "";
     [ObservableProperty] private string _apiRemainingText = "";
     [ObservableProperty] private double _apiPercentage;
+    [ObservableProperty] private bool _hasPersonalMetrics;
+    [ObservableProperty] private string _personalCostText = "";
+    [ObservableProperty] private string _personalAvgCostText = "";
+    [ObservableProperty] private string _personalSessionsText = "";
+    [ObservableProperty] private string _personalLinesText = "";
     [ObservableProperty] private string _lastUpdatedText = "";
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private bool _hasCredentials;
@@ -286,6 +291,16 @@ public partial class PopoverViewModel : ObservableObject
             ApiUsedText = apiUsage.FormattedUsed;
             ApiRemainingText = apiUsage.FormattedRemaining;
             ApiPercentage = apiUsage.UsagePercentage;
+        }
+
+        var personalMetrics = profile.PersonalMetrics;
+        HasPersonalMetrics = personalMetrics != null;
+        if (personalMetrics != null)
+        {
+            PersonalCostText = personalMetrics.FormattedTotalCost;
+            PersonalAvgCostText = personalMetrics.FormattedAvgCostPerDay;
+            PersonalSessionsText = $"{personalMetrics.TotalSessions} sessions";
+            PersonalLinesText = $"{personalMetrics.TotalLinesAccepted:N0} lines";
         }
     }
 

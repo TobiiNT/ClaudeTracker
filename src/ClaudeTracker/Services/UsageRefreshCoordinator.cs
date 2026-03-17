@@ -118,12 +118,34 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
 
             _notificationService.CheckKeyExpiry(profile);
 
-            // Fetch API Console usage
+            // Fetch API Console usage (non-fatal — don't break the whole refresh cycle)
             if (profile.HasAPIConsole)
             {
-                var apiUsage = await _apiService.FetchAPIUsageData(
-                    profile.ApiOrganizationId!, profile.ApiSessionKey!);
-                _profileService.UpdateUsageData(profile.Id, apiUsage: apiUsage);
+                try
+                {
+                    var apiUsage = await _apiService.FetchAPIUsageData(
+                        profile.ApiOrganizationId!, profile.ApiSessionKey!);
+                    _profileService.UpdateUsageData(profile.Id, apiUsage: apiUsage);
+                }
+                catch (HttpRequestException ex)
+                {
+                    LoggingService.Instance.LogWarning($"API Console usage fetch failed (non-fatal): {ex.Message}");
+                }
+            }
+
+            // Fetch personal Claude Code metrics (non-fatal)
+            if (profile.HasAPIConsole && !string.IsNullOrEmpty(profile.ApiUserSearch))
+            {
+                try
+                {
+                    var personalMetrics = await _apiService.FetchClaudeCodeUserMetrics(
+                        profile.ApiOrganizationId!, profile.ApiSessionKey!, profile.ApiUserSearch);
+                    _profileService.UpdatePersonalMetrics(profile.Id, personalMetrics);
+                }
+                catch (HttpRequestException ex)
+                {
+                    LoggingService.Instance.LogWarning($"Personal metrics fetch failed (non-fatal): {ex.Message}");
+                }
             }
 
             // Fetch Claude system status (every 5 minutes)

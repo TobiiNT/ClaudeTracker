@@ -183,6 +183,16 @@ public partial class PopoverWindow : Window
             ApiUsedText.Text = $"Used: {_viewModel.ApiUsedText}";
             ApiRemainingText.Text = $"Remaining: {_viewModel.ApiRemainingText}";
 
+            // Personal Claude Code metrics
+            PersonalCard.Visibility = _viewModel.HasPersonalMetrics ? Visibility.Visible : Visibility.Collapsed;
+            if (_viewModel.HasPersonalMetrics)
+            {
+                PersonalCostText.Text = _viewModel.PersonalCostText;
+                PersonalAvgCostText.Text = _viewModel.PersonalAvgCostText;
+                PersonalSessionsText.Text = _viewModel.PersonalSessionsText;
+                PersonalLinesText.Text = _viewModel.PersonalLinesText;
+            }
+
             // Status line
             if (_viewModel.IsRefreshing)
             {

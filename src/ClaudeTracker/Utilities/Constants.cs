@@ -9,7 +9,10 @@ public static class Constants
     public static class APIEndpoints
     {
         public const string ClaudeBase = "https://claude.ai/api";
-        public const string ConsoleBase = "https://console.anthropic.com/api";
+        public const string PlatformBase = "https://platform.claude.com";
+        public const string PlatformLogin = PlatformBase + "/login";
+        public const string ConsoleBase = PlatformBase + "/api";
+        public const string ClaudeCodeMetrics = ConsoleBase + "/claude_code/metrics_aggs";
         public const string OAuthUsage = "https://api.anthropic.com/api/oauth/usage";
     }
 

@@ -22,4 +22,9 @@ public interface IClaudeApiService
     Task<List<APIOrganization>> FetchConsoleOrganizations(string apiSessionKey);
     /// <summary>Fetches API billing/usage data for a Console organization.</summary>
     Task<APIUsage> FetchAPIUsageData(string organizationId, string apiSessionKey);
+
+    /// <summary>Fetches all Claude Code users for the organization (for identity picker).</summary>
+    Task<List<ClaudeCodeUserMetrics>> FetchClaudeCodeAllUsers(string organizationUuid, string apiSessionKey);
+    /// <summary>Fetches personal Claude Code usage metrics for a specific user.</summary>
+    Task<ClaudeCodeUserMetrics?> FetchClaudeCodeUserMetrics(string organizationUuid, string apiSessionKey, string search);
 }

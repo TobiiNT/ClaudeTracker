@@ -92,4 +92,12 @@ public class MockClaudeApiService : IClaudeApiService
             Currency = "USD"
         });
     }
+
+    public Task<List<ClaudeCodeUserMetrics>> FetchClaudeCodeAllUsers(
+        string organizationUuid, string apiSessionKey)
+        => Task.FromResult(new List<ClaudeCodeUserMetrics>());
+
+    public Task<ClaudeCodeUserMetrics?> FetchClaudeCodeUserMetrics(
+        string organizationUuid, string apiSessionKey, string search)
+        => Task.FromResult<ClaudeCodeUserMetrics?>(null);
 }
