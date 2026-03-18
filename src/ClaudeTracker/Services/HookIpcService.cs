@@ -1,6 +1,8 @@
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 using ClaudeTracker.Models;
@@ -106,12 +108,7 @@ public class HookIpcService : IHookIpcService
             NamedPipeServerStream? pipe = null;
             try
             {
-                pipe = new NamedPipeServerStream(
-                    Constants.Hooks.PipeName,
-                    PipeDirection.InOut,
-                    Constants.Hooks.MaxConcurrentConnections,
-                    PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous);
+                pipe = CreatePipeWithSecurity();
 
                 await pipe.WaitForConnectionAsync(ct);
 
@@ -144,6 +141,30 @@ public class HookIpcService : IHookIpcService
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Creates a named pipe server with an explicit ACL granting the current user full control.
+    /// Without this, pipe clients from the same user but different security context (e.g. Claude Code
+    /// spawning HookBridge) get UnauthorizedAccessException.
+    /// </summary>
+    private static NamedPipeServerStream CreatePipeWithSecurity()
+    {
+        var ps = new PipeSecurity();
+        ps.AddAccessRule(new PipeAccessRule(
+            WindowsIdentity.GetCurrent().User!,
+            PipeAccessRights.FullControl,
+            AccessControlType.Allow));
+
+        return NamedPipeServerStreamAcl.Create(
+            Constants.Hooks.PipeName,
+            PipeDirection.InOut,
+            Constants.Hooks.MaxConcurrentConnections,
+            PipeTransmissionMode.Byte,
+            PipeOptions.Asynchronous,
+            inBufferSize: 0,
+            outBufferSize: 0,
+            pipeSecurity: ps);
     }
 
     private async Task HandleConnectionAsync(NamedPipeServerStream pipe, CancellationToken ct)

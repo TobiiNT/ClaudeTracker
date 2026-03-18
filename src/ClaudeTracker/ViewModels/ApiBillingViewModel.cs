@@ -10,6 +10,7 @@ public partial class ApiBillingViewModel : ObservableObject
 {
     private readonly IClaudeApiService _apiService;
     private readonly IProfileService _profileService;
+    private readonly ISettingsService _settingsService;
 
     [ObservableProperty] private string _apiKey = "";
     [ObservableProperty] private bool _isTesting;
@@ -18,13 +19,17 @@ public partial class ApiBillingViewModel : ObservableObject
     [ObservableProperty] private bool _showOrgPicker;
     [ObservableProperty] private APIOrganization? _selectedOrg;
     [ObservableProperty] private bool _isConfigured;
+    [ObservableProperty] private bool _showUserPicker;
+    [ObservableProperty] private ClaudeCodeUserMetrics? _selectedUser;
 
     public ObservableCollection<APIOrganization> Organizations { get; } = new();
+    public ObservableCollection<ClaudeCodeUserMetrics> ClaudeCodeUsers { get; } = new();
 
-    public ApiBillingViewModel(IClaudeApiService apiService, IProfileService profileService)
+    public ApiBillingViewModel(IClaudeApiService apiService, IProfileService profileService, ISettingsService settingsService)
     {
         _apiService = apiService;
         _profileService = profileService;
+        _settingsService = settingsService;
 
         var profile = _profileService.ActiveProfile;
         IsConfigured = profile?.HasAPIConsole ?? false;
@@ -90,7 +95,70 @@ public partial class ApiBillingViewModel : ObservableObject
         IsConfigured = true;
         ShowOrgPicker = false;
 
-        await Task.CompletedTask;
+        // Auto-fetch Claude Code users for identity picker
+        try
+        {
+            var users = await _apiService.FetchClaudeCodeAllUsers(SelectedOrg.Id, ApiKey.Trim());
+            ClaudeCodeUsers.Clear();
+            foreach (var user in users)
+                ClaudeCodeUsers.Add(user);
+
+            if (users.Count > 0)
+            {
+                ShowUserPicker = true;
+                if (!string.IsNullOrEmpty(profile.ApiUserSearch))
+                    SelectedUser = users.FirstOrDefault(u => u.DisplayName == profile.ApiUserSearch);
+            }
+        }
+        catch (Exception ex)
+        {
+            Services.LoggingService.Instance.LogWarning($"Failed to fetch Claude Code users: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task LoadClaudeCodeUsers()
+    {
+        var profile = _profileService.ActiveProfile;
+        if (profile == null) return;
+
+        var credentials = _profileService.LoadCredentials(profile.Id);
+        if (string.IsNullOrEmpty(credentials.ApiSessionKey) || string.IsNullOrEmpty(credentials.ApiOrganizationId))
+            return;
+
+        try
+        {
+            var users = await _apiService.FetchClaudeCodeAllUsers(credentials.ApiOrganizationId, credentials.ApiSessionKey);
+            ClaudeCodeUsers.Clear();
+            foreach (var user in users)
+                ClaudeCodeUsers.Add(user);
+
+            if (users.Count > 0)
+            {
+                ShowUserPicker = true;
+                if (!string.IsNullOrEmpty(profile.ApiUserSearch))
+                    SelectedUser = users.FirstOrDefault(u => u.DisplayName == profile.ApiUserSearch);
+            }
+        }
+        catch (Exception ex)
+        {
+            Services.LoggingService.Instance.LogWarning($"Failed to fetch Claude Code users: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private void SaveUserSelection()
+    {
+        if (SelectedUser == null) return;
+        var profile = _profileService.ActiveProfile;
+        if (profile == null) return;
+
+        profile.ApiUserSearch = SelectedUser.DisplayName;
+        _settingsService.Save();
+
+        ShowUserPicker = false;
+        TestStatus = $"Tracking: {SelectedUser.DisplayName}";
+        TestSuccess = true;
     }
 
     [RelayCommand]

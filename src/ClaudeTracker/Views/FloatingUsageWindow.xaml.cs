@@ -53,13 +53,15 @@ public partial class FloatingUsageWindow : Window
         var lastUpdatedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
         lastUpdatedTimer.Tick += (_, _) =>
         {
-            if (_viewModel.HasClaudeUsage && !_viewModel.IsRefreshing)
-            {
-                var profile = App.Services.GetRequiredService<Services.Interfaces.IProfileService>().ActiveProfile;
-                var usage = profile?.ClaudeUsage;
-                if (usage != null)
-                    LastUpdatedText.Text = $"Updated {Utilities.FormatterHelper.FormatTimeAgo(usage.LastUpdated)}";
-            }
+            if (_viewModel.IsRefreshing) return;
+            var profile = App.Services.GetRequiredService<Services.Interfaces.IProfileService>().ActiveProfile;
+            if (profile == null) return;
+
+            var usage = profile.ClaudeUsage;
+            if (usage != null)
+                LastUpdatedText.Text = $"Updated {Utilities.FormatterHelper.FormatTimeAgo(usage.LastUpdated)}";
+            else if (profile.ApiUsage != null)
+                LastUpdatedText.Text = $"Updated {Utilities.FormatterHelper.FormatTimeAgo(profile.ApiUsage.LastUpdated)}";
         };
         lastUpdatedTimer.Start();
 
@@ -140,19 +142,50 @@ public partial class FloatingUsageWindow : Window
     {
         Dispatcher.Invoke(() =>
         {
-            SessionPercentText.Text = _viewModel.SessionPercentageText;
-            SessionResetText.Text = _viewModel.SessionResetText;
-            SessionProgressFill.Background = GetStatusBrush(_viewModel.SessionStatus);
-            UpdatePacePanel(SessionPacePanel, SessionPaceDot, SessionPaceText, SessionEstimateText,
-                _viewModel.SessionPaceLabel, _viewModel.SessionPaceColorHex,
-                _viewModel.SessionEstimateText, _viewModel.SessionPaceTooltip);
+            var hasSubscription = _viewModel.HasClaudeUsage;
+            var hasApi = _viewModel.HasApiUsage || _viewModel.HasPersonalMetrics;
 
-            WeeklyPercentText.Text = _viewModel.WeeklyPercentageText;
-            WeeklyResetText.Text = _viewModel.WeeklyResetText;
-            WeeklyProgressFill.Background = GetStatusBrush(_viewModel.WeeklyStatus);
-            UpdatePacePanel(WeeklyPacePanel, WeeklyPaceDot, WeeklyPaceText, WeeklyEstimateText,
-                _viewModel.WeeklyPaceLabel, _viewModel.WeeklyPaceColorHex,
-                _viewModel.WeeklyEstimateText, _viewModel.WeeklyPaceTooltip);
+            // Show subscription cards OR API cards, not both empty
+            SessionPanel.Visibility = hasSubscription ? Visibility.Visible : Visibility.Collapsed;
+            WeeklyPanel.Visibility = hasSubscription ? Visibility.Visible : Visibility.Collapsed;
+            ApiPanel.Visibility = (!hasSubscription && _viewModel.HasApiUsage) ? Visibility.Visible : Visibility.Collapsed;
+            PersonalPanel.Visibility = (!hasSubscription && _viewModel.HasPersonalMetrics) ? Visibility.Visible : Visibility.Collapsed;
+
+            if (hasSubscription)
+            {
+                SessionPercentText.Text = _viewModel.SessionPercentageText;
+                SessionResetText.Text = _viewModel.SessionResetText;
+                SessionProgressFill.Background = GetStatusBrush(_viewModel.SessionStatus);
+                UpdatePacePanel(SessionPacePanel, SessionPaceDot, SessionPaceText, SessionEstimateText,
+                    _viewModel.SessionPaceLabel, _viewModel.SessionPaceColorHex,
+                    _viewModel.SessionEstimateText, _viewModel.SessionPaceTooltip);
+
+                WeeklyPercentText.Text = _viewModel.WeeklyPercentageText;
+                WeeklyResetText.Text = _viewModel.WeeklyResetText;
+                WeeklyProgressFill.Background = GetStatusBrush(_viewModel.WeeklyStatus);
+                UpdatePacePanel(WeeklyPacePanel, WeeklyPaceDot, WeeklyPaceText, WeeklyEstimateText,
+                    _viewModel.WeeklyPaceLabel, _viewModel.WeeklyPaceColorHex,
+                    _viewModel.WeeklyEstimateText, _viewModel.WeeklyPaceTooltip);
+            }
+
+            if (_viewModel.HasApiUsage)
+            {
+                ApiPercentText.Text = $"{_viewModel.ApiPercentage:F0}%";
+                ApiBudgetText.Text = $"{_viewModel.ApiUsedText} / {_viewModel.ApiTotalText}";
+            }
+
+            if (_viewModel.HasPersonalMetrics)
+            {
+                PersonalCostText.Text = _viewModel.PersonalCostText;
+                PersonalSessionsText.Text = _viewModel.PersonalSessionsText;
+
+                FloatingDailyRow.Visibility = _viewModel.HasDailyMetrics ? Visibility.Visible : Visibility.Collapsed;
+                if (_viewModel.HasDailyMetrics)
+                {
+                    FloatingDailyCostText.Text = _viewModel.DailyCostText;
+                    FloatingDailyLinesText.Text = _viewModel.DailyLinesText;
+                }
+            }
 
             // Status line
             if (_viewModel.IsRefreshing)
@@ -165,14 +198,14 @@ public partial class FloatingUsageWindow : Window
                 StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
                 LastUpdatedText.Text = "No account connected";
             }
-            else if (!_viewModel.HasClaudeUsage)
+            else if (!hasSubscription && !hasApi)
             {
                 StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
                 LastUpdatedText.Text = "Waiting for data...";
             }
             else
             {
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)); // green = connected
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
                 LastUpdatedText.Text = _viewModel.LastUpdatedText;
             }
 
@@ -182,8 +215,15 @@ public partial class FloatingUsageWindow : Window
 
     private void UpdateProgressBars()
     {
-        SetProgressWidth(SessionProgressFill, _viewModel.SessionPercentage);
-        SetProgressWidth(WeeklyProgressFill, _viewModel.WeeklyPercentage);
+        if (_viewModel.HasClaudeUsage)
+        {
+            SetProgressWidth(SessionProgressFill, _viewModel.SessionPercentage);
+            SetProgressWidth(WeeklyProgressFill, _viewModel.WeeklyPercentage);
+        }
+        if (_viewModel.HasApiUsage)
+        {
+            SetProgressWidth(ApiProgressFill, _viewModel.ApiPercentage);
+        }
     }
 
     private static void SetProgressWidth(FrameworkElement fill, double percentage)

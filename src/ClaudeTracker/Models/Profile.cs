@@ -25,6 +25,9 @@ public class Profile
     [JsonPropertyName("apiOrganizationId")]
     public string? ApiOrganizationId { get; set; }
 
+    [JsonPropertyName("apiUserSearch")]
+    public string? ApiUserSearch { get; set; }
+
     [JsonPropertyName("cliCredentialsJSON")]
     public string? CliCredentialsJSON { get; set; }
 
@@ -47,6 +50,12 @@ public class Profile
 
     [JsonPropertyName("apiUsage")]
     public APIUsage? ApiUsage { get; set; }
+
+    [JsonPropertyName("personalMetrics")]
+    public ClaudeCodeUserMetrics? PersonalMetrics { get; set; }
+
+    [JsonIgnore]
+    public ClaudeCodeUserMetrics? DailyMetrics { get; set; }
 
     // Appearance Settings (Per-Profile)
     [JsonPropertyName("iconConfig")]

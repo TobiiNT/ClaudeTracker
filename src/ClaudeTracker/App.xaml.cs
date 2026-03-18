@@ -155,6 +155,7 @@ public partial class App : Application
             // When a post-execution event arrives while a popup is pending, the user
             // already answered in terminal and Claude Code moved on.
             // Only close popups from the SAME session (other sessions shouldn't interfere).
+            var sessionTracking = _services.GetRequiredService<ISessionTrackingService>();
             hookIpcService.EventArrived += (_, evt) =>
             {
                 if (pendingPopups.Count == 0) return;
@@ -174,6 +175,21 @@ public partial class App : Application
                 }
                 catch { }
 
+                // When subagents are active, PostToolUse/PostToolUseFailure events likely come
+                // from other agents — don't auto-close the permission popup for those.
+                // Only session-level signals (Stop, UserPromptSubmit) should still auto-close.
+                if (evt.EventName is Events.PostToolUse or Events.PostToolUseFailure
+                    && !string.IsNullOrEmpty(evtSessionId))
+                {
+                    var session = sessionTracking.ActiveSessions
+                        .FirstOrDefault(s => s.SessionId == evtSessionId);
+                    if (session?.ActiveSubagents.Count > 0)
+                    {
+                        LoggingService.Instance.Log($"[Hooks] Ignoring '{evt.EventName}' auto-close — session '{evtSessionId}' has {session.ActiveSubagents.Count} active subagent(s)");
+                        return;
+                    }
+                }
+
                 // Only close popups from the same session
                 if (!string.IsNullOrEmpty(evtSessionId) && pendingPopups.TryRemove(evtSessionId, out var tcs))
                 {
@@ -188,7 +204,6 @@ public partial class App : Application
             };
 
             // Start stale session pruning timer
-            var sessionTracking = _services.GetRequiredService<ISessionTrackingService>();
             var pruneTimer = new System.Windows.Threading.DispatcherTimer
             {
                 Interval = TimeSpan.FromMinutes(5)

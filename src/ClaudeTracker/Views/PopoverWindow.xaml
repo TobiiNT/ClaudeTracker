@@ -210,6 +210,39 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- ── Personal Claude Code Usage ── -->
+                    <Border x:Name="PersonalCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,6">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="AccountCircle" Width="15" Height="15"
+                                                             Foreground="#888" VerticalAlignment="Center"
+                                                             Margin="0,0,5,0" />
+                                    <TextBlock Text="My Claude Code" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                                </StackPanel>
+                                <TextBlock x:Name="PersonalCostText" HorizontalAlignment="Right"
+                                           FontSize="17" FontWeight="SemiBold" Foreground="#444" />
+                            </Grid>
+                            <Grid Margin="0,2,0,0">
+                                <TextBlock x:Name="PersonalAvgCostText" FontSize="12" Foreground="#999" />
+                                <TextBlock x:Name="PersonalSessionsText" HorizontalAlignment="Center"
+                                           FontSize="12" Foreground="#999" />
+                                <TextBlock x:Name="PersonalLinesText" HorizontalAlignment="Right"
+                                           FontSize="12" Foreground="#999" />
+                            </Grid>
+                            <!-- Today's usage -->
+                            <Grid x:Name="DailyMetricsRow" Margin="0,5,0,0" Visibility="Collapsed">
+                                <TextBlock FontSize="12" Foreground="#888">
+                                    <Run Text="Today: " FontWeight="Medium" /><Run x:Name="DailyCostText" />
+                                </TextBlock>
+                                <TextBlock x:Name="DailySessionsText" HorizontalAlignment="Center"
+                                           FontSize="12" Foreground="#999" />
+                                <TextBlock x:Name="DailyLinesText" HorizontalAlignment="Right"
+                                           FontSize="12" Foreground="#999" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
                     <!-- ── Active Claude Code Sessions ── -->
                     <Border x:Name="SessionsCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
                         <StackPanel>

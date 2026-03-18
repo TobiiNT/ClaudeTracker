@@ -316,46 +316,123 @@ public class ClaudeApiService : IClaudeApiService
     {
         var client = _httpClientFactory.CreateClient("Claude");
 
-        // Fetch spend
-        var spendUrl = new UrlBuilder(Constants.APIEndpoints.ConsoleBase)
-            .AppendingPath($"organizations/{organizationId}/current_spend")
-            .Build();
-        var spendReq = new HttpRequestMessage(HttpMethod.Get, spendUrl);
-        spendReq.Headers.Add("Cookie", $"sessionKey={apiSessionKey}");
-        spendReq.Headers.Add("Accept", "application/json");
+        HttpRequestMessage CreateRequest(string path)
+        {
+            var url = new UrlBuilder(Constants.APIEndpoints.ConsoleBase)
+                .AppendingPath(path).Build();
+            var req = new HttpRequestMessage(HttpMethod.Get, url);
+            req.Headers.Add("Cookie", $"sessionKey={apiSessionKey}");
+            req.Headers.Add("Accept", "application/json");
+            return req;
+        }
 
-        // Fetch credits
-        var creditsUrl = new UrlBuilder(Constants.APIEndpoints.ConsoleBase)
-            .AppendingPath($"organizations/{organizationId}/prepaid/credits")
-            .Build();
-        var creditsReq = new HttpRequestMessage(HttpMethod.Get, creditsUrl);
-        creditsReq.Headers.Add("Cookie", $"sessionKey={apiSessionKey}");
-        creditsReq.Headers.Add("Accept", "application/json");
-
-        var spendTask = client.SendAsync(spendReq);
-        var creditsTask = client.SendAsync(creditsReq);
-        await Task.WhenAll(spendTask, creditsTask);
+        // Fire all three requests in parallel
+        var spendTask = client.SendAsync(CreateRequest($"organizations/{organizationId}/current_spend"));
+        var creditsTask = client.SendAsync(CreateRequest($"organizations/{organizationId}/prepaid/credits"));
+        var limitTask = client.SendAsync(CreateRequest($"organizations/{organizationId}/rate_limits"));
+        await Task.WhenAll(spendTask, creditsTask, limitTask);
 
         var spendResponse = await spendTask;
-        var creditsResponse = await creditsTask;
         await EnsureSuccessResponse(spendResponse, "current_spend");
-        await EnsureSuccessResponse(creditsResponse, "prepaid/credits");
-
         var spendJson = await spendResponse.Content.ReadAsStringAsync();
-        var creditsJson = await creditsResponse.Content.ReadAsStringAsync();
-
         var spend = JsonSerializer.Deserialize<CurrentSpendResponse>(spendJson)!;
-        var credits = JsonSerializer.Deserialize<PrepaidCreditsResponse>(creditsJson)!;
-
         var resetsAt = DateTime.TryParse(spend.ResetsAt, out var dt) ? dt : DateTime.UtcNow;
+
+        // Credits endpoint requires billing:view — fail gracefully if permission is missing
+        int prepaidCents = 0;
+        string currency = "usd";
+        try
+        {
+            var creditsResponse = await creditsTask;
+            await EnsureSuccessResponse(creditsResponse, "prepaid/credits");
+            var creditsJson = await creditsResponse.Content.ReadAsStringAsync();
+            var credits = JsonSerializer.Deserialize<PrepaidCreditsResponse>(creditsJson)!;
+            prepaidCents = credits.Amount;
+            currency = credits.Currency;
+        }
+        catch (HttpRequestException)
+        {
+            // billing:view permission not available — skip prepaid credits
+        }
+
+        // Fetch monthly spend threshold from rate_limits — fail gracefully
+        int spendLimitCents = 0;
+        try
+        {
+            var limitResponse = await limitTask;
+            await EnsureSuccessResponse(limitResponse, "rate_limits");
+            var limitJson = await limitResponse.Content.ReadAsStringAsync();
+            var rateLimits = JsonSerializer.Deserialize<OrganizationRateLimitsResponse>(limitJson);
+            if (rateLimits?.SpendThreshold > 0)
+                spendLimitCents = rateLimits.SpendThreshold;
+        }
+        catch (HttpRequestException ex)
+        {
+            LoggingService.Instance.LogWarning($"Spend limit fetch failed (non-fatal): {ex.Message}");
+        }
 
         return new APIUsage
         {
             CurrentSpendCents = spend.Amount,
             ResetsAt = resetsAt,
-            PrepaidCreditsCents = credits.Amount,
-            Currency = credits.Currency
+            PrepaidCreditsCents = prepaidCents,
+            SpendLimitCents = spendLimitCents,
+            Currency = currency
         };
+    }
+
+    public async Task<List<ClaudeCodeUserMetrics>> FetchClaudeCodeAllUsers(
+        string organizationUuid, string apiSessionKey)
+    {
+        var now = DateTime.UtcNow;
+        var startOfMonth = new DateTime(now.Year, now.Month, 1);
+        var startOfNextMonth = startOfMonth.AddMonths(1);
+
+        var url = new Uri($"{Constants.APIEndpoints.ClaudeCodeMetrics}/users" +
+            $"?organization_uuid={Uri.EscapeDataString(organizationUuid)}" +
+            $"&start_date={startOfMonth:yyyy-MM-dd}&end_date={startOfNextMonth:yyyy-MM-dd}" +
+            $"&limit=200&offset=0&sort_by=total_cost_usd&sort_order=desc");
+
+        var client = _httpClientFactory.CreateClient("Claude");
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("Cookie", $"sessionKey={apiSessionKey}");
+        request.Headers.Add("Accept", "application/json");
+
+        var response = await client.SendAsync(request);
+        await EnsureSuccessResponse(response, "claude_code/metrics_aggs/users (all)");
+
+        var json = await response.Content.ReadAsStringAsync();
+        var metricsResponse = JsonSerializer.Deserialize<ClaudeCodeMetricsResponse>(json);
+
+        return metricsResponse?.Users ?? new List<ClaudeCodeUserMetrics>();
+    }
+
+    public async Task<ClaudeCodeUserMetrics?> FetchClaudeCodeUserMetrics(
+        string organizationUuid, string apiSessionKey, string search,
+        DateTime? startDate = null, DateTime? endDate = null)
+    {
+        var now = DateTime.UtcNow;
+        var start = startDate ?? new DateTime(now.Year, now.Month, 1);
+        var end = endDate ?? start.AddMonths(1);
+
+        var url = new Uri($"{Constants.APIEndpoints.ClaudeCodeMetrics}/users" +
+            $"?organization_uuid={Uri.EscapeDataString(organizationUuid)}" +
+            $"&start_date={start:yyyy-MM-dd}&end_date={end:yyyy-MM-dd}" +
+            $"&search={Uri.EscapeDataString(search)}&limit=1&offset=0" +
+            $"&sort_by=total_cost_usd&sort_order=desc");
+
+        var client = _httpClientFactory.CreateClient("Claude");
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("Cookie", $"sessionKey={apiSessionKey}");
+        request.Headers.Add("Accept", "application/json");
+
+        var response = await client.SendAsync(request);
+        await EnsureSuccessResponse(response, "claude_code/metrics_aggs/users");
+
+        var json = await response.Content.ReadAsStringAsync();
+        var metricsResponse = JsonSerializer.Deserialize<ClaudeCodeMetricsResponse>(json);
+
+        return metricsResponse?.Users.FirstOrDefault();
     }
 
     private async Task<string> PerformClaudeRequest(string endpoint, string sessionKey)

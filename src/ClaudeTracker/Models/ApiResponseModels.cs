@@ -62,6 +62,16 @@ public class AutoReloadSettings
     public int? ReloadAmount { get; set; }
 }
 
+public class OrganizationRateLimitsResponse
+{
+    [JsonPropertyName("rate_limit_tier")]
+    public string RateLimitTier { get; set; } = string.Empty;
+
+    /// <summary>Monthly spend threshold in cents (e.g. 20000000 = $200,000).</summary>
+    [JsonPropertyName("spend_threshold")]
+    public int SpendThreshold { get; set; }
+}
+
 public class ConsoleOrganization
 {
     [JsonPropertyName("id")]

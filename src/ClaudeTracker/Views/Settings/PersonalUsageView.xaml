@@ -178,7 +178,7 @@
 
                 <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"
                            Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                    <Run Text="1. Open " /><Run Text="console.anthropic.com" FontWeight="SemiBold" />
+                    <Run Text="1. Open " /><Run Text="platform.claude.com" FontWeight="SemiBold" />
                     <LineBreak />
                     <Run Text="2. Open DevTools (F12) → Application → Cookies" />
                     <LineBreak />
@@ -206,6 +206,19 @@
                             Style="{StaticResource MaterialDesignRaisedButton}"
                             HorizontalAlignment="Left" Height="36" />
                 </StackPanel>
+
+            </StackPanel>
+
+            <StackPanel x:Name="ApiUserPickerPanel" Visibility="Collapsed" Margin="0,8,0,0">
+                <TextBlock Text="Select your Claude Code identity" FontSize="12" FontWeight="Medium" Margin="0,0,0,6"
+                           Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+                <ComboBox x:Name="ApiUserCombo"
+                          Style="{StaticResource MaterialDesignFilledComboBox}"
+                          DisplayMemberPath="DisplayName"
+                          Margin="0,0,0,8" />
+                <Button x:Name="ApiUserSaveButton" Content="Confirm"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        HorizontalAlignment="Left" Height="36" />
             </StackPanel>
 
             <ProgressBar x:Name="ApiLoadingBar" IsIndeterminate="True" Visibility="Collapsed"

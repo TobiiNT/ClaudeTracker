@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
 using ClaudeTracker.Services.Interfaces;
+using ClaudeTracker.Utilities;
 using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views.Settings;
@@ -49,7 +50,7 @@ public partial class PersonalUsageView : UserControl
 
         BrowserApiSignInButton.Click += async (_, _) =>
         {
-            var window = new BrowserSignInWindow("https://console.anthropic.com/login", "platform.claude.com");
+            var window = new BrowserSignInWindow(Constants.APIEndpoints.PlatformLogin, "platform.claude.com");
             window.Owner = Window.GetWindow(this);
             window.Show();
             var result = await window.ResultTask;
@@ -114,11 +115,22 @@ public partial class PersonalUsageView : UserControl
         };
 
         ApiOrgCombo.ItemsSource = _apiVm.Organizations;
+        ApiUserCombo.ItemsSource = _apiVm.ClaudeCodeUsers;
+
+        ApiUserSaveButton.Click += (_, _) =>
+        {
+            _apiVm.SelectedUser = ApiUserCombo.SelectedItem as Models.ClaudeCodeUserMetrics;
+            _apiVm.SaveUserSelectionCommand.Execute(null);
+        };
 
         _apiVm.PropertyChanged += (_, _) => UpdateApiUI();
 
         UpdateUI();
         UpdateApiUI();
+
+        // Auto-load user picker if API is already configured
+        if (_apiVm.IsConfigured)
+            _ = _apiVm.LoadClaudeCodeUsersCommand.ExecuteAsync(null);
     }
 
     private void UpdateUI()
@@ -150,6 +162,7 @@ public partial class PersonalUsageView : UserControl
             ApiSetupPanel.Visibility = _apiVm.IsConfigured ? Visibility.Collapsed : Visibility.Visible;
             ApiStatusText.Text = _apiVm.TestStatus;
             ApiOrgPickerPanel.Visibility = _apiVm.ShowOrgPicker ? Visibility.Visible : Visibility.Collapsed;
+            ApiUserPickerPanel.Visibility = _apiVm.ShowUserPicker ? Visibility.Visible : Visibility.Collapsed;
         });
     }
 }

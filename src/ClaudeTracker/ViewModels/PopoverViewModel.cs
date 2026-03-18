@@ -32,7 +32,17 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private bool _hasApiUsage;
     [ObservableProperty] private string _apiUsedText = "";
     [ObservableProperty] private string _apiRemainingText = "";
+    [ObservableProperty] private string _apiTotalText = "";
     [ObservableProperty] private double _apiPercentage;
+    [ObservableProperty] private bool _hasPersonalMetrics;
+    [ObservableProperty] private string _personalCostText = "";
+    [ObservableProperty] private string _personalAvgCostText = "";
+    [ObservableProperty] private string _personalSessionsText = "";
+    [ObservableProperty] private string _personalLinesText = "";
+    [ObservableProperty] private bool _hasDailyMetrics;
+    [ObservableProperty] private string _dailyCostText = "";
+    [ObservableProperty] private string _dailySessionsText = "";
+    [ObservableProperty] private string _dailyLinesText = "";
     [ObservableProperty] private string _lastUpdatedText = "";
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private bool _hasCredentials;
@@ -285,7 +295,31 @@ public partial class PopoverViewModel : ObservableObject
         {
             ApiUsedText = apiUsage.FormattedUsed;
             ApiRemainingText = apiUsage.FormattedRemaining;
+            ApiTotalText = apiUsage.FormattedTotal;
             ApiPercentage = apiUsage.UsagePercentage;
+
+            // For API-only users (no subscription), show last updated from API data
+            if (!HasClaudeUsage)
+                LastUpdatedText = $"Updated {FormatterHelper.FormatTimeAgo(apiUsage.LastUpdated)}";
+        }
+
+        var personalMetrics = profile.PersonalMetrics;
+        HasPersonalMetrics = personalMetrics != null;
+        if (personalMetrics != null)
+        {
+            PersonalCostText = personalMetrics.FormattedTotalCost;
+            PersonalAvgCostText = personalMetrics.FormattedAvgCostPerDay;
+            PersonalSessionsText = $"{personalMetrics.TotalSessions} sessions";
+            PersonalLinesText = $"{personalMetrics.TotalLinesAccepted:N0} lines";
+        }
+
+        var dailyMetrics = profile.DailyMetrics;
+        HasDailyMetrics = dailyMetrics != null;
+        if (dailyMetrics != null)
+        {
+            DailyCostText = dailyMetrics.FormattedTotalCost;
+            DailySessionsText = $"{dailyMetrics.TotalSessions} sessions";
+            DailyLinesText = $"{dailyMetrics.TotalLinesAccepted:N0} lines";
         }
     }
 

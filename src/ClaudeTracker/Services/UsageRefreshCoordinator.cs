@@ -18,6 +18,8 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     private DateTime _lastStatusFetch = DateTime.MinValue;
     private bool _isRefreshing;
     private DateTime _rateLimitedUntil = DateTime.MinValue;
+    private DateTime _lastApiFetch = DateTime.MinValue;
+    private static readonly TimeSpan ApiRefreshInterval = TimeSpan.FromMinutes(5);
 
     public bool IsRunning => _timer?.IsEnabled ?? false;
     public ClaudeStatus CurrentStatus => _cachedStatus;
@@ -118,12 +120,47 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
 
             _notificationService.CheckKeyExpiry(profile);
 
-            // Fetch API Console usage
-            if (profile.HasAPIConsole)
+            // Fetch API Console + personal metrics (non-fatal, throttled to every 5 min)
+            var shouldFetchApi = profile.HasAPIConsole
+                && (DateTime.UtcNow - _lastApiFetch) >= ApiRefreshInterval;
+            if (shouldFetchApi)
             {
-                var apiUsage = await _apiService.FetchAPIUsageData(
-                    profile.ApiOrganizationId!, profile.ApiSessionKey!);
-                _profileService.UpdateUsageData(profile.Id, apiUsage: apiUsage);
+                try
+                {
+                    var apiUsage = await _apiService.FetchAPIUsageData(
+                        profile.ApiOrganizationId!, profile.ApiSessionKey!);
+                    _profileService.UpdateUsageData(profile.Id, apiUsage: apiUsage);
+                }
+                catch (HttpRequestException ex)
+                {
+                    LoggingService.Instance.LogWarning($"API Console usage fetch failed (non-fatal): {ex.Message}");
+                }
+
+                if (!string.IsNullOrEmpty(profile.ApiUserSearch))
+                {
+                    try
+                    {
+                        var today = DateTime.UtcNow.Date;
+                        var tomorrow = today.AddDays(1);
+
+                        // Fetch monthly and daily metrics in parallel
+                        var monthlyTask = _apiService.FetchClaudeCodeUserMetrics(
+                            profile.ApiOrganizationId!, profile.ApiSessionKey!, profile.ApiUserSearch);
+                        var dailyTask = _apiService.FetchClaudeCodeUserMetrics(
+                            profile.ApiOrganizationId!, profile.ApiSessionKey!, profile.ApiUserSearch,
+                            today, tomorrow);
+                        await Task.WhenAll(monthlyTask, dailyTask);
+
+                        _profileService.UpdatePersonalMetrics(profile.Id, await monthlyTask);
+                        profile.DailyMetrics = await dailyTask;
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        LoggingService.Instance.LogWarning($"Personal metrics fetch failed (non-fatal): {ex.Message}");
+                    }
+                }
+
+                _lastApiFetch = DateTime.UtcNow;
             }
 
             // Fetch Claude system status (every 5 minutes)
