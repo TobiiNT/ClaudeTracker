@@ -14,27 +14,42 @@ public class ClaudeCodeSettingsService : IClaudeCodeSettingsService
 
     public List<PermissionRuleEntry> GetPermissions()
     {
-        var path = Constants.Hooks.ClaudeSettingsPath;
-        if (!File.Exists(path)) return new();
-
-        string json;
-        lock (_fileLock)
+        try
         {
-            json = File.ReadAllText(path);
+            var path = Constants.Hooks.ClaudeSettingsPath;
+            if (!File.Exists(path)) return new();
+
+            string json;
+            lock (_fileLock)
+            {
+                json = File.ReadAllText(path);
+            }
+            return ParsePermissions(json);
         }
-        return ParsePermissions(json);
+        catch (Exception ex)
+        {
+            LoggingService.Instance.LogError("Failed to read Claude Code permissions", ex);
+            return new();
+        }
     }
 
     public void RemovePermission(string key)
     {
-        var path = Constants.Hooks.ClaudeSettingsPath;
-        if (!File.Exists(path)) return;
-
-        lock (_fileLock)
+        try
         {
-            var json = File.ReadAllText(path);
-            var updated = RemovePermission(json, key);
-            File.WriteAllText(path, updated);
+            var path = Constants.Hooks.ClaudeSettingsPath;
+            if (!File.Exists(path)) return;
+
+            lock (_fileLock)
+            {
+                var json = File.ReadAllText(path);
+                var updated = RemovePermission(json, key);
+                File.WriteAllText(path, updated);
+            }
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.LogError("Failed to remove Claude Code permission", ex);
         }
     }
 
