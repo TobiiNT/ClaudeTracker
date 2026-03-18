@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
 using ClaudeTracker.Services.Interfaces;
@@ -20,33 +21,21 @@ public partial class PersonalUsageView : UserControl
         _apiVm = App.Services.GetRequiredService<ApiBillingViewModel>();
         DataContext = _vm;
 
-        // --- Browser sign-in (WebView2) ---
-        if (BrowserSignInWindow.IsWebView2Available())
+        // --- Claude.ai Subscription (CLI auto-detect only) ---
+        AutoDetectButton.Click += async (_, _) =>
         {
-            BrowserSignInCard.Visibility = Visibility.Visible;
-            BrowserApiSignInCard.Visibility = Visibility.Visible;
-        }
-
-        BrowserSignInButton.Click += async (_, _) =>
-        {
-            var window = new BrowserSignInWindow("https://claude.ai/login", "claude.ai");
-            window.Owner = Window.GetWindow(this);
-            window.Show();
-            var result = await window.ResultTask;
-            if (result.HasValue)
-            {
-                SessionKeyInput.Text = result.Value.sessionKey;
-                _vm.SessionKey = result.Value.sessionKey;
-
-                var profile = App.Services.GetRequiredService<IProfileService>().ActiveProfile;
-                if (profile != null && result.Value.expiry.HasValue)
-                    profile.ClaudeSessionKeyExpiry = result.Value.expiry;
-
-                LoadingBar.Visibility = Visibility.Visible;
-                await _vm.TestConnectionCommand.ExecuteAsync(null);
-                LoadingBar.Visibility = Visibility.Collapsed;
-            }
+            LoadingBar.Visibility = Visibility.Visible;
+            await _vm.AutoDetectCommand.ExecuteAsync(null);
+            LoadingBar.Visibility = Visibility.Collapsed;
         };
+
+        DisconnectButton.Click += (_, _) => _vm.DisconnectCommand.Execute(null);
+
+        _vm.PropertyChanged += (_, _) => UpdateUI();
+
+        // --- Claude Code API Usage ---
+        if (BrowserSignInWindow.IsWebView2Available())
+            BrowserApiSignInCard.Visibility = Visibility.Visible;
 
         BrowserApiSignInButton.Click += async (_, _) =>
         {
@@ -69,36 +58,6 @@ public partial class PersonalUsageView : UserControl
             }
         };
 
-        // --- Claude.ai connection ---
-        AutoDetectButton.Click += async (_, _) =>
-        {
-            LoadingBar.Visibility = Visibility.Visible;
-            await _vm.AutoDetectCommand.ExecuteAsync(null);
-            LoadingBar.Visibility = Visibility.Collapsed;
-        };
-
-        TestButton.Click += async (_, _) =>
-        {
-            LoadingBar.Visibility = Visibility.Visible;
-            await _vm.TestConnectionCommand.ExecuteAsync(null);
-            LoadingBar.Visibility = Visibility.Collapsed;
-        };
-
-        DisconnectButton.Click += (_, _) => _vm.DisconnectCommand.Execute(null);
-        SaveOrgButton.Click += async (_, _) =>
-        {
-            _vm.SelectedOrg = OrgCombo.SelectedItem as Models.AccountInfo;
-            await _vm.SelectOrganizationCommand.ExecuteAsync(null);
-        };
-
-        _vm.PropertyChanged += (_, _) => UpdateUI();
-
-        SessionKeyInput.TextChanged += (_, _) => _vm.SessionKey = SessionKeyInput.Text;
-        SessionKeyInput.Text = _vm.SessionKey;
-
-        OrgCombo.ItemsSource = _vm.Organizations;
-
-        // --- API Billing ---
         ApiTestButton.Click += async (_, _) =>
         {
             _apiVm.ApiKey = ApiKeyInput.Text;
@@ -108,11 +67,22 @@ public partial class PersonalUsageView : UserControl
         };
 
         ApiDisconnectButton.Click += (_, _) => _apiVm.DisconnectCommand.Execute(null);
-        ApiSaveButton.Click += async (_, _) =>
+        ApiChangeUserButton.Click += async (_, _) =>
         {
-            _apiVm.SelectedOrg = ApiOrgCombo.SelectedItem as Models.APIOrganization;
+            await _apiVm.ChangeUserCommand.ExecuteAsync(null);
+        };
+
+        // Org dropdown: only fetch on deliberate click selection, block scroll wheel
+        ApiOrgCombo.PreviewMouseWheel += ComboBox_BlockScrollWheel;
+        ApiOrgCombo.DropDownClosed += async (_, _) =>
+        {
+            var selected = ApiOrgCombo.SelectedItem as Models.APIOrganization;
+            if (selected == null || selected == _apiVm.SelectedOrg) return;
+            _apiVm.SelectedOrg = selected;
             await _apiVm.SelectOrganizationCommand.ExecuteAsync(null);
         };
+
+        ApiUserCombo.PreviewMouseWheel += ComboBox_BlockScrollWheel;
 
         ApiOrgCombo.ItemsSource = _apiVm.Organizations;
         ApiUserCombo.ItemsSource = _apiVm.ClaudeCodeUsers;
@@ -127,10 +97,13 @@ public partial class PersonalUsageView : UserControl
 
         UpdateUI();
         UpdateApiUI();
+    }
 
-        // Auto-load user picker if API is already configured
-        if (_apiVm.IsConfigured)
-            _ = _apiVm.LoadClaudeCodeUsersCommand.ExecuteAsync(null);
+    /// <summary>Prevents mouse wheel from changing ComboBox selection when dropdown is closed.</summary>
+    private static void ComboBox_BlockScrollWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (sender is ComboBox combo && !combo.IsDropDownOpen)
+            e.Handled = true;
     }
 
     private void UpdateUI()
@@ -141,11 +114,6 @@ public partial class PersonalUsageView : UserControl
             SetupPanel.Visibility = _vm.IsConfigured ? Visibility.Collapsed : Visibility.Visible;
             ConnectedText.Text = _vm.ConnectedLabel;
             ConnectedDetailText.Text = _vm.ConnectedDetail;
-            TestStatusText.Text = _vm.TestStatus;
-            TestStatusText.Foreground = _vm.TestSuccess
-                ? new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50))
-                : new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36));
-            OrgPickerPanel.Visibility = _vm.ShowOrgPicker ? Visibility.Visible : Visibility.Collapsed;
 
             AutoDetectStatus.Text = _vm.AutoDetectStatusText;
             AutoDetectStatus.Foreground = _vm.AutoDetectSuccess
@@ -161,8 +129,24 @@ public partial class PersonalUsageView : UserControl
             ApiConnectedPanel.Visibility = _apiVm.IsConfigured ? Visibility.Visible : Visibility.Collapsed;
             ApiSetupPanel.Visibility = _apiVm.IsConfigured ? Visibility.Collapsed : Visibility.Visible;
             ApiStatusText.Text = _apiVm.TestStatus;
+            ApiStatusText.Foreground = _apiVm.TestSuccess
+                ? new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50))
+                : new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36));
+
+            var wasOrgHidden = ApiOrgPickerPanel.Visibility != Visibility.Visible;
+            var wasUserHidden = ApiUserPickerPanel.Visibility != Visibility.Visible;
+
             ApiOrgPickerPanel.Visibility = _apiVm.ShowOrgPicker ? Visibility.Visible : Visibility.Collapsed;
             ApiUserPickerPanel.Visibility = _apiVm.ShowUserPicker ? Visibility.Visible : Visibility.Collapsed;
+            ApiUserLoadingBar.Visibility = _apiVm.IsLoadingUsers ? Visibility.Visible : Visibility.Collapsed;
+            ApiTrackedUserText.Text = string.IsNullOrEmpty(_apiVm.TrackedUserLabel) ? "" : $"Tracking: {_apiVm.TrackedUserLabel}";
+            ApiErrorText.Text = _apiVm.IsConfigured && !_apiVm.TestSuccess ? _apiVm.TestStatus : "";
+
+            // Auto-scroll into view when panels first appear
+            if (wasUserHidden && _apiVm.ShowUserPicker)
+                ApiUserPickerPanel.BringIntoView();
+            else if (wasOrgHidden && _apiVm.ShowOrgPicker)
+                ApiOrgPickerPanel.BringIntoView();
         });
     }
 }

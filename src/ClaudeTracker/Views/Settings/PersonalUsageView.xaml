@@ -4,8 +4,8 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
         <StackPanel MaxWidth="480">
-            <TextBlock Text="Connect to Claude" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
-            <TextBlock Text="Link your Claude account to track usage"
+            <TextBlock Text="Claude.ai Subscription" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="Track your Pro/Team/Enterprise usage cap (% remaining)"
                        FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
                        Margin="0,0,0,20" />
 
@@ -29,102 +29,18 @@
 
             <!-- Setup (not connected) -->
             <StackPanel x:Name="SetupPanel">
-
-                <!-- Option 0: Browser sign-in (shown when WebView2 available) -->
-                <Border x:Name="BrowserSignInCard" Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8"
-                        Visibility="Collapsed">
+                <Border Style="{StaticResource UsageCardStyle}" Padding="16">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <materialDesign:PackIcon Kind="Web" Width="18" Height="18"
-                                                     Foreground="#2196F3" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="Sign in with Browser" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <TextBlock Text="Sign in directly — session key is captured automatically"
-                                   FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
-                        <Button x:Name="BrowserSignInButton" Content="Open Browser"
-                                Style="{StaticResource MaterialDesignRaisedButton}"
-                                HorizontalAlignment="Left" Height="34" FontSize="12" />
-                    </StackPanel>
-                </Border>
-
-                <!-- Option 1: Auto-detect from Claude Code CLI -->
-                <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <materialDesign:PackIcon Kind="Console" Width="18" Height="18"
-                                                     Foreground="#7C4DFF" Margin="0,0,8,0"
-                                                     VerticalAlignment="Center" />
-                            <TextBlock Text="Claude Code CLI" FontSize="14" FontWeight="SemiBold"
-                                       VerticalAlignment="Center" />
-                        </StackPanel>
-
-                        <TextBlock Text="Auto-detect credentials from Claude Code (recommended)"
+                        <TextBlock Text="Automatically syncs credentials from your Claude Code CLI login."
                                    FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
                                    Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
 
                         <StackPanel Orientation="Horizontal">
-                            <Button x:Name="AutoDetectButton" Content="Auto-Detect"
+                            <Button x:Name="AutoDetectButton" Content="Connect"
                                     Style="{StaticResource MaterialDesignRaisedButton}"
                                     Height="34" FontSize="12" />
                             <TextBlock x:Name="AutoDetectStatus" FontSize="12" Margin="12,0,0,0"
                                        VerticalAlignment="Center" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Divider -->
-                <Grid Margin="0,8">
-                    <Border BorderThickness="0,0.5,0,0" BorderBrush="#22000000"
-                            VerticalAlignment="Center" />
-                    <TextBlock Text="OR" HorizontalAlignment="Center" FontSize="11"
-                               Foreground="#999" Background="{DynamicResource MaterialDesign.Brush.Background}"
-                               Padding="12,0" />
-                </Grid>
-
-                <!-- Option 2: Manual session key -->
-                <Border Style="{StaticResource UsageCardStyle}" Padding="16">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <materialDesign:PackIcon Kind="KeyVariant" Width="18" Height="18"
-                                                     Foreground="#FF9800" Margin="0,0,8,0"
-                                                     VerticalAlignment="Center" />
-                            <TextBlock Text="Session Key" FontSize="14" FontWeight="SemiBold"
-                                       VerticalAlignment="Center" />
-                        </StackPanel>
-
-                        <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,10"
-                                   Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                            Open claude.ai, press F12, go to Application > Cookies, and copy the sessionKey value.
-                        </TextBlock>
-
-                        <TextBox x:Name="SessionKeyInput"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 materialDesign:HintAssist.Hint="sk-ant-..."
-                                 FontFamily="Consolas"
-                                 FontSize="12"
-                                 MaxLines="1"
-                                 Margin="0,0,0,10" />
-
-                        <Button x:Name="TestButton" Content="Connect"
-                                Style="{StaticResource MaterialDesignRaisedButton}"
-                                HorizontalAlignment="Left" Height="34" FontSize="12" />
-
-                        <!-- Status -->
-                        <TextBlock x:Name="TestStatusText" FontSize="12" TextWrapping="Wrap"
-                                   Margin="0,8,0,0" />
-
-                        <!-- Org Picker (if multiple orgs) -->
-                        <StackPanel x:Name="OrgPickerPanel" Visibility="Collapsed" Margin="0,10,0,0">
-                            <TextBlock Text="Select Organization" FontSize="13" FontWeight="SemiBold"
-                                       Margin="0,0,0,6" />
-                            <ComboBox x:Name="OrgCombo"
-                                      Style="{StaticResource MaterialDesignFilledComboBox}"
-                                      DisplayMemberPath="Name"
-                                      Margin="0,0,0,8" />
-                            <Button x:Name="SaveOrgButton" Content="Save"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
-                                    HorizontalAlignment="Left" Height="34" FontSize="12" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -135,27 +51,37 @@
                          Style="{StaticResource MaterialDesignLinearProgressBar}"
                          Margin="0,8" />
 
-            <!-- API Billing Section -->
+            <!-- Claude Code API Usage Section -->
             <Border BorderThickness="0,0.5,0,0" BorderBrush="#22000000" Margin="0,24,0,0" />
-            <TextBlock Text="API Billing" FontSize="18" FontWeight="Bold" Margin="0,20,0,4" />
-            <TextBlock Text="Track your Anthropic API Console spending"
+            <TextBlock Text="Claude Code API Usage" FontSize="18" FontWeight="Bold" Margin="0,20,0,4" />
+            <TextBlock Text="Track per-user Claude Code spending from API Console ($ cost)"
                        FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
                        Margin="0,0,0,16" />
 
             <Border x:Name="ApiConnectedPanel" Visibility="Collapsed"
                     Style="{StaticResource UsageCardStyle}" Padding="16">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                         <materialDesign:PackIcon Kind="CheckCircle" Foreground="#4CAF50"
                                                  Width="20" Height="20" Margin="0,0,8,0" />
                         <TextBlock x:Name="ApiConnectedText" FontSize="14" FontWeight="SemiBold"
                                    VerticalAlignment="Center" Text="Connected" />
                     </StackPanel>
-                    <Button x:Name="ApiDisconnectButton" Content="Disconnect"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            HorizontalAlignment="Left" Height="32" FontSize="12" />
+                    <TextBlock x:Name="ApiTrackedUserText" FontSize="12" Margin="28,0,0,8"
+                               Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="ApiChangeUserButton" Content="Change User"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                HorizontalAlignment="Left" Height="32" FontSize="12" Margin="0,0,8,0" />
+                        <Button x:Name="ApiDisconnectButton" Content="Disconnect"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                HorizontalAlignment="Left" Height="32" FontSize="12" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
+
+            <TextBlock x:Name="ApiErrorText" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"
+                       Foreground="#F44336" />
 
             <StackPanel x:Name="ApiSetupPanel">
                 <!-- Browser sign-in for API Console -->
@@ -198,24 +124,26 @@
                 <TextBlock x:Name="ApiStatusText" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12" />
 
                 <StackPanel x:Name="ApiOrgPickerPanel" Visibility="Collapsed">
+                    <TextBlock Text="Select Organization" FontSize="12" FontWeight="Medium" Margin="0,0,0,6"
+                               Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
                     <ComboBox x:Name="ApiOrgCombo"
                               Style="{StaticResource MaterialDesignFilledComboBox}"
                               DisplayMemberPath="DisplayName"
                               Margin="0,0,0,12" />
-                    <Button x:Name="ApiSaveButton" Content="Save"
-                            Style="{StaticResource MaterialDesignRaisedButton}"
-                            HorizontalAlignment="Left" Height="36" />
                 </StackPanel>
 
             </StackPanel>
 
-            <StackPanel x:Name="ApiUserPickerPanel" Visibility="Collapsed" Margin="0,8,0,0">
-                <TextBlock Text="Select your Claude Code identity" FontSize="12" FontWeight="Medium" Margin="0,0,0,6"
+            <ProgressBar x:Name="ApiUserLoadingBar" IsIndeterminate="True" Visibility="Collapsed"
+                         Style="{StaticResource MaterialDesignLinearProgressBar}" Margin="0,0,0,8" />
+
+            <StackPanel x:Name="ApiUserPickerPanel" Visibility="Collapsed">
+                <TextBlock Text="Select your identity" FontSize="12" FontWeight="Medium" Margin="0,0,0,6"
                            Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
                 <ComboBox x:Name="ApiUserCombo"
                           Style="{StaticResource MaterialDesignFilledComboBox}"
                           DisplayMemberPath="DisplayName"
-                          Margin="0,0,0,8" />
+                          Margin="0,0,0,12" />
                 <Button x:Name="ApiUserSaveButton" Content="Confirm"
                         Style="{StaticResource MaterialDesignRaisedButton}"
                         HorizontalAlignment="Left" Height="36" />

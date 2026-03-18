@@ -11,6 +11,7 @@ public partial class PersonalUsageViewModel : ObservableObject
 {
     private readonly IClaudeApiService _apiService;
     private readonly IProfileService _profileService;
+    private readonly IUsageRefreshCoordinator _refreshCoordinator;
     private readonly ClaudeCodeSyncService _cliSyncService;
 
     [ObservableProperty] private string _sessionKey = "";
@@ -30,14 +31,16 @@ public partial class PersonalUsageViewModel : ObservableObject
     public PersonalUsageViewModel(
         IClaudeApiService apiService,
         IProfileService profileService,
+        IUsageRefreshCoordinator refreshCoordinator,
         ClaudeCodeSyncService cliSyncService)
     {
         _apiService = apiService;
         _profileService = profileService;
+        _refreshCoordinator = refreshCoordinator;
         _cliSyncService = cliSyncService;
 
         var profile = _profileService.ActiveProfile;
-        IsConfigured = profile?.HasAnyCredentials ?? false;
+        IsConfigured = profile?.HasClaudeAI == true || !string.IsNullOrEmpty(profile?.CliCredentialsJSON);
         if (profile?.ClaudeSessionKey != null)
             SessionKey = profile.ClaudeSessionKey;
 
@@ -178,6 +181,7 @@ public partial class PersonalUsageViewModel : ObservableObject
         profile.CliCredentialsJSON = null;
         profile.HasCliAccount = false;
         profile.CliAccountSyncedAt = null;
+        profile.ClaudeUsage = null;
         _profileService.UpdateProfile(profile);
 
         SessionKey = "";
@@ -188,6 +192,8 @@ public partial class PersonalUsageViewModel : ObservableObject
         AutoDetectSuccess = false;
         ConnectedLabel = "";
         ConnectedDetail = "";
+
+        _refreshCoordinator.RefreshNow();
     }
 
     private void UpdateConnectedInfo()

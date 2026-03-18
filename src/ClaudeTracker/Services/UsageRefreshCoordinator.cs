@@ -73,6 +73,11 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
         _ = RefreshAsync();
     }
 
+    public void InvalidateApiCache()
+    {
+        _lastApiFetch = DateTime.MinValue;
+    }
+
     public void UpdateInterval(double seconds)
     {
         seconds = Math.Clamp(seconds, Constants.RefreshIntervals.MinSeconds, Constants.RefreshIntervals.MaxSeconds);
@@ -107,8 +112,8 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
 
         try
         {
-            // Fetch Claude.ai usage
-            if (profile.HasClaudeAI || !string.IsNullOrEmpty(profile.CliCredentialsJSON))
+            // Fetch Claude.ai subscription usage (only when explicitly configured)
+            if (profile.HasClaudeAI)
             {
                 var usage = await _apiService.FetchUsageData();
                 _profileService.UpdateUsageData(profile.Id, claudeUsage: usage);

@@ -161,7 +161,7 @@ public partial class PopoverViewModel : ObservableObject
         ProfileName = profile.Name;
         HasCredentials = profile.HasUsageCredentials;
 
-        var usage = profile.ClaudeUsage;
+        var usage = profile.HasClaudeAI ? profile.ClaudeUsage : null;
         HasClaudeUsage = usage != null;
         if (usage != null)
         {

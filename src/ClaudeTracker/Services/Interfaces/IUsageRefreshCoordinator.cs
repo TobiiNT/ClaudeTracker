@@ -14,6 +14,8 @@ public interface IUsageRefreshCoordinator
     void Stop();
     /// <summary>Triggers an immediate out-of-cycle refresh.</summary>
     void RefreshNow();
+    /// <summary>Invalidates API fetch cache so next RefreshNow() re-fetches immediately.</summary>
+    void InvalidateApiCache();
     /// <summary>Updates the refresh interval in seconds.</summary>
     void UpdateInterval(double seconds);
     /// <summary>Whether the refresh timer is currently running.</summary>
