@@ -173,4 +173,31 @@ public class PermissionRequestHandlerTests
         Assert.Equal("allow", decision.GetProperty("behavior").GetString());
         Assert.False(decision.TryGetProperty("updatedPermissions", out _));
     }
+
+    [Fact]
+    public void BuildResponseJson_AlwaysAllow_ToolAlwaysAllow_NoRawJson()
+    {
+        var result = new PermissionDecisionResult
+        {
+            Decision = PermissionDecision.AlwaysAllow,
+            AppliedSuggestion = new PermissionSuggestion
+            {
+                Type = "toolAlwaysAllow",
+                Tool = "Bash"
+            }
+        };
+
+        var json = PermissionRequestHandler.BuildResponseJson(result);
+
+        Assert.NotNull(json);
+        using var doc = JsonDocument.Parse(json!);
+        var decision = doc.RootElement
+            .GetProperty("hookSpecificOutput")
+            .GetProperty("decision");
+        Assert.Equal("allow", decision.GetProperty("behavior").GetString());
+        var perms = decision.GetProperty("updatedPermissions");
+        Assert.Equal(1, perms.GetArrayLength());
+        Assert.Equal("toolAlwaysAllow", perms[0].GetProperty("type").GetString());
+        Assert.Equal("Bash", perms[0].GetProperty("tool").GetString());
+    }
 }

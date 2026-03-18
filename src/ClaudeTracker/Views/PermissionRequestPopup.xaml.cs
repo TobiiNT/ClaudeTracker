@@ -641,6 +641,61 @@ public partial class PermissionRequestPopup : Window
 
             AlwaysAllowPanel.Children.Add(btn);
         }
+
+        // Add blanket "Always allow [Tool]" button if not already present
+        var toolName = _info.ToolName;
+        if (!string.IsNullOrEmpty(toolName))
+        {
+            var blanketLabel = $"Always allow {toolName}";
+            var blanketKey = $"{blanketLabel}|{toolName}|";
+            if (seenKeys.Add(blanketKey))
+            {
+                var blanketSuggestion = new PermissionSuggestion
+                {
+                    Type = "toolAlwaysAllow",
+                    Tool = toolName
+                };
+
+                var btn = new Button
+                {
+                    Content = blanketLabel,
+                    Height = 28,
+                    FontSize = 10,
+                    Foreground = new SolidColorBrush(Colors.White),
+                    Cursor = Cursors.Hand,
+                    Margin = new Thickness(0, 0, 4, 0),
+                    ToolTip = $"Always allow all {toolName} operations"
+                };
+
+                var style = new Style(typeof(Button));
+                var template = new ControlTemplate(typeof(Button));
+                var borderFactory = new FrameworkElementFactory(typeof(Border));
+                borderFactory.SetValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x0D, 0x47, 0xA1)));
+                borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+                borderFactory.SetValue(Border.PaddingProperty, new Thickness(8, 0, 8, 0));
+
+                var contentFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+                contentFactory.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+                contentFactory.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+                borderFactory.AppendChild(contentFactory);
+
+                template.VisualTree = borderFactory;
+                borderFactory.Name = "Bd";
+                style.Setters.Add(new Setter(Control.TemplateProperty, template));
+                btn.Style = style;
+
+                btn.Click += (_, _) =>
+                {
+                    SetDecision(new PermissionDecisionResult
+                    {
+                        Decision = PermissionDecision.AlwaysAllow,
+                        AppliedSuggestion = blanketSuggestion
+                    });
+                };
+
+                AlwaysAllowPanel.Children.Add(btn);
+            }
+        }
     }
 
     private void SetDecision(PermissionDecisionResult result)
