@@ -112,8 +112,8 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
 
         try
         {
-            // Fetch Claude.ai subscription usage (only when explicitly configured)
-            if (profile.HasClaudeAI)
+            // Fetch Claude.ai subscription usage (session key or CLI auto-detect)
+            if (profile.HasClaudeAI || profile.HasCliAccount)
             {
                 var usage = await _apiService.FetchUsageData();
                 _profileService.UpdateUsageData(profile.Id, claudeUsage: usage);
