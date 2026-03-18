@@ -42,6 +42,9 @@
                     <RadioButton x:Name="NavHooks" Content="Hooks"
                                  Style="{StaticResource SidebarButton}"
                                  GroupName="SettingsNav" />
+                    <RadioButton x:Name="NavPermissions" Content="Permissions"
+                                 Style="{StaticResource SidebarButton}"
+                                 GroupName="SettingsNav" />
 
 
                     <!-- Other Section -->

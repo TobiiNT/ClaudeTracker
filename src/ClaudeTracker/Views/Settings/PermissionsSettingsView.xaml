@@ -1,0 +1,63 @@
+<UserControl x:Class="ClaudeTracker.Views.Settings.PermissionsSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="24,16" MaxWidth="480" HorizontalAlignment="Left">
+            <!-- Title -->
+            <TextBlock Text="Permissions" FontSize="20" FontWeight="Bold"
+                       Foreground="{DynamicResource MaterialDesign.Brush.Foreground}" />
+            <TextBlock Text="Always-allow rules from Claude Code settings"
+                       FontSize="12" Opacity="0.6" Margin="0,2,0,16"
+                       Foreground="{DynamicResource MaterialDesign.Brush.Foreground}" />
+
+            <!-- Empty state -->
+            <TextBlock x:Name="EmptyText" Text="No permission rules found."
+                       FontSize="13" Opacity="0.5" Margin="0,8,0,16"
+                       Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                       Visibility="Collapsed" />
+
+            <!-- Rules list -->
+            <ItemsControl x:Name="RulesList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="0,0,0,0.5"
+                                BorderBrush="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
+                                Padding="0,6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding DisplayLabel}" FontSize="13"
+                                               Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Key}" FontSize="10" Opacity="0.5"
+                                               Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+
+                                <Button Grid.Column="1" x:Name="DeleteBtn"
+                                        Content="&#x2715;" FontSize="12"
+                                        Width="28" Height="28"
+                                        ToolTip="Remove this rule"
+                                        Click="DeleteRule_Click"
+                                        Tag="{Binding Key}"
+                                        Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                                        Background="Transparent" BorderThickness="0"
+                                        Cursor="Hand" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Refresh button -->
+            <Button x:Name="RefreshButton" Content="Refresh" Margin="0,16,0,0"
+                    HorizontalAlignment="Left" Height="32" Padding="16,0"
+                    Style="{StaticResource MaterialDesignOutlinedButton}" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
