@@ -18,7 +18,7 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     private DateTime _lastStatusFetch = DateTime.MinValue;
     private bool _isRefreshing;
     private DateTime _rateLimitedUntil = DateTime.MinValue;
-    private DateTime _lastApiFetch = DateTime.MinValue;
+    private long _lastApiFetchTicks = DateTime.MinValue.Ticks;
     private static readonly TimeSpan ApiRefreshInterval = TimeSpan.FromMinutes(5);
 
     public bool IsRunning => _timer?.IsEnabled ?? false;
@@ -75,7 +75,7 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
 
     public void InvalidateApiCache()
     {
-        _lastApiFetch = DateTime.MinValue;
+        Interlocked.Exchange(ref _lastApiFetchTicks, DateTime.MinValue.Ticks);
     }
 
     public void UpdateInterval(double seconds)
@@ -126,8 +126,9 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
             _notificationService.CheckKeyExpiry(profile);
 
             // Fetch API Console + personal metrics (non-fatal, throttled to every 5 min)
+            var lastApiFetch = new DateTime(Interlocked.Read(ref _lastApiFetchTicks));
             var shouldFetchApi = profile.HasAPIConsole
-                && (DateTime.UtcNow - _lastApiFetch) >= ApiRefreshInterval;
+                && (DateTime.UtcNow - lastApiFetch) >= ApiRefreshInterval;
             if (shouldFetchApi)
             {
                 try
@@ -165,7 +166,7 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
                     }
                 }
 
-                _lastApiFetch = DateTime.UtcNow;
+                Interlocked.Exchange(ref _lastApiFetchTicks, DateTime.UtcNow.Ticks);
             }
 
             // Fetch Claude system status (every 5 minutes)

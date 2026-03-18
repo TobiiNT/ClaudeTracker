@@ -193,6 +193,7 @@ public partial class PersonalUsageViewModel : ObservableObject
         ConnectedLabel = "";
         ConnectedDetail = "";
 
+        _refreshCoordinator.InvalidateApiCache();
         _refreshCoordinator.RefreshNow();
     }
 

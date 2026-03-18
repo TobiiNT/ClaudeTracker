@@ -11,7 +11,6 @@ public partial class SettingsViewModel : ObservableObject
     private object? _currentView;
 
     public PersonalUsageViewModel PersonalUsage { get; }
-    public ApiBillingViewModel ApiBilling { get; }
     public CliAccountViewModel CliAccount { get; }
     public AppearanceViewModel Appearance { get; }
     public GeneralSettingsViewModel GeneralSettings { get; }
@@ -21,7 +20,6 @@ public partial class SettingsViewModel : ObservableObject
 
     public SettingsViewModel(
         PersonalUsageViewModel personalUsage,
-        ApiBillingViewModel apiBilling,
         CliAccountViewModel cliAccount,
         AppearanceViewModel appearance,
         GeneralSettingsViewModel generalSettings,
@@ -30,7 +28,6 @@ public partial class SettingsViewModel : ObservableObject
         AboutViewModel about)
     {
         PersonalUsage = personalUsage;
-        ApiBilling = apiBilling;
         CliAccount = cliAccount;
         Appearance = appearance;
         GeneralSettings = generalSettings;
@@ -44,7 +41,6 @@ public partial class SettingsViewModel : ObservableObject
         CurrentView = value switch
         {
             "PersonalUsage" => PersonalUsage,
-            "ApiBilling" => ApiBilling,
             "CliAccount" => CliAccount,
             "Appearance" => Appearance,
             "General" => GeneralSettings,
