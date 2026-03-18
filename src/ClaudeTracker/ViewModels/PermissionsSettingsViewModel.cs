@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services.Interfaces;
 
-namespace ClaudeTracker.ViewModels.Settings;
+namespace ClaudeTracker.ViewModels;
 
 public partial class PermissionsSettingsViewModel : ObservableObject
 {

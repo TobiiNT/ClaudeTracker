@@ -6,7 +6,6 @@ using MaterialDesignThemes.Wpf;
 using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.ViewModels;
-using ClaudeTracker.ViewModels.Settings;
 using ClaudeTracker.TrayIcon;
 using ClaudeTracker.Services.Handlers;
 using ClaudeTracker.Services.Observers;
