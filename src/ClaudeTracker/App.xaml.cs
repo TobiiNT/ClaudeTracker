@@ -6,6 +6,7 @@ using MaterialDesignThemes.Wpf;
 using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.ViewModels;
+using ClaudeTracker.ViewModels.Settings;
 using ClaudeTracker.TrayIcon;
 using ClaudeTracker.Services.Handlers;
 using ClaudeTracker.Services.Observers;
@@ -360,6 +361,7 @@ public partial class App : Application
         services.AddSingleton<IUpdateService, UpdateService>();
         services.AddSingleton<IClaudeStatusService, ClaudeStatusService>();
         services.AddSingleton<INetworkMonitorService, NetworkMonitorService>();
+        services.AddSingleton<IClaudeCodeSettingsService, ClaudeCodeSettingsService>();
 
         // Tray
         services.AddSingleton<TrayIconManager>();
@@ -377,6 +379,7 @@ public partial class App : Application
         services.AddTransient<ProfilesViewModel>();
 
         services.AddTransient<HooksSettingsViewModel>();
+        services.AddTransient<PermissionsSettingsViewModel>();
         services.AddTransient<AboutViewModel>();
 
         // HttpClient
