@@ -215,7 +215,10 @@ public partial class PopoverWindow : Window
             else if (!_viewModel.HasClaudeUsage && !_viewModel.HasApiUsage && !_viewModel.HasPersonalMetrics)
             {
                 StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00)); // orange
-                StatusText.Text = "Waiting for usage data...";
+                // Show error/rate-limit message if available, otherwise generic waiting text
+                StatusText.Text = !string.IsNullOrEmpty(_viewModel.LastUpdatedText)
+                    ? _viewModel.LastUpdatedText
+                    : "Waiting for usage data...";
             }
             else
             {

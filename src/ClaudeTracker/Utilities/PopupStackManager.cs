@@ -67,12 +67,24 @@ public static class PopupStackManager
     {
         try
         {
-            var source = PresentationSource.FromVisual(Application.Current.MainWindow);
+            var window = Application.Current?.MainWindow;
+            if (window == null) return GetDpiScaleFromSystem();
+
+            var source = PresentationSource.FromVisual(window);
             if (source?.CompositionTarget != null)
                 return source.CompositionTarget.TransformToDevice.M11;
         }
         catch { /* fall through */ }
-        return 1.0;
+        return GetDpiScaleFromSystem();
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern uint GetDpiForSystem();
+
+    private static double GetDpiScaleFromSystem()
+    {
+        try { return GetDpiForSystem() / 96.0; }
+        catch { return 1.0; }
     }
 
     public static void PositionWindow(Window popup)

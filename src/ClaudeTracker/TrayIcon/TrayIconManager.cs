@@ -96,20 +96,43 @@ public class TrayIconManager : IDisposable
         try
         {
             var profile = _profileService.ActiveProfile;
-            var usage = profile?.ClaudeUsage;
+            var claudeUsage = profile?.HasClaudeAI == true ? profile.ClaudeUsage : null;
+            var apiUsage = profile?.HasAPIConsole == true ? profile.ApiUsage : null;
             var iconConfig = profile?.IconConfig ?? MenuBarIconConfiguration.Default;
             var sessionConfig = iconConfig.GetConfig(MenuBarMetricType.Session);
 
-            var percentage = usage?.EffectiveSessionPercentage ?? 0;
+            double percentage;
+            string tooltipText;
+
+            if (claudeUsage != null)
+            {
+                // Subscription user: show session usage %
+                percentage = claudeUsage.EffectiveSessionPercentage;
+                tooltipText = $"Claude Usage: {FormatterHelper.FormatPercentage(percentage)} used\nResets: {FormatterHelper.FormatTimeRemaining(claudeUsage.SessionResetTime)}";
+            }
+            else if (apiUsage != null)
+            {
+                // API-only user: show budget usage %
+                percentage = apiUsage.UsagePercentage;
+                tooltipText = $"API Budget: {apiUsage.FormattedUsed} / {apiUsage.FormattedTotal} ({FormatterHelper.FormatPercentage(percentage)} used)";
+            }
+            else
+            {
+                percentage = 0;
+                tooltipText = "Claude Tracker - No usage data";
+            }
+
             var displayPercentage = UsageStatusCalculator.GetDisplayPercentage(
                 percentage, iconConfig.ShowRemainingPercentage);
             var status = UsageStatusCalculator.CalculateStatus(
                 percentage, iconConfig.ShowRemainingPercentage);
             var style = sessionConfig?.IconStyle ?? MenuBarIconStyle.Battery;
-            var isDark = App.IsSystemDarkMode();
+            var isDark = App.IsTaskbarDarkMode();
 
             var customColor = iconConfig.UseCustomColor ? iconConfig.CustomColorHex : null;
-            var metricPrefix = iconConfig.ShowIconNames ? "S:" : null;
+            var metricPrefix = iconConfig.ShowIconNames
+                ? (claudeUsage != null ? "S:" : "$:")
+                : null;
             var icon = _renderer.RenderIcon(
                 displayPercentage, status, style,
                 iconConfig.MonochromeMode, isDark, customColor,
@@ -121,9 +144,7 @@ public class TrayIconManager : IDisposable
                 _trayIcon.Icon = icon;
                 oldIcon?.Dispose();
 
-                _tooltipText = usage != null
-                    ? $"Claude Usage: {FormatterHelper.FormatPercentage(percentage)} used\nResets: {FormatterHelper.FormatTimeRemaining(usage.SessionResetTime)}"
-                    : "Claude Tracker - No usage data";
+                _tooltipText = tooltipText;
             });
         }
         catch (Exception ex)

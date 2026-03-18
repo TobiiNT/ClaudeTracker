@@ -57,7 +57,7 @@ public partial class FloatingUsageWindow : Window
             var profile = App.Services.GetRequiredService<Services.Interfaces.IProfileService>().ActiveProfile;
             if (profile == null) return;
 
-            var usage = profile.ClaudeUsage;
+            var usage = profile.HasClaudeAI ? profile.ClaudeUsage : null;
             if (usage != null)
                 LastUpdatedText.Text = $"Updated {Utilities.FormatterHelper.FormatTimeAgo(usage.LastUpdated)}";
             else if (profile.ApiUsage != null)

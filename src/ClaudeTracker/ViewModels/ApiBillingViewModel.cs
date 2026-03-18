@@ -11,6 +11,7 @@ public partial class ApiBillingViewModel : ObservableObject
     private readonly IClaudeApiService _apiService;
     private readonly IProfileService _profileService;
     private readonly ISettingsService _settingsService;
+    private readonly IUsageRefreshCoordinator _refreshCoordinator;
 
     [ObservableProperty] private string _apiKey = "";
     [ObservableProperty] private bool _isTesting;
@@ -20,19 +21,24 @@ public partial class ApiBillingViewModel : ObservableObject
     [ObservableProperty] private APIOrganization? _selectedOrg;
     [ObservableProperty] private bool _isConfigured;
     [ObservableProperty] private bool _showUserPicker;
+    [ObservableProperty] private bool _isLoadingUsers;
     [ObservableProperty] private ClaudeCodeUserMetrics? _selectedUser;
+    [ObservableProperty] private string _trackedUserLabel = "";
 
     public ObservableCollection<APIOrganization> Organizations { get; } = new();
     public ObservableCollection<ClaudeCodeUserMetrics> ClaudeCodeUsers { get; } = new();
 
-    public ApiBillingViewModel(IClaudeApiService apiService, IProfileService profileService, ISettingsService settingsService)
+    public ApiBillingViewModel(IClaudeApiService apiService, IProfileService profileService,
+        ISettingsService settingsService, IUsageRefreshCoordinator refreshCoordinator)
     {
         _apiService = apiService;
         _profileService = profileService;
         _settingsService = settingsService;
+        _refreshCoordinator = refreshCoordinator;
 
         var profile = _profileService.ActiveProfile;
         IsConfigured = profile?.HasAPIConsole ?? false;
+        TrackedUserLabel = profile?.ApiUserSearch ?? "";
     }
 
     [RelayCommand]
@@ -42,6 +48,8 @@ public partial class ApiBillingViewModel : ObservableObject
 
         IsTesting = true;
         TestStatus = "Testing connection...";
+        ShowOrgPicker = false;
+        ShowUserPicker = false;
 
         try
         {
@@ -54,12 +62,20 @@ public partial class ApiBillingViewModel : ObservableObject
             if (orgs.Count == 1)
             {
                 SelectedOrg = orgs[0];
-                await SaveConfiguration();
+                TestStatus = $"Connected to {orgs[0].DisplayName}";
+                TestSuccess = true;
+                await FetchUsersForOrg(orgs[0]);
+            }
+            else if (orgs.Count > 1)
+            {
+                ShowOrgPicker = true;
+                TestStatus = "Select your organization:";
+                TestSuccess = true;
             }
             else
             {
-                ShowOrgPicker = true;
-                TestStatus = $"Found {orgs.Count} organizations.";
+                TestStatus = "No organizations found.";
+                TestSuccess = false;
             }
         }
         catch (Exception ex)
@@ -73,33 +89,30 @@ public partial class ApiBillingViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Called when org is selected from the dropdown — immediately fetches users.
+    /// </summary>
     [RelayCommand]
     private async Task SelectOrganization()
     {
         if (SelectedOrg == null) return;
-        await SaveConfiguration();
-    }
-
-    private async Task SaveConfiguration()
-    {
-        var profile = _profileService.ActiveProfile;
-        if (profile == null || SelectedOrg == null) return;
-
-        var credentials = _profileService.LoadCredentials(profile.Id);
-        credentials.ApiSessionKey = ApiKey.Trim();
-        credentials.ApiOrganizationId = SelectedOrg.Id;
-        _profileService.SaveCredentials(profile.Id, credentials);
-
         TestStatus = $"Connected to {SelectedOrg.DisplayName}";
         TestSuccess = true;
-        IsConfigured = true;
-        ShowOrgPicker = false;
+        await FetchUsersForOrg(SelectedOrg);
+    }
 
-        // Auto-fetch Claude Code users for identity picker
+    private async Task FetchUsersForOrg(APIOrganization org)
+    {
+        var profile = _profileService.ActiveProfile;
+        if (profile == null) return;
+
+        IsLoadingUsers = true;
+        ClaudeCodeUsers.Clear();
+        ShowUserPicker = false;
+
         try
         {
-            var users = await _apiService.FetchClaudeCodeAllUsers(SelectedOrg.Id, ApiKey.Trim());
-            ClaudeCodeUsers.Clear();
+            var users = await _apiService.FetchClaudeCodeAllUsers(org.Id, ApiKey.Trim());
             foreach (var user in users)
                 ClaudeCodeUsers.Add(user);
 
@@ -109,22 +122,70 @@ public partial class ApiBillingViewModel : ObservableObject
                 if (!string.IsNullOrEmpty(profile.ApiUserSearch))
                     SelectedUser = users.FirstOrDefault(u => u.DisplayName == profile.ApiUserSearch);
             }
+            else
+            {
+                TestStatus = $"Connected to {org.DisplayName}, but no users found.";
+            }
         }
         catch (Exception ex)
         {
+            TestStatus = $"Connected, but failed to load users: {ex.Message}";
+            TestSuccess = false;
             Services.LoggingService.Instance.LogWarning($"Failed to fetch Claude Code users: {ex.Message}");
+        }
+        finally
+        {
+            IsLoadingUsers = false;
         }
     }
 
+    /// <summary>
+    /// Final confirm — saves org + user selection together.
+    /// </summary>
     [RelayCommand]
-    private async Task LoadClaudeCodeUsers()
+    private void SaveUserSelection()
+    {
+        if (SelectedUser == null || SelectedOrg == null) return;
+        var profile = _profileService.ActiveProfile;
+        if (profile == null) return;
+
+        // Save credentials
+        var credentials = _profileService.LoadCredentials(profile.Id);
+        credentials.ApiSessionKey = ApiKey.Trim();
+        credentials.ApiOrganizationId = SelectedOrg.Id;
+        _profileService.SaveCredentials(profile.Id, credentials);
+
+        // Save user selection
+        profile.ApiUserSearch = SelectedUser.DisplayName;
+        _settingsService.Save();
+
+        ShowUserPicker = false;
+        ShowOrgPicker = false;
+        IsConfigured = true;
+        TrackedUserLabel = SelectedUser.DisplayName;
+        TestStatus = $"Tracking: {SelectedUser.DisplayName}";
+        TestSuccess = true;
+
+        _refreshCoordinator.InvalidateApiCache();
+        _refreshCoordinator.RefreshNow();
+    }
+
+    [RelayCommand]
+    private async Task ChangeUser()
     {
         var profile = _profileService.ActiveProfile;
         if (profile == null) return;
 
         var credentials = _profileService.LoadCredentials(profile.Id);
         if (string.IsNullOrEmpty(credentials.ApiSessionKey) || string.IsNullOrEmpty(credentials.ApiOrganizationId))
+        {
+            TestStatus = "No API credentials configured.";
+            TestSuccess = false;
             return;
+        }
+
+        ApiKey = credentials.ApiSessionKey;
+        IsLoadingUsers = true;
 
         try
         {
@@ -139,26 +200,22 @@ public partial class ApiBillingViewModel : ObservableObject
                 if (!string.IsNullOrEmpty(profile.ApiUserSearch))
                     SelectedUser = users.FirstOrDefault(u => u.DisplayName == profile.ApiUserSearch);
             }
+            else
+            {
+                TestStatus = "No users found in this organization.";
+                TestSuccess = false;
+            }
         }
         catch (Exception ex)
         {
+            TestStatus = $"Failed to load users: {ex.Message}";
+            TestSuccess = false;
             Services.LoggingService.Instance.LogWarning($"Failed to fetch Claude Code users: {ex.Message}");
         }
-    }
-
-    [RelayCommand]
-    private void SaveUserSelection()
-    {
-        if (SelectedUser == null) return;
-        var profile = _profileService.ActiveProfile;
-        if (profile == null) return;
-
-        profile.ApiUserSearch = SelectedUser.DisplayName;
-        _settingsService.Save();
-
-        ShowUserPicker = false;
-        TestStatus = $"Tracking: {SelectedUser.DisplayName}";
-        TestSuccess = true;
+        finally
+        {
+            IsLoadingUsers = false;
+        }
     }
 
     [RelayCommand]
@@ -172,8 +229,20 @@ public partial class ApiBillingViewModel : ObservableObject
         credentials.ApiOrganizationId = null;
         _profileService.SaveCredentials(profile.Id, credentials);
 
+        profile.ApiUserSearch = null;
+        profile.ApiUsage = null;
+        profile.PersonalMetrics = null;
+        profile.DailyMetrics = null;
+        _settingsService.Save();
+
         ApiKey = "";
         IsConfigured = false;
+        ShowUserPicker = false;
+        ShowOrgPicker = false;
+        TrackedUserLabel = "";
         TestStatus = "";
+
+        _refreshCoordinator.InvalidateApiCache();
+        _refreshCoordinator.RefreshNow();
     }
 }
