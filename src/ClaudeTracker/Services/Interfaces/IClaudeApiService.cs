@@ -25,6 +25,7 @@ public interface IClaudeApiService
 
     /// <summary>Fetches all Claude Code users for the organization (for identity picker).</summary>
     Task<List<ClaudeCodeUserMetrics>> FetchClaudeCodeAllUsers(string organizationUuid, string apiSessionKey);
-    /// <summary>Fetches personal Claude Code usage metrics for a specific user.</summary>
-    Task<ClaudeCodeUserMetrics?> FetchClaudeCodeUserMetrics(string organizationUuid, string apiSessionKey, string search);
+    /// <summary>Fetches personal Claude Code usage metrics for a specific user. Defaults to current month if no dates given.</summary>
+    Task<ClaudeCodeUserMetrics?> FetchClaudeCodeUserMetrics(string organizationUuid, string apiSessionKey, string search,
+        DateTime? startDate = null, DateTime? endDate = null);
 }

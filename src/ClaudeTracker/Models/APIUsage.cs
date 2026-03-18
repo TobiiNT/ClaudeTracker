@@ -15,17 +15,44 @@ public class APIUsage
     [JsonPropertyName("prepaidCreditsCents")]
     public int PrepaidCreditsCents { get; set; }
 
+    /// <summary>Monthly spend limit in cents (from org settings). 0 = no limit configured.</summary>
+    [JsonIgnore]
+    public int SpendLimitCents { get; set; }
+
     [JsonPropertyName("currency")]
     public string Currency { get; set; } = "USD";
+
+    [JsonIgnore]
+    public DateTime LastUpdated { get; set; } = DateTime.Now;
 
     [JsonIgnore]
     public double UsedAmount => CurrentSpendCents / 100.0;
 
     [JsonIgnore]
-    public double RemainingAmount => PrepaidCreditsCents / 100.0;
+    public double SpendLimit => SpendLimitCents / 100.0;
+
+    /// <summary>Remaining = max(spend limit, prepaid credits) - used. Spend limit takes priority.</summary>
+    [JsonIgnore]
+    public double RemainingAmount
+    {
+        get
+        {
+            if (SpendLimitCents > 0)
+                return Math.Max(0, SpendLimit - UsedAmount);
+            return PrepaidCreditsCents / 100.0;
+        }
+    }
 
     [JsonIgnore]
-    public double TotalCredits => UsedAmount + RemainingAmount;
+    public double TotalCredits
+    {
+        get
+        {
+            if (SpendLimitCents > 0)
+                return SpendLimit;
+            return UsedAmount + (PrepaidCreditsCents / 100.0);
+        }
+    }
 
     [JsonIgnore]
     public double UsagePercentage => TotalCredits > 0 ? (UsedAmount / TotalCredits) * 100.0 : 0;

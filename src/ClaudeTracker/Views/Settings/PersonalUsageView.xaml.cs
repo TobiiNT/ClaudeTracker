@@ -127,6 +127,10 @@ public partial class PersonalUsageView : UserControl
 
         UpdateUI();
         UpdateApiUI();
+
+        // Auto-load user picker if API is already configured
+        if (_apiVm.IsConfigured)
+            _ = _apiVm.LoadClaudeCodeUsersCommand.ExecuteAsync(null);
     }
 
     private void UpdateUI()

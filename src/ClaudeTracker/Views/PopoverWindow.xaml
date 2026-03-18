@@ -230,6 +230,16 @@
                                 <TextBlock x:Name="PersonalLinesText" HorizontalAlignment="Right"
                                            FontSize="12" Foreground="#999" />
                             </Grid>
+                            <!-- Today's usage -->
+                            <Grid x:Name="DailyMetricsRow" Margin="0,5,0,0" Visibility="Collapsed">
+                                <TextBlock FontSize="12" Foreground="#888">
+                                    <Run Text="Today: " FontWeight="Medium" /><Run x:Name="DailyCostText" />
+                                </TextBlock>
+                                <TextBlock x:Name="DailySessionsText" HorizontalAlignment="Center"
+                                           FontSize="12" Foreground="#999" />
+                                <TextBlock x:Name="DailyLinesText" HorizontalAlignment="Right"
+                                           FontSize="12" Foreground="#999" />
+                            </Grid>
                         </StackPanel>
                     </Border>
 

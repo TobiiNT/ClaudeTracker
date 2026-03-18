@@ -54,6 +54,9 @@ public class Profile
     [JsonPropertyName("personalMetrics")]
     public ClaudeCodeUserMetrics? PersonalMetrics { get; set; }
 
+    [JsonIgnore]
+    public ClaudeCodeUserMetrics? DailyMetrics { get; set; }
+
     // Appearance Settings (Per-Profile)
     [JsonPropertyName("iconConfig")]
     public MenuBarIconConfiguration IconConfig { get; set; } = MenuBarIconConfiguration.Default;

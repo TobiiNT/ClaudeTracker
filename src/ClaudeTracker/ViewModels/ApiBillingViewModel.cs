@@ -117,6 +117,36 @@ public partial class ApiBillingViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task LoadClaudeCodeUsers()
+    {
+        var profile = _profileService.ActiveProfile;
+        if (profile == null) return;
+
+        var credentials = _profileService.LoadCredentials(profile.Id);
+        if (string.IsNullOrEmpty(credentials.ApiSessionKey) || string.IsNullOrEmpty(credentials.ApiOrganizationId))
+            return;
+
+        try
+        {
+            var users = await _apiService.FetchClaudeCodeAllUsers(credentials.ApiOrganizationId, credentials.ApiSessionKey);
+            ClaudeCodeUsers.Clear();
+            foreach (var user in users)
+                ClaudeCodeUsers.Add(user);
+
+            if (users.Count > 0)
+            {
+                ShowUserPicker = true;
+                if (!string.IsNullOrEmpty(profile.ApiUserSearch))
+                    SelectedUser = users.FirstOrDefault(u => u.DisplayName == profile.ApiUserSearch);
+            }
+        }
+        catch (Exception ex)
+        {
+            Services.LoggingService.Instance.LogWarning($"Failed to fetch Claude Code users: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
     private void SaveUserSelection()
     {
         if (SelectedUser == null) return;

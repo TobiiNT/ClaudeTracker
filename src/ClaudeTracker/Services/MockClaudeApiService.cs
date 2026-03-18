@@ -98,6 +98,7 @@ public class MockClaudeApiService : IClaudeApiService
         => Task.FromResult(new List<ClaudeCodeUserMetrics>());
 
     public Task<ClaudeCodeUserMetrics?> FetchClaudeCodeUserMetrics(
-        string organizationUuid, string apiSessionKey, string search)
+        string organizationUuid, string apiSessionKey, string search,
+        DateTime? startDate = null, DateTime? endDate = null)
         => Task.FromResult<ClaudeCodeUserMetrics?>(null);
 }

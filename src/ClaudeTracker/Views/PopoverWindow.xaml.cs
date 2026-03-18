@@ -191,6 +191,14 @@ public partial class PopoverWindow : Window
                 PersonalAvgCostText.Text = _viewModel.PersonalAvgCostText;
                 PersonalSessionsText.Text = _viewModel.PersonalSessionsText;
                 PersonalLinesText.Text = _viewModel.PersonalLinesText;
+
+                DailyMetricsRow.Visibility = _viewModel.HasDailyMetrics ? Visibility.Visible : Visibility.Collapsed;
+                if (_viewModel.HasDailyMetrics)
+                {
+                    DailyCostText.Text = _viewModel.DailyCostText;
+                    DailySessionsText.Text = _viewModel.DailySessionsText;
+                    DailyLinesText.Text = _viewModel.DailyLinesText;
+                }
             }
 
             // Status line
@@ -204,7 +212,7 @@ public partial class PopoverWindow : Window
                 StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99)); // gray
                 StatusText.Text = "No account connected";
             }
-            else if (!_viewModel.HasClaudeUsage)
+            else if (!_viewModel.HasClaudeUsage && !_viewModel.HasApiUsage && !_viewModel.HasPersonalMetrics)
             {
                 StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00)); // orange
                 StatusText.Text = "Waiting for usage data...";
