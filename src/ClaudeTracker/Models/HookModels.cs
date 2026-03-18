@@ -380,3 +380,15 @@ public class HookInteractiveEventArgs<T> : EventArgs
         ResponseSource = responseSource;
     }
 }
+
+/// <summary>
+/// Represents a permission rule entry from Claude Code's ~/.claude/settings.json
+/// </summary>
+public class PermissionRuleEntry
+{
+    public string Key { get; set; } = string.Empty;
+    public string Tool { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public string DisplayLabel { get; set; } = string.Empty;
+    public string RawJson { get; set; } = string.Empty;
+}
