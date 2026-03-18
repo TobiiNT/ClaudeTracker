@@ -522,4 +522,20 @@ public partial class App : Application
             return false;
         }
     }
+
+    /// <summary>Checks if the taskbar/tray uses dark mode (separate from app theme on W11).</summary>
+    public static bool IsTaskbarDarkMode()
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            var value = key?.GetValue("SystemUsesLightTheme");
+            return value is int intValue && intValue == 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

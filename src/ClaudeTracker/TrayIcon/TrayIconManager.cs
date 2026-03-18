@@ -127,7 +127,7 @@ public class TrayIconManager : IDisposable
             var status = UsageStatusCalculator.CalculateStatus(
                 percentage, iconConfig.ShowRemainingPercentage);
             var style = sessionConfig?.IconStyle ?? MenuBarIconStyle.Battery;
-            var isDark = App.IsSystemDarkMode();
+            var isDark = App.IsTaskbarDarkMode();
 
             var customColor = iconConfig.UseCustomColor ? iconConfig.CustomColorHex : null;
             var metricPrefix = iconConfig.ShowIconNames
