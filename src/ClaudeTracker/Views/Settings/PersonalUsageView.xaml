@@ -29,21 +29,56 @@
 
             <!-- Setup (not connected) -->
             <StackPanel x:Name="SetupPanel">
-                <Border Style="{StaticResource UsageCardStyle}" Padding="16">
+                <Border x:Name="DefaultSetupCard" Style="{StaticResource UsageCardStyle}" Padding="16">
                     <StackPanel>
                         <TextBlock Text="Automatically syncs credentials from your Claude Code CLI login."
                                    FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
                                    Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
-
                         <StackPanel Orientation="Horizontal">
                             <Button x:Name="AutoDetectButton" Content="Connect"
                                     Style="{StaticResource MaterialDesignRaisedButton}"
                                     Height="34" FontSize="12" />
                             <TextBlock x:Name="AutoDetectStatus" FontSize="12" Margin="12,0,0,0"
-                                       VerticalAlignment="Center" />
+                                       VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="300" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
+
+                <!-- Setup: Additional profile — explicit method choice -->
+                <StackPanel x:Name="ExplicitSetupPanel" Visibility="Collapsed">
+                    <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="Connect via Claude Code CLI" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <TextBlock Text="Reads OAuth credentials from ~/.claude/.credentials.json"
+                                       FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="ExplicitCliButton" Content="Connect via CLI"
+                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                        Height="34" FontSize="12" />
+                                <TextBlock x:Name="ExplicitCliStatus" FontSize="12" Margin="12,0,0,0"
+                                           VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="300" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="Connect via Session Key" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,10"
+                                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
+                                <Run Text="Paste your session key from claude.ai (F12 → Application → Cookies)" />
+                            </TextBlock>
+                            <TextBox x:Name="SessionKeyInput"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     materialDesign:HintAssist.Hint="Session key..."
+                                     FontFamily="Consolas" FontSize="12" Margin="0,0,0,10" />
+                            <Button x:Name="SessionKeyTestButton" Content="Test Connection"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Height="34" FontSize="12" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </StackPanel>
 
             <!-- Loading -->
@@ -84,42 +119,62 @@
                        Foreground="#F44336" />
 
             <StackPanel x:Name="ApiSetupPanel">
-                <!-- Browser sign-in for API Console -->
-                <Border x:Name="BrowserApiSignInCard" Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8"
-                        Visibility="Collapsed">
+                <!-- Default profile: auto-launch WebView2 -->
+                <Border x:Name="ApiAutoDetectCard" Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <materialDesign:PackIcon Kind="Web" Width="18" Height="18"
-                                                     Foreground="#2196F3" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="Sign in with Browser" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <TextBlock Text="Sign in to API Console — session key is captured automatically"
+                        <TextBlock Text="Sign in to API Console to track Claude Code spending."
                                    FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
                                    Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
-                        <Button x:Name="BrowserApiSignInButton" Content="Open Browser"
-                                Style="{StaticResource MaterialDesignRaisedButton}"
-                                HorizontalAlignment="Left" Height="34" FontSize="12" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="ApiAutoDetectButton" Content="Connect"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Height="34" FontSize="12" />
+                            <TextBlock x:Name="ApiAutoDetectStatus" FontSize="12" Margin="12,0,0,0"
+                                       VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="300" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
-                <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"
-                           Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                    <Run Text="1. Open " /><Run Text="platform.claude.com" FontWeight="SemiBold" />
-                    <LineBreak />
-                    <Run Text="2. Open DevTools (F12) → Application → Cookies" />
-                    <LineBreak />
-                    <Run Text="3. Copy the value of " /><Run Text="sessionKey" FontWeight="SemiBold" />
-                </TextBlock>
+                <!-- Additional profile: explicit options -->
+                <StackPanel x:Name="ApiExplicitSetupPanel" Visibility="Collapsed">
+                    <Border x:Name="ApiBrowserCard" Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8"
+                            Visibility="Collapsed">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <materialDesign:PackIcon Kind="Web" Width="18" Height="18"
+                                                         Foreground="#2196F3" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Sign in with Browser" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="Sign in to API Console — session key is captured automatically"
+                                       FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+                            <Button x:Name="ApiBrowserButton" Content="Open Browser"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    HorizontalAlignment="Left" Height="34" FontSize="12" />
+                        </StackPanel>
+                    </Border>
 
-                <TextBox x:Name="ApiKeyInput"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         materialDesign:HintAssist.Hint="Session key..."
-                         FontFamily="Consolas" FontSize="12"
-                         Margin="0,0,0,12" />
-
-                <Button x:Name="ApiTestButton" Content="Test Connection"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
-                        HorizontalAlignment="Left" Height="36" Margin="0,0,0,12" />
+                    <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="Manual Session Key" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"
+                                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
+                                <Run Text="1. Open " /><Run Text="platform.claude.com" FontWeight="SemiBold" />
+                                <LineBreak />
+                                <Run Text="2. Open DevTools (F12) → Application → Cookies" />
+                                <LineBreak />
+                                <Run Text="3. Copy the value of " /><Run Text="sessionKey" FontWeight="SemiBold" />
+                            </TextBlock>
+                            <TextBox x:Name="ApiKeyInput"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     materialDesign:HintAssist.Hint="Session key..."
+                                     FontFamily="Consolas" FontSize="12" Margin="0,0,0,12" />
+                            <Button x:Name="ApiTestButton" Content="Test Connection"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    HorizontalAlignment="Left" Height="36" Margin="0,0,0,12" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
 
                 <TextBlock x:Name="ApiStatusText" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12" />
 

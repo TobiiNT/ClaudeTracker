@@ -21,6 +21,30 @@ public partial class PersonalUsageView : UserControl
         _apiVm = App.Services.GetRequiredService<ApiBillingViewModel>();
         DataContext = _vm;
 
+        // --- Profile detection for UI mode ---
+        var isDefault = IsDefaultProfile();
+
+        // Section 1: Show unified or explicit setup
+        if (!isDefault)
+        {
+            DefaultSetupCard.Visibility = Visibility.Collapsed;
+            ExplicitSetupPanel.Visibility = Visibility.Visible;
+        }
+
+        // Section 2: Show unified or explicit setup
+        if (isDefault)
+        {
+            ApiAutoDetectCard.Visibility = Visibility.Visible;
+            ApiExplicitSetupPanel.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            ApiAutoDetectCard.Visibility = Visibility.Collapsed;
+            ApiExplicitSetupPanel.Visibility = Visibility.Visible;
+            if (BrowserSignInWindow.IsWebView2Available())
+                ApiBrowserCard.Visibility = Visibility.Visible;
+        }
+
         // --- Claude.ai Subscription (CLI auto-detect only) ---
         AutoDetectButton.Click += async (_, _) =>
         {
@@ -34,10 +58,64 @@ public partial class PersonalUsageView : UserControl
         _vm.PropertyChanged += (_, _) => UpdateUI();
 
         // --- Claude Code API Usage ---
-        if (BrowserSignInWindow.IsWebView2Available())
-            BrowserApiSignInCard.Visibility = Visibility.Visible;
 
-        BrowserApiSignInButton.Click += async (_, _) =>
+        // Default profile: API section Connect opens WebView2 directly
+        ApiAutoDetectButton.Click += async (_, _) =>
+        {
+            if (!BrowserSignInWindow.IsWebView2Available())
+            {
+                ApiAutoDetectStatus.Text = "WebView2 not available. Use manual paste below.";
+                ApiAutoDetectCard.Visibility = Visibility.Collapsed;
+                ApiExplicitSetupPanel.Visibility = Visibility.Visible;
+                return;
+            }
+
+            var window = new BrowserSignInWindow(Constants.APIEndpoints.PlatformLogin, "platform.claude.com");
+            window.Owner = Window.GetWindow(this);
+            window.Show();
+            var result = await window.ResultTask;
+            if (result.HasValue)
+            {
+                _apiVm.ApiKey = result.Value.sessionKey;
+                var profile = App.Services.GetRequiredService<IProfileService>().ActiveProfile;
+                if (profile != null && result.Value.expiry.HasValue)
+                    profile.ApiSessionKeyExpiry = result.Value.expiry;
+
+                ApiLoadingBar.Visibility = Visibility.Visible;
+                await _apiVm.TestConnectionCommand.ExecuteAsync(null);
+                ApiLoadingBar.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                // User closed WebView2 without completing sign-in — show manual fallback
+                ApiAutoDetectStatus.Text = "Sign-in cancelled. You can try again or use manual paste.";
+                ApiAutoDetectCard.Visibility = Visibility.Collapsed;
+                ApiExplicitSetupPanel.Visibility = Visibility.Visible;
+                if (BrowserSignInWindow.IsWebView2Available())
+                    ApiBrowserCard.Visibility = Visibility.Visible;
+            }
+        };
+
+        // Additional profile: explicit CLI button (for Section 1)
+        ExplicitCliButton.Click += async (_, _) =>
+        {
+            LoadingBar.Visibility = Visibility.Visible;
+            await _vm.AutoDetectCommand.ExecuteAsync(null);
+            LoadingBar.Visibility = Visibility.Collapsed;
+            ExplicitCliStatus.Text = _vm.AutoDetectStatusText;
+        };
+
+        // Additional profile: explicit session key test (for Section 1)
+        SessionKeyTestButton.Click += async (_, _) =>
+        {
+            _vm.SessionKey = SessionKeyInput.Text;
+            LoadingBar.Visibility = Visibility.Visible;
+            await _vm.TestConnectionCommand.ExecuteAsync(null);
+            LoadingBar.Visibility = Visibility.Collapsed;
+        };
+
+        // Additional profile: API browser sign-in (for Section 2)
+        ApiBrowserButton.Click += async (_, _) =>
         {
             var window = new BrowserSignInWindow(Constants.APIEndpoints.PlatformLogin, "platform.claude.com");
             window.Owner = Window.GetWindow(this);
@@ -47,7 +125,6 @@ public partial class PersonalUsageView : UserControl
             {
                 ApiKeyInput.Text = result.Value.sessionKey;
                 _apiVm.ApiKey = result.Value.sessionKey;
-
                 var profile = App.Services.GetRequiredService<IProfileService>().ActiveProfile;
                 if (profile != null && result.Value.expiry.HasValue)
                     profile.ApiSessionKeyExpiry = result.Value.expiry;
@@ -120,6 +197,15 @@ public partial class PersonalUsageView : UserControl
                 ? new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50))
                 : new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
         });
+    }
+
+    private bool IsDefaultProfile()
+    {
+        var profileService = App.Services.GetRequiredService<IProfileService>();
+        var profiles = profileService.Profiles;
+        if (profiles.Count <= 1) return true;
+        var active = profileService.ActiveProfile;
+        return active != null && profiles.Count > 0 && profiles[0].Id == active.Id;
     }
 
     private void UpdateApiUI()
