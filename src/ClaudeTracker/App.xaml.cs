@@ -294,7 +294,7 @@ public partial class App : Application
     /// <summary>Release the single-instance mutex before Velopack restarts the app.</summary>
     public void ReleaseSingleInstanceMutex()
     {
-        _mutex?.ReleaseMutex();
+        try { _mutex?.ReleaseMutex(); } catch (ApplicationException) { }
         _mutex?.Dispose();
         _mutex = null;
     }
