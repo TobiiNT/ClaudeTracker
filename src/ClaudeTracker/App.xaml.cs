@@ -160,10 +160,11 @@ public partial class App : Application
             {
                 if (pendingPopups.Count == 0) return;
 
+                // PreToolUse = next tool starting (user already answered in terminal)
                 // PostToolUse = tool executed (allowed), Stop = session ended,
                 // UserPromptSubmit = user sent next prompt (denied/completed)
-                if (evt.EventName is not (Events.PostToolUse or Events.PostToolUseFailure
-                    or Events.Stop or Events.UserPromptSubmit))
+                if (evt.EventName is not (Events.PreToolUse or Events.PostToolUse
+                    or Events.PostToolUseFailure or Events.Stop or Events.UserPromptSubmit))
                     return;
 
                 // Extract session_id from the event payload to match against pending popups
