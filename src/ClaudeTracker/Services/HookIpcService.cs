@@ -22,6 +22,7 @@ public class HookIpcService : IHookIpcService
     private readonly List<Task> _listeners = new();
     private readonly object _lock = new();
     private bool _disposed;
+    private System.Windows.Threading.DispatcherTimer? _watchdog;
 
     public bool IsRunning { get; private set; }
 
@@ -65,6 +66,14 @@ public class HookIpcService : IHookIpcService
                 var listenerTask = Task.Run(() => ListenLoop(_cts.Token));
                 _listeners.Add(listenerTask);
             }
+
+            // Watchdog: check listener health every 30s, restart if all dead
+            _watchdog = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(30)
+            };
+            _watchdog.Tick += (_, _) => CheckAndRestartListeners();
+            _watchdog.Start();
         }
     }
 
@@ -77,6 +86,8 @@ public class HookIpcService : IHookIpcService
 
             LoggingService.Instance.Log("[HookIpc] Stopping named pipe server");
 
+            _watchdog?.Stop();
+            _watchdog = null;
             _cts?.Cancel();
             IsRunning = false;
 
@@ -101,6 +112,35 @@ public class HookIpcService : IHookIpcService
         }
     }
 
+    private void CheckAndRestartListeners()
+    {
+        lock (_lock)
+        {
+            if (!IsRunning || _cts == null || _cts.IsCancellationRequested) return;
+
+            // Remove completed tasks and count survivors
+            _listeners.RemoveAll(t => t.IsCompleted);
+
+            if (_listeners.Count == 0)
+            {
+                LoggingService.Instance.LogWarning("[HookIpc] All listeners dead — restarting");
+                for (var i = 0; i < Constants.Hooks.MaxConcurrentConnections; i++)
+                {
+                    _listeners.Add(Task.Run(() => ListenLoop(_cts.Token)));
+                }
+            }
+            else if (_listeners.Count < Constants.Hooks.MaxConcurrentConnections)
+            {
+                var toAdd = Constants.Hooks.MaxConcurrentConnections - _listeners.Count;
+                LoggingService.Instance.Log($"[HookIpc] {toAdd} listener(s) died — respawning");
+                for (var i = 0; i < toAdd; i++)
+                {
+                    _listeners.Add(Task.Run(() => ListenLoop(_cts.Token)));
+                }
+            }
+        }
+    }
+
     private async Task ListenLoop(CancellationToken ct)
     {
         while (!ct.IsCancellationRequested)
@@ -122,6 +162,8 @@ public class HookIpcService : IHookIpcService
             catch (Exception ex)
             {
                 LoggingService.Instance.LogError("[HookIpc] Listener error", ex);
+                // Delay before retry to avoid CPU burn on persistent errors
+                try { await Task.Delay(2000, ct); } catch (OperationCanceledException) { break; }
             }
             finally
             {
