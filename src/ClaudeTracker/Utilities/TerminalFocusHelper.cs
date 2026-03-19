@@ -39,9 +39,9 @@ public static class TerminalFocusHelper
         "Hyper", "Alacritty", "wezterm-gui", "ConEmu", "ConEmu64"
     };
 
-    public static void BringToFront(string cwd)
+    public static bool BringToFront(string cwd)
     {
-        if (string.IsNullOrEmpty(cwd)) return;
+        if (string.IsNullOrEmpty(cwd)) return false;
 
         var projectName = System.IO.Path.GetFileName(cwd) ?? cwd;
         IntPtr found = IntPtr.Zero;
@@ -74,10 +74,12 @@ public static class TerminalFocusHelper
 
         if (found != IntPtr.Zero)
         {
-            // Only restore if minimized — otherwise just bring to front without resizing
             if (IsIconic(found))
                 ShowWindow(found, 9); // SW_RESTORE
             SetForegroundWindow(found);
+            return true;
         }
+
+        return false;
     }
 }

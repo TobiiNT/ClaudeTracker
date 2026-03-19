@@ -48,6 +48,7 @@ public partial class BrowserSignInWindow : Window
                 userDataFolder: Utilities.Constants.WebView2.ProfilePath);
             await WebView.EnsureCoreWebView2Async(env);
             WebView.CoreWebView2.NavigationCompleted += OnNavigationCompleted;
+            Closed += (_, _) => WebView.CoreWebView2.NavigationCompleted -= OnNavigationCompleted;
             WebView.CoreWebView2.Navigate(_targetUrl);
         }
         catch (Exception ex)

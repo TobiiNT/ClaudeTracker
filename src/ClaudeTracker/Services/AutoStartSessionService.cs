@@ -12,6 +12,7 @@ public class AutoStartSessionService : IDisposable
     private DispatcherTimer? _timer;
     private bool _isProcessing;
     private readonly HashSet<Guid> _recentlyAutoStarted = new();
+    private CancellationTokenSource? _cts;
 
     public AutoStartSessionService(
         IClaudeApiService apiService,
@@ -28,6 +29,7 @@ public class AutoStartSessionService : IDisposable
     public void Start()
     {
         if (_timer != null) return;
+        _cts = new CancellationTokenSource();
 
         _timer = new DispatcherTimer
         {
@@ -73,8 +75,8 @@ public class AutoStartSessionService : IDisposable
                 $"A new session has been started for {profile.Name}");
 
             // Clear the auto-start flag after reset time passes
-            _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ =>
-                _recentlyAutoStarted.Remove(profile.Id));
+            _ = Task.Delay(TimeSpan.FromMinutes(10), _cts?.Token ?? CancellationToken.None)
+                .ContinueWith(_ => _recentlyAutoStarted.Remove(profile.Id), TaskContinuationOptions.OnlyOnRanToCompletion);
         }
         catch (Exception ex)
         {
@@ -97,6 +99,9 @@ public class AutoStartSessionService : IDisposable
 
     public void Dispose()
     {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
         Stop();
         Microsoft.Win32.SystemEvents.PowerModeChanged -= OnPowerModeChanged;
     }

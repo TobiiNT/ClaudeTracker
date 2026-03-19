@@ -72,6 +72,10 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     {
         _timer?.Stop();
         _timer = null;
+        _resetTimer?.Stop();
+        _resetTimer = null;
+        _rateLimitTimer?.Stop();
+        _rateLimitTimer = null;
         LoggingService.Instance.Log("UsageRefreshCoordinator stopped");
     }
 

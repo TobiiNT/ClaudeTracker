@@ -36,6 +36,7 @@ public partial class NotificationPopup : Window
         _autoCloseTimer.Tick += (_, _) => FadeOut();
 
         Loaded += OnLoaded;
+        Closed += (_, _) => _autoCloseTimer.Stop();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)

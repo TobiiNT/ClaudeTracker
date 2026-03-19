@@ -114,9 +114,8 @@ public class NotificationService : INotificationService
                 var popup = new NotificationPopup(title, message, level);
                 popup.NotificationClicked += (_, _) =>
                 {
-                    if (!string.IsNullOrEmpty(cwd))
-                        Utilities.TerminalFocusHelper.BringToFront(cwd);
-                    else
+                    // Try to focus the terminal window; fall back to popover if not found
+                    if (string.IsNullOrEmpty(cwd) || !Utilities.TerminalFocusHelper.BringToFront(cwd))
                         NotificationClicked?.Invoke(this, EventArgs.Empty);
                 };
                 popup.Show();
