@@ -224,7 +224,7 @@ public partial class PersonalUsageView : UserControl
             }
             else
             {
-                ApiSubtitle.Text = "Select your organization";
+                ApiSubtitle.Text = $"Found {orgs.Count} organizations.";
                 ApiOrgCombo.ItemsSource = orgs;
                 ApiStep2.Visibility = Visibility.Visible;
             }
