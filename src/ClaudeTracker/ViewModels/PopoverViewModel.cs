@@ -45,6 +45,8 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private string _dailyLinesText = "";
     [ObservableProperty] private string _lastUpdatedText = "";
     [ObservableProperty] private bool _isRefreshing;
+    public bool IsRateLimited => _refreshCoordinator.IsRateLimited;
+    public DateTime RateLimitedUntilLocal => _refreshCoordinator.RateLimitedUntil.ToLocalTime();
     [ObservableProperty] private bool _hasCredentials;
     [ObservableProperty] private bool _hasClaudeUsage;
     [ObservableProperty] private UsageStatusLevel _sessionStatus = UsageStatusLevel.Safe;
@@ -90,17 +92,19 @@ public partial class PopoverViewModel : ObservableObject
 
         _profileService.ActiveProfileChanged += (_, _) => { UpdateProfilesList(); RefreshData(); };
         _profileService.ProfilesChanged += (_, _) => UpdateProfilesList();
-        _refreshCoordinator.RefreshStarted += (_, _) => IsRefreshing = true;
+        _refreshCoordinator.RefreshStarted += (_, _) => { IsRefreshing = true; OnPropertyChanged(nameof(IsRateLimited)); };
         _refreshCoordinator.RefreshCompleted += (_, _) =>
         {
             IsRefreshing = false;
+            OnPropertyChanged(nameof(IsRateLimited));
             RefreshData();
         };
         _refreshCoordinator.RefreshFailed += (_, error) =>
         {
             IsRefreshing = false;
-            LastUpdatedText = error.Contains("Rate limited", StringComparison.OrdinalIgnoreCase)
-                ? "Rate limited — try again later"
+            OnPropertyChanged(nameof(IsRateLimited));
+            LastUpdatedText = IsRateLimited
+                ? $"Rate limited — retrying in {Math.Max(1, (int)Math.Ceiling((_refreshCoordinator.RateLimitedUntil - DateTime.UtcNow).TotalMinutes))}m"
                 : "Update failed";
         };
 

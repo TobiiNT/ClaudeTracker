@@ -19,11 +19,14 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     private DateTime _lastStatusFetch = DateTime.MinValue;
     private bool _isRefreshing;
     private DateTime _rateLimitedUntil = DateTime.MinValue;
+    private DispatcherTimer? _rateLimitTimer;
     private long _lastApiFetchTicks = DateTime.MinValue.Ticks;
     private static readonly TimeSpan ApiRefreshInterval = TimeSpan.FromMinutes(5);
 
     public bool IsRunning => _timer?.IsEnabled ?? false;
     public ClaudeStatus CurrentStatus => _cachedStatus;
+    public bool IsRateLimited => DateTime.UtcNow < _rateLimitedUntil;
+    public DateTime RateLimitedUntil => _rateLimitedUntil;
 
     public event EventHandler? RefreshStarted;
     public event EventHandler? RefreshCompleted;
@@ -99,6 +102,8 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
         if (DateTime.UtcNow < _rateLimitedUntil)
         {
             LoggingService.Instance.Log($"Skipping refresh — rate limited until {_rateLimitedUntil:HH:mm:ss}");
+            var remaining = _rateLimitedUntil - DateTime.UtcNow;
+            RefreshFailed?.Invoke(this, $"Rate limited — retrying in {Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes))}m");
             return;
         }
 
@@ -202,6 +207,7 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
             _rateLimitedUntil = DateTime.UtcNow.AddMinutes(5);
             LoggingService.Instance.LogWarning($"Rate limited — backing off until {_rateLimitedUntil:HH:mm:ss}");
             RefreshFailed?.Invoke(this, "Rate limited — retrying in 5 minutes");
+            ScheduleRateLimitRefresh();
         }
         catch (Exception ex)
         {
@@ -212,6 +218,23 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
         {
             _isRefreshing = false;
         }
+    }
+
+    private void ScheduleRateLimitRefresh()
+    {
+        _rateLimitTimer?.Stop();
+        var delay = _rateLimitedUntil - DateTime.UtcNow;
+        if (delay.TotalSeconds <= 0) return;
+
+        _rateLimitTimer = new DispatcherTimer { Interval = delay + TimeSpan.FromSeconds(1) };
+        _rateLimitTimer.Tick += (_, _) =>
+        {
+            _rateLimitTimer?.Stop();
+            _rateLimitTimer = null;
+            LoggingService.Instance.Log("Rate limit expired — refreshing now");
+            RefreshNow();
+        };
+        _rateLimitTimer.Start();
     }
 
     private void ScheduleResetRefresh(DateTime resetTime)

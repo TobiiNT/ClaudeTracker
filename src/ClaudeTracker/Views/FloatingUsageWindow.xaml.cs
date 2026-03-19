@@ -191,7 +191,13 @@ public partial class FloatingUsageWindow : Window
             }
 
             // Status line
-            if (_viewModel.IsRefreshing)
+            if (_viewModel.IsRateLimited)
+            {
+                var remaining = _viewModel.RateLimitedUntilLocal - DateTime.Now;
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+                LastUpdatedText.Text = $"Rate limited — {Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes))}m";
+            }
+            else if (_viewModel.IsRefreshing)
             {
                 StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
                 LastUpdatedText.Text = "Refreshing...";
