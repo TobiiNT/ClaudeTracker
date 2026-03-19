@@ -106,15 +106,18 @@ public partial class PersonalUsageViewModel : ObservableObject
                 return;
             }
 
+            // Fetch and store usage data immediately
             try
             {
-                await _apiService.FetchUsageData();
+                var usage = await _apiService.FetchUsageData();
+                _profileService.UpdateUsageData(profile.Id, claudeUsage: usage);
             }
             catch
             {
                 // Token synced but usage fetch may need org ID setup — that's OK
             }
 
+            _refreshCoordinator.RefreshNow();
             AutoDetectSuccess = true;
             var planLabel = !string.IsNullOrEmpty(subType) ? $" ({subType})" : "";
             AutoDetectStatusText = $"Connected{planLabel}";

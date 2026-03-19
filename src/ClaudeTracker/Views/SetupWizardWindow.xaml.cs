@@ -179,9 +179,12 @@ public partial class SetupWizardWindow : Window
                 return;
             }
 
-            _refreshCoordinator.RefreshNow();
-
             var planLabel = !string.IsNullOrEmpty(subType) ? $" ({subType})" : "";
+            OAuthSubtitle.Text = $"Connected{planLabel} — fetching usage...";
+            OAuthSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+
+            try { await _apiService.FetchUsageData(); } catch { /* non-fatal */ }
+
             OAuthSubtitle.Text = $"Connected{planLabel}";
             OAuthSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
             AutoDetectButton.Content = "✓";
@@ -272,6 +275,7 @@ public partial class SetupWizardWindow : Window
             if (orgs.Count == 1)
             {
                 _selectedOrg = orgs[0];
+                SaveApiConsoleOrg(orgs[0]);
                 ApiSubtitle.Text = $"Connected to {orgs[0].DisplayName}";
                 await FetchUsersForOrg(orgs[0]);
             }
@@ -299,6 +303,7 @@ public partial class SetupWizardWindow : Window
     {
         if (ApiOrgCombo.SelectedItem is not APIOrganization org) return;
         _selectedOrg = org;
+        SaveApiConsoleOrg(org);
         await FetchUsersForOrg(org);
     }
 
