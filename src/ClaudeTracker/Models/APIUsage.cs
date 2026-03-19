@@ -166,6 +166,17 @@ public class APIOrganization
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>Optional spend summary, populated after fetching billing data.</summary>
     [JsonIgnore]
-    public string DisplayName => string.IsNullOrEmpty(Name) ? Id : Name;
+    public string? SpendSummary { get; set; }
+
+    [JsonIgnore]
+    public string DisplayName
+    {
+        get
+        {
+            var name = string.IsNullOrEmpty(Name) ? Id : Name;
+            return string.IsNullOrEmpty(SpendSummary) ? name : $"{name} ({SpendSummary})";
+        }
+    }
 }

@@ -25,6 +25,9 @@ public class Profile
     [JsonPropertyName("apiOrganizationId")]
     public string? ApiOrganizationId { get; set; }
 
+    [JsonPropertyName("apiOrganizationName")]
+    public string? ApiOrganizationName { get; set; }
+
     [JsonPropertyName("apiUserSearch")]
     public string? ApiUserSearch { get; set; }
 
@@ -37,12 +40,12 @@ public class Profile
     [JsonPropertyName("apiSessionKeyExpiry")]
     public DateTime? ApiSessionKeyExpiry { get; set; }
 
-    // CLI Account Sync Metadata
-    [JsonPropertyName("hasCliAccount")]
-    public bool HasCliAccount { get; set; }
+    // Claude OAuth Sync Metadata
+    [JsonPropertyName("hasClaudeOAuth")]
+    public bool HasClaudeOAuth { get; set; }
 
-    [JsonPropertyName("cliAccountSyncedAt")]
-    public DateTime? CliAccountSyncedAt { get; set; }
+    [JsonPropertyName("claudeOAuthSyncedAt")]
+    public DateTime? ClaudeOAuthSyncedAt { get; set; }
 
     // Usage Data (Per-Profile)
     [JsonPropertyName("claudeUsage")]
@@ -88,16 +91,16 @@ public class Profile
 
     // Computed Properties
     [JsonIgnore]
-    public bool HasClaudeAI => !string.IsNullOrEmpty(ClaudeSessionKey) && !string.IsNullOrEmpty(OrganizationId);
+    public bool HasClaudeSessionKey => !string.IsNullOrEmpty(ClaudeSessionKey) && !string.IsNullOrEmpty(OrganizationId);
 
     [JsonIgnore]
     public bool HasAPIConsole => !string.IsNullOrEmpty(ApiSessionKey) && !string.IsNullOrEmpty(ApiOrganizationId);
 
     [JsonIgnore]
-    public bool HasAnyCredentials => HasClaudeAI || HasAPIConsole || !string.IsNullOrEmpty(CliCredentialsJSON);
+    public bool HasAnyCredentials => HasClaudeSessionKey || HasAPIConsole || !string.IsNullOrEmpty(CliCredentialsJSON);
 
     [JsonIgnore]
-    public bool HasUsageCredentials => HasClaudeAI || HasAPIConsole || !string.IsNullOrEmpty(CliCredentialsJSON);
+    public bool HasUsageCredentials => HasClaudeSessionKey || HasAPIConsole || !string.IsNullOrEmpty(CliCredentialsJSON);
 }
 
 /// <summary>Credential bundle for transferring authentication data to/from a profile.</summary>
@@ -109,7 +112,7 @@ public class ProfileCredentials
     public string? ApiOrganizationId { get; set; }
     public string? CliCredentialsJSON { get; set; }
 
-    public bool HasClaudeAI => !string.IsNullOrEmpty(ClaudeSessionKey) && !string.IsNullOrEmpty(OrganizationId);
+    public bool HasClaudeSessionKey => !string.IsNullOrEmpty(ClaudeSessionKey) && !string.IsNullOrEmpty(OrganizationId);
     public bool HasAPIConsole => !string.IsNullOrEmpty(ApiSessionKey) && !string.IsNullOrEmpty(ApiOrganizationId);
     public bool HasCLI => !string.IsNullOrEmpty(CliCredentialsJSON);
 }

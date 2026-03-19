@@ -371,7 +371,7 @@ public partial class App : Application
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<PersonalUsageViewModel>();
         services.AddTransient<ApiBillingViewModel>();
-        services.AddTransient<CliAccountViewModel>();
+        services.AddTransient<ClaudeOAuthViewModel>();
         services.AddTransient<AppearanceViewModel>();
         services.AddTransient<GeneralSettingsViewModel>();
         services.AddTransient<ProfilesViewModel>();

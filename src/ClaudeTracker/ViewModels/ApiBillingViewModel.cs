@@ -150,6 +150,7 @@ public partial class ApiBillingViewModel : ObservableObject
         if (profile == null) return;
 
         // Save credentials
+        profile.ApiOrganizationName = SelectedOrg.Name;
         var credentials = _profileService.LoadCredentials(profile.Id);
         credentials.ApiSessionKey = ApiKey.Trim();
         credentials.ApiOrganizationId = SelectedOrg.Id;
