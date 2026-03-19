@@ -179,6 +179,7 @@ public partial class PopoverWindow : Window
 
             // API
             ApiCard.Visibility = _viewModel.HasApiUsage ? Visibility.Visible : Visibility.Collapsed;
+            ApiPercentText.Text = $"{_viewModel.ApiPercentage:F0}%";
             ApiProgress.Value = _viewModel.ApiPercentage;
             ApiUsedText.Text = $"Used: {_viewModel.ApiUsedText}";
             ApiRemainingText.Text = $"Remaining: {_viewModel.ApiRemainingText}";

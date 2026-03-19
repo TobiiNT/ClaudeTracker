@@ -13,16 +13,10 @@
 
     <Border Style="{StaticResource FloatingBorderStyle}" Padding="14,10,14,12"
             MouseLeftButtonDown="DragHandle_MouseLeftButtonDown">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel>
 
             <!-- Drag handle + close button -->
-            <Grid x:Name="DragHandle" Grid.Row="0" Margin="0,0,0,8"
+            <Grid x:Name="DragHandle" Margin="0,0,0,8"
                   Cursor="SizeAll">
                 <Grid.Background>
                     <SolidColorBrush Color="Transparent" />
@@ -58,7 +52,7 @@
             </Grid>
 
             <!-- Session Usage (subscription) -->
-            <StackPanel x:Name="SessionPanel" Grid.Row="1" Margin="0,0,0,8">
+            <StackPanel x:Name="SessionPanel" Margin="0,0,0,8">
                 <Grid Margin="0,0,0,4">
                     <TextBlock Text="Session" FontSize="12" FontWeight="Medium" Foreground="#666" />
                     <TextBlock x:Name="SessionPercentText" HorizontalAlignment="Right"
@@ -82,7 +76,7 @@
             </StackPanel>
 
             <!-- Weekly Usage (subscription) -->
-            <StackPanel x:Name="WeeklyPanel" Grid.Row="2" Margin="0,0,0,6">
+            <StackPanel x:Name="WeeklyPanel" Margin="0,0,0,6">
                 <Grid Margin="0,0,0,4">
                     <TextBlock Text="Weekly" FontSize="12" FontWeight="Medium" Foreground="#666" />
                     <TextBlock x:Name="WeeklyPercentText" HorizontalAlignment="Right"
@@ -106,9 +100,9 @@
             </StackPanel>
 
             <!-- Org Budget (API-only users) -->
-            <StackPanel x:Name="ApiPanel" Grid.Row="1" Margin="0,0,0,8" Visibility="Collapsed">
+            <StackPanel x:Name="ApiPanel" Margin="0,0,0,8" Visibility="Collapsed">
                 <Grid Margin="0,0,0,4">
-                    <TextBlock Text="Org Budget" FontSize="12" FontWeight="Medium" Foreground="#666" />
+                    <TextBlock x:Name="ApiBudgetLabel" Text="Org Budget" FontSize="12" FontWeight="Medium" Foreground="#666" />
                     <TextBlock x:Name="ApiPercentText" HorizontalAlignment="Right"
                                FontSize="16" FontWeight="Bold" Foreground="#333" />
                 </Grid>
@@ -120,7 +114,7 @@
             </StackPanel>
 
             <!-- My Usage (API-only users) -->
-            <StackPanel x:Name="PersonalPanel" Grid.Row="2" Margin="0,0,0,6" Visibility="Collapsed">
+            <StackPanel x:Name="PersonalPanel" Margin="0,0,0,6" Visibility="Collapsed">
                 <TextBlock Text="My Usage" FontSize="12" FontWeight="Medium" Foreground="#666" Margin="0,0,0,4" />
                 <!-- This Month -->
                 <Border Background="#08000000" CornerRadius="4" Padding="8,5" Margin="0,0,0,3">
@@ -154,10 +148,10 @@
             </StackPanel>
 
             <!-- Status -->
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
                 <Ellipse x:Name="StatusDot" Width="6" Height="6" Margin="0,0,4,0" VerticalAlignment="Center" />
                 <TextBlock x:Name="LastUpdatedText" FontSize="10" Foreground="#BBB" VerticalAlignment="Center" />
             </StackPanel>
-        </Grid>
+        </StackPanel>
     </Border>
 </Window>
