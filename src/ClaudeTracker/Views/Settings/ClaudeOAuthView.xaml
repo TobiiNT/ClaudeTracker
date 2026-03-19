@@ -1,11 +1,11 @@
-<UserControl x:Class="ClaudeTracker.Views.Settings.CliAccountView"
+<UserControl x:Class="ClaudeTracker.Views.Settings.ClaudeOAuthView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
         <StackPanel MaxWidth="480">
-            <TextBlock Text="CLI Account" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
-            <TextBlock Text="Sync credentials from Claude Code CLI"
+            <TextBlock Text="Claude OAuth" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="Sync Claude OAuth credentials"
                        FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
                        Margin="0,0,0,20" />
 
@@ -23,8 +23,8 @@
 
                     <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"
                                Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                        Reads OAuth token from Windows Credential Manager
-                        (stored by Claude Code CLI).
+                        Reads Claude OAuth token from Windows Credential Manager
+                        (stored by Claude Code).
                     </TextBlock>
 
                     <Button x:Name="SyncButton" Content="Sync Now"

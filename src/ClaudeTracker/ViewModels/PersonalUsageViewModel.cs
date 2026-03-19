@@ -52,7 +52,7 @@ public partial class PersonalUsageViewModel : ObservableObject
         _cliSyncService = cliSyncService;
 
         var profile = _profileService.ActiveProfile;
-        IsConfigured = profile?.HasClaudeAI == true || !string.IsNullOrEmpty(profile?.CliCredentialsJSON);
+        IsConfigured = profile?.HasClaudeSessionKey == true || !string.IsNullOrEmpty(profile?.CliCredentialsJSON);
         if (profile?.ClaudeSessionKey != null)
             SessionKey = profile.ClaudeSessionKey;
 
@@ -71,7 +71,7 @@ public partial class PersonalUsageViewModel : ObservableObject
 
             if (string.IsNullOrEmpty(token))
             {
-                AutoDetectStatusText = "No Claude Code credentials found.\nMake sure Claude Code is installed and logged in.";
+                AutoDetectStatusText = "No Claude OAuth credentials found.\nMake sure Claude Code is installed and logged in.";
                 return;
             }
 
@@ -87,7 +87,7 @@ public partial class PersonalUsageViewModel : ObservableObject
 
                 if (isExpired)
                 {
-                    AutoDetectStatusText = "CLI token is expired and refresh failed.\nRun 'claude auth login' to re-authenticate.";
+                    AutoDetectStatusText = "Claude OAuth token is expired and refresh failed.\nRun 'claude auth login' to re-authenticate.";
                     return;
                 }
             }
@@ -200,8 +200,8 @@ public partial class PersonalUsageViewModel : ObservableObject
         profile.ClaudeSessionKey = null;
         profile.OrganizationId = null;
         profile.CliCredentialsJSON = null;
-        profile.HasCliAccount = false;
-        profile.CliAccountSyncedAt = null;
+        profile.HasClaudeOAuth = false;
+        profile.ClaudeOAuthSyncedAt = null;
         profile.ClaudeUsage = null;
         _profileService.UpdateProfile(profile);
 
@@ -226,15 +226,15 @@ public partial class PersonalUsageViewModel : ObservableObject
         if (!string.IsNullOrEmpty(profile.CliCredentialsJSON))
         {
             var parsed = _cliSyncService.ParseCredentials(profile.CliCredentialsJSON);
-            var subType = parsed?.ClaudeAiOauth?.SubscriptionType;
-            ConnectedLabel = "Connected via Claude Code CLI";
+            var subType = parsed?.ClaudeOAuth?.SubscriptionType;
+            ConnectedLabel = "Connected via Claude OAuth";
             ConnectedDetail = !string.IsNullOrEmpty(subType)
                 ? $"Plan: {subType}"
-                : "OAuth token active";
+                : "Claude OAuth token active";
         }
-        else if (profile.HasClaudeAI)
+        else if (profile.HasClaudeSessionKey)
         {
-            ConnectedLabel = "Connected via Session Key";
+            ConnectedLabel = "Connected via Claude Session Key";
             ConnectedDetail = !string.IsNullOrEmpty(profile.OrganizationId)
                 ? $"Org: {profile.OrganizationId[..Math.Min(8, profile.OrganizationId.Length)]}..."
                 : "";

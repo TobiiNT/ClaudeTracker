@@ -50,7 +50,7 @@ tests/ClaudeTracker.Tests/  # xUnit tests
 | `CredentialService` | CLI credentials (`~/.claude/.credentials.json`) |
 | `NotificationService` | Usage alerts at 75%/90%/95% thresholds, hook event notifications |
 | `UsageRefreshCoordinator` | DispatcherTimer-based polling (default 60s), rate-limit backoff, auto-refresh on session reset |
-| `ClaudeCodeSyncService` | CLI OAuth token sync from Windows Credential Manager |
+| `ClaudeCodeSyncService` | CLI OAuth token sync + silent refresh (POSTs to `OAuthTokenEndpoint` with stored refresh token) |
 | `AutoStartSessionService` | Auto-start session when usage resets to 0% |
 | `TrayIconManager` | System tray lifecycle, popover positioning, context menu |
 | `TrayIconRenderer` | SkiaSharp rendering for 5 icon styles (Battery, ProgressBar, Percentage, Ring, Compact) |
@@ -66,6 +66,8 @@ tests/ClaudeTracker.Tests/  # xUnit tests
 1. Claude.ai session key (cookie-based)
 2. CLI OAuth token (Bearer, from saved profile or `~/.claude/.credentials.json`)
 3. API Console session key (billing only)
+
+**Silent OAuth refresh**: When access token is expired but refresh token exists, `ClaudeCodeSyncService.TryRefreshTokenAsync()` POSTs to `Constants.APIEndpoints.OAuthTokenEndpoint` and updates `~/.claude/.credentials.json`. Runs automatically for the **default profile only** (during poll + AutoDetect). Additional profiles must trigger it explicitly via Connect.
 
 ### Hooks Integration (v2.0.0+)
 
@@ -123,6 +125,9 @@ Note: Debug build will fail if the app is running (file lock). Use Release confi
 - `UsageRefreshCoordinator` has `_isRefreshing` guard + 5-min rate-limit backoff — don't remove these
 - Notification `SendNotification` accepts optional `cwd` param — when set, click focuses terminal instead of popover
 - MCP tool names: `mcp__Server__action_Target` format — `FormatMcpToolName` strips prefix for display
+- Connection UX: default/single profile uses unified **Auto Detect** (CLI → silent refresh → error); additional profiles show explicit **CLI / Browser / Manual** buttons — don't collapse these into AutoDetect
+- WebView2 sign-in uses persistent `UserDataFolder` at `Constants.WebView2.ProfilePath` — users sign in once; don't omit `UserDataFolder` or they re-authenticate every time
+- `ReleaseSingleInstanceMutex()` is called by both UpdateService (pre-restart) and OnExit — catch `ApplicationException` to guard against the second call; don't remove this guard
 
 ## CI/CD
 

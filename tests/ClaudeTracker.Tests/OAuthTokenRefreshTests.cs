@@ -17,7 +17,7 @@ public class OAuthTokenRefreshTests
     {
         var creds = new CliCredentialsJson
         {
-            ClaudeAiOauth = new CliOAuthData
+            ClaudeOAuth = new ClaudeOAuthData
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,

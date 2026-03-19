@@ -93,13 +93,13 @@ public class ConversationResponse
 public class CliCredentialsJson
 {
     [JsonPropertyName("claudeAiOauth")]
-    public CliOAuthData? ClaudeAiOauth { get; set; }
+    public ClaudeOAuthData? ClaudeOAuth { get; set; }
 
     [JsonPropertyName("organizationUuid")]
     public string? OrganizationUuid { get; set; }
 }
 
-public class CliOAuthData
+public class ClaudeOAuthData
 {
     [JsonPropertyName("accessToken")]
     public string? AccessToken { get; set; }

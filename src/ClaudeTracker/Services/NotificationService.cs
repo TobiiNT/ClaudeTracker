@@ -66,10 +66,10 @@ public class NotificationService : INotificationService
         var expiryKey = $"{profile.Id}_expiry_{keyType}";
         if (_sentExpiryNotifications.Contains(expiryKey)) return;
 
-        var title = $"Session Key Expiring — {profile.Name}";
+        var title = $"Claude Session Key Expiring — {profile.Name}";
         var message = remaining.TotalHours > 0
-            ? $"Your {keyType} session key expires in {(int)remaining.TotalHours}h {remaining.Minutes}m. Re-authenticate to avoid interruption."
-            : $"Your {keyType} session key has expired. Re-authenticate to continue tracking.";
+            ? $"Your {keyType} Claude Session Key expires in {(int)remaining.TotalHours}h {remaining.Minutes}m. Re-authenticate to avoid interruption."
+            : $"Your {keyType} Claude Session Key has expired. Re-authenticate to continue tracking.";
 
         SendNotification(title, message, NotificationPopup.NotificationLevel.Warning);
         _sentExpiryNotifications.Add(expiryKey);

@@ -115,8 +115,8 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
 
         try
         {
-            // Fetch Claude.ai subscription usage (session key or CLI auto-detect)
-            if (profile.HasClaudeAI || profile.HasCliAccount)
+            // Fetch Claude.ai subscription usage (Claude Session Key or Claude OAuth)
+            if (profile.HasClaudeSessionKey || profile.HasClaudeOAuth)
             {
                 // Silent refresh for default profile if token expired
                 if (!string.IsNullOrEmpty(profile.CliCredentialsJSON) && _cliSyncService.IsTokenExpired(profile.CliCredentialsJSON))

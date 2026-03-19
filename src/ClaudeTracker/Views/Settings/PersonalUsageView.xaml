@@ -31,7 +31,7 @@
             <StackPanel x:Name="SetupPanel">
                 <Border x:Name="DefaultSetupCard" Style="{StaticResource UsageCardStyle}" Padding="16">
                     <StackPanel>
-                        <TextBlock Text="Automatically syncs credentials from your Claude Code CLI login."
+                        <TextBlock Text="Automatically syncs your Claude OAuth credentials."
                                    FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
                                    Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
                         <StackPanel Orientation="Horizontal">
@@ -48,12 +48,12 @@
                 <StackPanel x:Name="ExplicitSetupPanel" Visibility="Collapsed">
                     <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
                         <StackPanel>
-                            <TextBlock Text="Connect via Claude Code CLI" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <TextBlock Text="Reads OAuth credentials from ~/.claude/.credentials.json"
+                            <TextBlock Text="Connect via Claude OAuth" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <TextBlock Text="Reads Claude OAuth credentials from ~/.claude/.credentials.json"
                                        FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
                                        Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
                             <StackPanel Orientation="Horizontal">
-                                <Button x:Name="ExplicitCliButton" Content="Connect via CLI"
+                                <Button x:Name="ExplicitCliButton" Content="Connect via OAuth"
                                         Style="{StaticResource MaterialDesignRaisedButton}"
                                         Height="34" FontSize="12" />
                                 <TextBlock x:Name="ExplicitCliStatus" FontSize="12" Margin="12,0,0,0"
@@ -64,7 +64,7 @@
 
                     <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
                         <StackPanel>
-                            <TextBlock Text="Connect via Session Key" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <TextBlock Text="Connect via Claude Session Key" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
                             <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,10"
                                        Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
                                 <Run Text="Paste your session key from claude.ai (F12 → Application → Cookies)" />

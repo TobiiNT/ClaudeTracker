@@ -11,7 +11,7 @@ public partial class SettingsViewModel : ObservableObject
     private object? _currentView;
 
     public PersonalUsageViewModel PersonalUsage { get; }
-    public CliAccountViewModel CliAccount { get; }
+    public ClaudeOAuthViewModel ClaudeOAuth { get; }
     public AppearanceViewModel Appearance { get; }
     public GeneralSettingsViewModel GeneralSettings { get; }
     public ProfilesViewModel Profiles { get; }
@@ -20,7 +20,7 @@ public partial class SettingsViewModel : ObservableObject
 
     public SettingsViewModel(
         PersonalUsageViewModel personalUsage,
-        CliAccountViewModel cliAccount,
+        ClaudeOAuthViewModel claudeOAuth,
         AppearanceViewModel appearance,
         GeneralSettingsViewModel generalSettings,
         ProfilesViewModel profiles,
@@ -28,7 +28,7 @@ public partial class SettingsViewModel : ObservableObject
         AboutViewModel about)
     {
         PersonalUsage = personalUsage;
-        CliAccount = cliAccount;
+        ClaudeOAuth = claudeOAuth;
         Appearance = appearance;
         GeneralSettings = generalSettings;
         Profiles = profiles;
@@ -41,7 +41,7 @@ public partial class SettingsViewModel : ObservableObject
         CurrentView = value switch
         {
             "PersonalUsage" => PersonalUsage,
-            "CliAccount" => CliAccount,
+            "ClaudeOAuth" => ClaudeOAuth,
             "Appearance" => Appearance,
             "General" => GeneralSettings,
             "Profiles" => Profiles,
