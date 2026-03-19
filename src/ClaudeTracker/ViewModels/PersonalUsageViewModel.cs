@@ -28,6 +28,18 @@ public partial class PersonalUsageViewModel : ObservableObject
 
     public ObservableCollection<AccountInfo> Organizations { get; } = new();
 
+    /// <summary>True if the active profile is the first (default) profile or the only profile.</summary>
+    public bool IsDefaultProfile
+    {
+        get
+        {
+            var profiles = _profileService.Profiles;
+            if (profiles.Count <= 1) return true;
+            var active = _profileService.ActiveProfile;
+            return active != null && profiles.Count > 0 && profiles[0].Id == active.Id;
+        }
+    }
+
     public PersonalUsageViewModel(
         IClaudeApiService apiService,
         IProfileService profileService,
@@ -63,10 +75,21 @@ public partial class PersonalUsageViewModel : ObservableObject
                 return;
             }
 
+            // If expired, try silent refresh before giving up
             if (isExpired)
             {
-                AutoDetectStatusText = "CLI token is expired. Run 'claude' to refresh.";
-                return;
+                var refreshed = await _cliSyncService.TryRefreshTokenAsync();
+                if (refreshed)
+                {
+                    // Re-read refreshed token info
+                    (token, orgUuid, subType, isExpired, expiresAt) = _cliSyncService.GetTokenInfo();
+                }
+
+                if (isExpired)
+                {
+                    AutoDetectStatusText = "CLI token is expired and refresh failed.\nRun 'claude auth login' to re-authenticate.";
+                    return;
+                }
             }
 
             var profile = _profileService.ActiveProfile;
@@ -76,7 +99,6 @@ public partial class PersonalUsageViewModel : ObservableObject
                 return;
             }
 
-            // Sync credentials to profile
             var success = _cliSyncService.SyncToProfile(_profileService, profile.Id);
             if (!success)
             {
@@ -84,14 +106,13 @@ public partial class PersonalUsageViewModel : ObservableObject
                 return;
             }
 
-            // Try fetching usage to verify the token works
             try
             {
                 await _apiService.FetchUsageData();
             }
             catch
             {
-                // Token synced but usage fetch may need org ID setup - that's OK
+                // Token synced but usage fetch may need org ID setup — that's OK
             }
 
             AutoDetectSuccess = true;
