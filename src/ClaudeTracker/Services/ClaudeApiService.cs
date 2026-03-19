@@ -11,7 +11,7 @@ public class ClaudeApiService : IClaudeApiService
 {
     private enum AuthenticationType
     {
-        ClaudeAISession,
+        ClaudeSessionKey,
         CliOAuth,
         ConsoleAPISession
     }
@@ -38,18 +38,18 @@ public class ClaudeApiService : IClaudeApiService
         var profile = _profileService.ActiveProfile
             ?? throw new InvalidOperationException("No active profile");
 
-        // 1. Try claude.ai session key
+        // 1. Try Claude Session Key
         if (!string.IsNullOrEmpty(profile.ClaudeSessionKey))
         {
             var result = _validator.Validate(profile.ClaudeSessionKey);
             if (result.IsValid)
             {
-                LoggingService.Instance.Log("Using claude.ai session key");
-                return new AuthInfo(AuthenticationType.ClaudeAISession, result.SanitizedKey!);
+                LoggingService.Instance.Log("Using Claude Session Key");
+                return new AuthInfo(AuthenticationType.ClaudeSessionKey, result.SanitizedKey!);
             }
         }
 
-        // 2. Try saved CLI OAuth
+        // 2. Try saved Claude OAuth
         if (!string.IsNullOrEmpty(profile.CliCredentialsJSON))
         {
             if (!_cliSyncService.IsTokenExpired(profile.CliCredentialsJSON))
@@ -57,7 +57,7 @@ public class ClaudeApiService : IClaudeApiService
                 var token = _cliSyncService.ExtractAccessToken(profile.CliCredentialsJSON);
                 if (!string.IsNullOrEmpty(token))
                 {
-                    LoggingService.Instance.Log("Using saved CLI OAuth token");
+                    LoggingService.Instance.Log("Using saved Claude OAuth token");
                     return new AuthInfo(AuthenticationType.CliOAuth, token);
                 }
             }
@@ -70,7 +70,7 @@ public class ClaudeApiService : IClaudeApiService
             var token = _cliSyncService.ExtractAccessToken(systemCreds);
             if (!string.IsNullOrEmpty(token))
             {
-                LoggingService.Instance.Log("Using CLI credentials from ~/.claude/.credentials.json");
+                LoggingService.Instance.Log("Using Claude OAuth credentials from ~/.claude/.credentials.json");
                 return new AuthInfo(AuthenticationType.CliOAuth, token);
             }
         }
@@ -84,7 +84,7 @@ public class ClaudeApiService : IClaudeApiService
 
         switch (auth.Type)
         {
-            case AuthenticationType.ClaudeAISession:
+            case AuthenticationType.ClaudeSessionKey:
                 request.Headers.Add("Cookie", $"sessionKey={auth.Token}");
                 request.Headers.Add("Accept", "application/json");
                 break;
@@ -180,7 +180,7 @@ public class ClaudeApiService : IClaudeApiService
 
         switch (auth.Type)
         {
-            case AuthenticationType.ClaudeAISession:
+            case AuthenticationType.ClaudeSessionKey:
             {
                 var orgId = await FetchOrganizationId(auth.Token);
                 var usageData = await PerformClaudeRequest($"/organizations/{orgId}/usage", auth.Token);

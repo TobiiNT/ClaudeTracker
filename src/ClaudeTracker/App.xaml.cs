@@ -109,11 +109,15 @@ public partial class App : Application
                 permHandler.PermissionRequested += (_, args) =>
                 {
                     // Track this TCS for disconnect auto-close
-                    pendingPopups[args.Info.SessionId] = args.ResponseSource;
+                    var sid = args.Info.SessionId;
+                    LoggingService.Instance.Log($"[Popup] Opened for session '{sid}', tool={args.Info.ToolName}, pending={pendingPopups.Count + 1}");
+                    pendingPopups[sid] = args.ResponseSource;
                     popupOpenedAt = DateTime.UtcNow;
-                    args.ResponseSource.Task.ContinueWith(_ =>
+                    args.ResponseSource.Task.ContinueWith(t =>
                     {
-                        pendingPopups.TryRemove(args.Info.SessionId, out var _ignored);
+                        var reason = t.IsCanceled ? "cancelled" : "resolved";
+                        pendingPopups.TryRemove(sid, out var _ignored);
+                        LoggingService.Instance.Log($"[Popup] Closed for session '{sid}' ({reason}), pending={pendingPopups.Count}");
                     });
 
                     Application.Current.Dispatcher.Invoke(() =>
@@ -139,7 +143,7 @@ public partial class App : Application
             // When pipe disconnects (user answered in terminal), close any pending popup
             hookIpcService.PipeDisconnected += (_, requestId) =>
             {
-                LoggingService.Instance.Log($"[Hooks] PipeDisconnected: closing {pendingPopups.Count} pending popup(s)");
+                LoggingService.Instance.Log($"[Popup] PipeDisconnected (req={requestId}): closing {pendingPopups.Count} pending popup(s) [{string.Join(", ", pendingPopups.Keys)}]");
                 foreach (var kvp in pendingPopups)
                 {
                     kvp.Value.TrySetResult(new Models.HookResponse
@@ -160,10 +164,11 @@ public partial class App : Application
             {
                 if (pendingPopups.Count == 0) return;
 
+                // PreToolUse = next tool starting (user already answered in terminal)
                 // PostToolUse = tool executed (allowed), Stop = session ended,
                 // UserPromptSubmit = user sent next prompt (denied/completed)
-                if (evt.EventName is not (Events.PostToolUse or Events.PostToolUseFailure
-                    or Events.Stop or Events.UserPromptSubmit))
+                if (evt.EventName is not (Events.PreToolUse or Events.PostToolUse
+                    or Events.PostToolUseFailure or Events.Stop or Events.UserPromptSubmit))
                     return;
 
                 // Extract session_id from the event payload to match against pending popups
@@ -175,9 +180,12 @@ public partial class App : Application
                 }
                 catch { }
 
+                var hasPendingForSession = !string.IsNullOrEmpty(evtSessionId) && pendingPopups.ContainsKey(evtSessionId);
+                LoggingService.Instance.Log($"[Popup] AutoClose candidate: event={evt.EventName}, session={evtSessionId}, match={hasPendingForSession}, pending=[{string.Join(", ", pendingPopups.Keys)}]");
+
                 // When subagents are active, PostToolUse/PostToolUseFailure events likely come
                 // from other agents — don't auto-close the permission popup for those.
-                // Only session-level signals (Stop, UserPromptSubmit) should still auto-close.
+                // Only session-level signals (Stop, UserPromptSubmit, PreToolUse) should still auto-close.
                 if (evt.EventName is Events.PostToolUse or Events.PostToolUseFailure
                     && !string.IsNullOrEmpty(evtSessionId))
                 {
@@ -185,21 +193,25 @@ public partial class App : Application
                         .FirstOrDefault(s => s.SessionId == evtSessionId);
                     if (session?.ActiveSubagents.Count > 0)
                     {
-                        LoggingService.Instance.Log($"[Hooks] Ignoring '{evt.EventName}' auto-close — session '{evtSessionId}' has {session.ActiveSubagents.Count} active subagent(s)");
+                        LoggingService.Instance.Log($"[Popup] Blocked by subagent guard: event={evt.EventName}, session={evtSessionId}, subagents={session.ActiveSubagents.Count}");
                         return;
                     }
                 }
 
                 // Only close popups from the same session
-                if (!string.IsNullOrEmpty(evtSessionId) && pendingPopups.TryRemove(evtSessionId, out var tcs))
+                if (hasPendingForSession && pendingPopups.TryRemove(evtSessionId, out var tcs))
                 {
-                    LoggingService.Instance.Log($"[Hooks] Event '{evt.EventName}' from session '{evtSessionId}' — auto-closing popup");
+                    LoggingService.Instance.Log($"[Popup] Auto-closing: event={evt.EventName}, session={evtSessionId}");
                     tcs.TrySetResult(new Models.HookResponse
                     {
                         RequestId = evt.RequestId,
                         Success = true,
                         JsonOutput = null
                     });
+                }
+                else if (!hasPendingForSession && pendingPopups.Count > 0)
+                {
+                    LoggingService.Instance.Log($"[Popup] No session match: event session={evtSessionId}, pending sessions=[{string.Join(", ", pendingPopups.Keys)}]");
                 }
             };
 
@@ -294,7 +306,7 @@ public partial class App : Application
     /// <summary>Release the single-instance mutex before Velopack restarts the app.</summary>
     public void ReleaseSingleInstanceMutex()
     {
-        _mutex?.ReleaseMutex();
+        try { _mutex?.ReleaseMutex(); } catch (ApplicationException) { }
         _mutex?.Dispose();
         _mutex = null;
     }
@@ -371,7 +383,7 @@ public partial class App : Application
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<PersonalUsageViewModel>();
         services.AddTransient<ApiBillingViewModel>();
-        services.AddTransient<CliAccountViewModel>();
+        services.AddTransient<ClaudeOAuthViewModel>();
         services.AddTransient<AppearanceViewModel>();
         services.AddTransient<GeneralSettingsViewModel>();
         services.AddTransient<ProfilesViewModel>();

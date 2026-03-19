@@ -43,7 +43,8 @@ public class StopHandler : IHookEventHandler
                     : $"Claude Code has finished processing in {projectName}.";
 
                 ((NotificationService)_notificationService).SendNotification(
-                    title, message, NotificationPopup.NotificationLevel.Info, cwd: cwd);
+                    title, message, NotificationPopup.NotificationLevel.Info,
+                    cwd: cwd, consoleWindowHandle: evt.ConsoleWindowHandle);
 
                 LoggingService.Instance.Log($"StopHandler: Sent completion notification for project '{projectName}'");
             }

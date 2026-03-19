@@ -12,17 +12,22 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     private readonly IProfileService _profileService;
     private readonly INotificationService _notificationService;
     private readonly IClaudeStatusService _statusService;
+    private readonly ClaudeCodeSyncService _cliSyncService;
     private DispatcherTimer? _timer;
     private DispatcherTimer? _resetTimer;
     private ClaudeStatus _cachedStatus = ClaudeStatus.Unknown;
     private DateTime _lastStatusFetch = DateTime.MinValue;
     private bool _isRefreshing;
     private DateTime _rateLimitedUntil = DateTime.MinValue;
+    private DispatcherTimer? _rateLimitTimer;
+    private int _consecutiveRateLimits;
     private long _lastApiFetchTicks = DateTime.MinValue.Ticks;
     private static readonly TimeSpan ApiRefreshInterval = TimeSpan.FromMinutes(5);
 
     public bool IsRunning => _timer?.IsEnabled ?? false;
     public ClaudeStatus CurrentStatus => _cachedStatus;
+    public bool IsRateLimited => DateTime.UtcNow < _rateLimitedUntil;
+    public DateTime RateLimitedUntil => _rateLimitedUntil;
 
     public event EventHandler? RefreshStarted;
     public event EventHandler? RefreshCompleted;
@@ -32,12 +37,14 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
         IClaudeApiService apiService,
         IProfileService profileService,
         INotificationService notificationService,
-        IClaudeStatusService statusService)
+        IClaudeStatusService statusService,
+        ClaudeCodeSyncService cliSyncService)
     {
         _apiService = apiService;
         _profileService = profileService;
         _notificationService = notificationService;
         _statusService = statusService;
+        _cliSyncService = cliSyncService;
 
         Microsoft.Win32.SystemEvents.PowerModeChanged += OnPowerModeChanged;
     }
@@ -65,6 +72,10 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     {
         _timer?.Stop();
         _timer = null;
+        _resetTimer?.Stop();
+        _resetTimer = null;
+        _rateLimitTimer?.Stop();
+        _rateLimitTimer = null;
         LoggingService.Instance.Log("UsageRefreshCoordinator stopped");
     }
 
@@ -96,6 +107,8 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
         if (DateTime.UtcNow < _rateLimitedUntil)
         {
             LoggingService.Instance.Log($"Skipping refresh — rate limited until {_rateLimitedUntil:HH:mm:ss}");
+            var remaining = _rateLimitedUntil - DateTime.UtcNow;
+            RefreshFailed?.Invoke(this, $"Rate limited — retrying in {Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes))}m");
             return;
         }
 
@@ -112,9 +125,24 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
 
         try
         {
-            // Fetch Claude.ai subscription usage (session key or CLI auto-detect)
-            if (profile.HasClaudeAI || profile.HasCliAccount)
+            // Fetch Claude.ai subscription usage (Claude Session Key or Claude OAuth)
+            if (profile.HasClaudeSessionKey || profile.HasClaudeOAuth)
             {
+                // Silent refresh for default profile if token expired
+                if (!string.IsNullOrEmpty(profile.CliCredentialsJSON) && _cliSyncService.IsTokenExpired(profile.CliCredentialsJSON))
+                {
+                    var isDefault = _profileService.Profiles.Count <= 1 || _profileService.Profiles[0].Id == profile.Id;
+                    if (isDefault)
+                    {
+                        var refreshed = await _cliSyncService.TryRefreshTokenAsync();
+                        if (refreshed)
+                        {
+                            _cliSyncService.SyncToProfile(_profileService, profile.Id);
+                            LoggingService.Instance.Log("Auto-refreshed expired OAuth token during usage poll");
+                        }
+                    }
+                }
+
                 var usage = await _apiService.FetchUsageData();
                 _profileService.UpdateUsageData(profile.Id, claudeUsage: usage);
                 _notificationService.CheckAndNotify(profile, usage);
@@ -176,14 +204,18 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
                 _lastStatusFetch = DateTime.UtcNow;
             }
 
+            _consecutiveRateLimits = 0;
             RefreshCompleted?.Invoke(this, EventArgs.Empty);
         }
         catch (HttpRequestException ex) when (ex.Message.Contains("Rate limited"))
         {
-            // Back off for 5 minutes on rate limit — don't extend it with retries
-            _rateLimitedUntil = DateTime.UtcNow.AddMinutes(5);
-            LoggingService.Instance.LogWarning($"Rate limited — backing off until {_rateLimitedUntil:HH:mm:ss}");
-            RefreshFailed?.Invoke(this, "Rate limited — retrying in 5 minutes");
+            // Linear backoff: 5m → 7m → 9m → 11m → ... (capped at 15m)
+            _consecutiveRateLimits++;
+            var backoffMinutes = Math.Min(5 + (_consecutiveRateLimits - 1) * 2, 15);
+            _rateLimitedUntil = DateTime.UtcNow.AddMinutes(backoffMinutes);
+            LoggingService.Instance.LogWarning($"Rate limited (attempt {_consecutiveRateLimits}) — backing off {backoffMinutes}m until {_rateLimitedUntil:HH:mm:ss}");
+            RefreshFailed?.Invoke(this, $"Rate limited — retrying in {backoffMinutes}m");
+            ScheduleRateLimitRefresh();
         }
         catch (Exception ex)
         {
@@ -194,6 +226,23 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
         {
             _isRefreshing = false;
         }
+    }
+
+    private void ScheduleRateLimitRefresh()
+    {
+        _rateLimitTimer?.Stop();
+        var delay = _rateLimitedUntil - DateTime.UtcNow;
+        if (delay.TotalSeconds <= 0) return;
+
+        _rateLimitTimer = new DispatcherTimer { Interval = delay + TimeSpan.FromSeconds(1) };
+        _rateLimitTimer.Tick += (_, _) =>
+        {
+            _rateLimitTimer?.Stop();
+            _rateLimitTimer = null;
+            LoggingService.Instance.Log("Rate limit expired — refreshing now");
+            RefreshNow();
+        };
+        _rateLimitTimer.Start();
     }
 
     private void ScheduleResetRefresh(DateTime resetTime)

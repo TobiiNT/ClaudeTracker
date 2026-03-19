@@ -4,6 +4,7 @@ using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.Utilities;
 using ClaudeTracker.Views;
 using Hardcodet.Wpf.TaskbarNotification;
+using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -96,7 +97,7 @@ public class TrayIconManager : IDisposable
         try
         {
             var profile = _profileService.ActiveProfile;
-            var claudeUsage = profile?.HasClaudeAI == true ? profile.ClaudeUsage : null;
+            var claudeUsage = (profile?.HasClaudeSessionKey == true || profile?.HasClaudeOAuth == true) ? profile.ClaudeUsage : null;
             var apiUsage = profile?.HasAPIConsole == true ? profile.ApiUsage : null;
             var iconConfig = profile?.IconConfig ?? MenuBarIconConfiguration.Default;
             var sessionConfig = iconConfig.GetConfig(MenuBarMetricType.Session);
@@ -294,33 +295,64 @@ public class TrayIconManager : IDisposable
 
         var menu = new ContextMenu { Style = menuStyle };
 
+        // Refresh
         var refreshItem = new MenuItem { Header = "Refresh Now", Style = itemStyle };
         refreshItem.Click += (_, _) => _refreshCoordinator.RefreshNow();
         menu.Items.Add(refreshItem);
 
-        menu.Items.Add(new Separator { Style = sepStyle });
-
+        // Floating widget (only if credentials configured)
         var hasMetrics = _profileService.ActiveProfile?.HasUsageCredentials == true;
-        var floatingItem = new MenuItem
-        {
-            Header = "Floating Widget",
-            IsCheckable = true,
-            IsChecked = _settingsService.Settings.IsFloatingModeEnabled,
-            IsEnabled = hasMetrics,
-            Style = itemStyle
-        };
-        floatingItem.Click += (_, _) => ToggleFloatingMode(floatingItem.IsChecked);
         if (hasMetrics)
+        {
+            var floatingItem = new MenuItem
+            {
+                Header = "Floating Widget",
+                IsCheckable = true,
+                IsChecked = _settingsService.Settings.IsFloatingModeEnabled,
+                Style = itemStyle
+            };
+            floatingItem.Click += (_, _) => ToggleFloatingMode(floatingItem.IsChecked);
             menu.Items.Add(floatingItem);
+        }
 
         menu.Items.Add(new Separator { Style = sepStyle });
 
+        // Update indicator
+        var updateService = App.Services.GetRequiredService<IUpdateService>();
+        if (updateService.IsUpdateAvailable)
+        {
+            var updateItem = new MenuItem
+            {
+                Header = $"Update Available ({updateService.AvailableVersion})",
+                Style = itemStyle,
+                FontWeight = FontWeights.SemiBold
+            };
+            updateItem.Click += (_, _) => ShowSettings();
+            menu.Items.Add(updateItem);
+        }
+
+        // Settings
         var settingsItem = new MenuItem { Header = "Settings...", Style = itemStyle };
         settingsItem.Click += (_, _) => ShowSettings();
         menu.Items.Add(settingsItem);
 
+        // Open log folder
+        var logItem = new MenuItem { Header = "Open Log Folder", Style = itemStyle };
+        logItem.Click += (_, _) =>
+        {
+            var logDir = System.IO.Path.GetDirectoryName(Utilities.Constants.LogFilePath);
+            if (logDir != null && System.IO.Directory.Exists(logDir))
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = logDir,
+                    UseShellExecute = true
+                });
+        };
+        menu.Items.Add(logItem);
+
         menu.Items.Add(new Separator { Style = sepStyle });
 
+        // Quit
         var quitItem = new MenuItem { Header = "Quit Claude Tracker", Style = itemStyle };
         quitItem.Click += (_, _) => Application.Current.Shutdown();
         menu.Items.Add(quitItem);

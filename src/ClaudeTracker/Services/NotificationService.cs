@@ -66,10 +66,10 @@ public class NotificationService : INotificationService
         var expiryKey = $"{profile.Id}_expiry_{keyType}";
         if (_sentExpiryNotifications.Contains(expiryKey)) return;
 
-        var title = $"Session Key Expiring — {profile.Name}";
+        var title = $"Claude Session Key Expiring — {profile.Name}";
         var message = remaining.TotalHours > 0
-            ? $"Your {keyType} session key expires in {(int)remaining.TotalHours}h {remaining.Minutes}m. Re-authenticate to avoid interruption."
-            : $"Your {keyType} session key has expired. Re-authenticate to continue tracking.";
+            ? $"Your {keyType} Claude Session Key expires in {(int)remaining.TotalHours}h {remaining.Minutes}m. Re-authenticate to avoid interruption."
+            : $"Your {keyType} Claude Session Key has expired. Re-authenticate to continue tracking.";
 
         SendNotification(title, message, NotificationPopup.NotificationLevel.Warning);
         _sentExpiryNotifications.Add(expiryKey);
@@ -105,7 +105,7 @@ public class NotificationService : INotificationService
 
     public void SendNotification(string title, string message,
         NotificationPopup.NotificationLevel level = NotificationPopup.NotificationLevel.Warning,
-        string? cwd = null)
+        string? cwd = null, long? consoleWindowHandle = null)
     {
         try
         {
@@ -114,10 +114,12 @@ public class NotificationService : INotificationService
                 var popup = new NotificationPopup(title, message, level);
                 popup.NotificationClicked += (_, _) =>
                 {
-                    if (!string.IsNullOrEmpty(cwd))
-                        Utilities.TerminalFocusHelper.BringToFront(cwd);
-                    else
-                        NotificationClicked?.Invoke(this, EventArgs.Empty);
+                    // Try direct window handle first, then title match, then popover
+                    if (consoleWindowHandle is > 0 && Utilities.TerminalFocusHelper.BringToFront(consoleWindowHandle.Value))
+                        return;
+                    if (!string.IsNullOrEmpty(cwd) && Utilities.TerminalFocusHelper.BringToFront(cwd))
+                        return;
+                    NotificationClicked?.Invoke(this, EventArgs.Empty);
                 };
                 popup.Show();
             });

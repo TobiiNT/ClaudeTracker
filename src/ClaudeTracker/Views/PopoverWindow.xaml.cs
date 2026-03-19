@@ -179,6 +179,7 @@ public partial class PopoverWindow : Window
 
             // API
             ApiCard.Visibility = _viewModel.HasApiUsage ? Visibility.Visible : Visibility.Collapsed;
+            ApiPercentText.Text = $"{_viewModel.ApiPercentage:F0}%";
             ApiProgress.Value = _viewModel.ApiPercentage;
             ApiUsedText.Text = $"Used: {_viewModel.ApiUsedText}";
             ApiRemainingText.Text = $"Remaining: {_viewModel.ApiRemainingText}";
@@ -201,8 +202,20 @@ public partial class PopoverWindow : Window
                 }
             }
 
+            // Refresh button state
+            RefreshButton.IsEnabled = !_viewModel.IsRateLimited;
+            RefreshButton.ToolTip = _viewModel.IsRateLimited
+                ? $"Rate limited until {_viewModel.RateLimitedUntilLocal:HH:mm:ss}"
+                : "Refresh";
+
             // Status line
-            if (_viewModel.IsRefreshing)
+            if (_viewModel.IsRateLimited)
+            {
+                var remaining = _viewModel.RateLimitedUntilLocal - DateTime.Now;
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00)); // orange
+                StatusText.Text = $"Rate limited — retrying in {Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes))}m";
+            }
+            else if (_viewModel.IsRefreshing)
             {
                 StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3)); // blue
                 StatusText.Text = "Refreshing...";

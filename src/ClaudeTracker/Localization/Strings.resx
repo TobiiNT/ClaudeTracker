@@ -75,7 +75,7 @@
   <!-- Settings Tabs -->
   <data name="PersonalUsage" xml:space="preserve"><value>Personal Usage</value></data>
   <data name="APIBilling" xml:space="preserve"><value>API Billing</value></data>
-  <data name="CLIAccount" xml:space="preserve"><value>CLI Account</value></data>
+  <data name="ClaudeOAuth" xml:space="preserve"><value>Claude OAuth</value></data>
   <data name="Appearance" xml:space="preserve"><value>Appearance</value></data>
   <data name="General" xml:space="preserve"><value>General</value></data>
   <data name="Profiles" xml:space="preserve"><value>Profiles</value></data>

@@ -20,6 +20,10 @@ public interface IUsageRefreshCoordinator
     void UpdateInterval(double seconds);
     /// <summary>Whether the refresh timer is currently running.</summary>
     bool IsRunning { get; }
+    /// <summary>Whether requests are currently rate-limited.</summary>
+    bool IsRateLimited { get; }
+    /// <summary>When the rate limit expires (UTC). Only meaningful when IsRateLimited is true.</summary>
+    DateTime RateLimitedUntil { get; }
 
     event EventHandler? RefreshStarted;
     event EventHandler? RefreshCompleted;

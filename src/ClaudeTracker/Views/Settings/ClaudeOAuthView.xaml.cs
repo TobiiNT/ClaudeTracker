@@ -6,14 +6,14 @@ using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views.Settings;
 
-public partial class CliAccountView : UserControl
+public partial class ClaudeOAuthView : UserControl
 {
-    private readonly CliAccountViewModel _vm;
+    private readonly ClaudeOAuthViewModel _vm;
 
-    public CliAccountView()
+    public ClaudeOAuthView()
     {
         InitializeComponent();
-        _vm = App.Services.GetRequiredService<CliAccountViewModel>();
+        _vm = App.Services.GetRequiredService<ClaudeOAuthViewModel>();
         DataContext = _vm;
 
         SyncButton.Click += (_, _) => _vm.SyncCommand.Execute(null);

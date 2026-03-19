@@ -1,16 +1,97 @@
+using System.Net.Http;
 using System.Text.Json;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services.Interfaces;
+using ClaudeTracker.Utilities;
 
 namespace ClaudeTracker.Services;
 
 public class ClaudeCodeSyncService
 {
     private readonly ICredentialService _credentialService;
+    private readonly HttpClient _httpClient;
 
-    public ClaudeCodeSyncService(ICredentialService credentialService)
+    public ClaudeCodeSyncService(ICredentialService credentialService, HttpClient? httpClient = null)
     {
         _credentialService = credentialService;
+        _httpClient = httpClient ?? new HttpClient();
+    }
+
+    public async Task<bool> TryRefreshTokenAsync()
+    {
+        try
+        {
+            var json = ReadSystemCredentials();
+            var parsed = ParseCredentials(json);
+            if (parsed?.ClaudeOAuth == null)
+            {
+                LoggingService.Instance.Log("No credentials found for token refresh");
+                return false;
+            }
+
+            var refreshToken = parsed.ClaudeOAuth.RefreshToken;
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                LoggingService.Instance.Log("No refresh token available");
+                return false;
+            }
+
+            var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["grant_type"] = "refresh_token",
+                ["refresh_token"] = refreshToken,
+                ["client_id"] = Constants.APIEndpoints.OAuthClientId
+            });
+
+            var response = await _httpClient.PostAsync(Constants.APIEndpoints.OAuthTokenEndpoint, content);
+            if (!response.IsSuccessStatusCode)
+            {
+                LoggingService.Instance.Log($"Token refresh failed with status {(int)response.StatusCode}");
+                return false;
+            }
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(responseBody);
+            var root = doc.RootElement;
+
+            if (!root.TryGetProperty("access_token", out var accessTokenEl))
+            {
+                LoggingService.Instance.Log("Token refresh response missing access_token");
+                return false;
+            }
+
+            var newAccessToken = accessTokenEl.GetString();
+            if (string.IsNullOrEmpty(newAccessToken))
+            {
+                LoggingService.Instance.Log("Token refresh response has empty access_token");
+                return false;
+            }
+
+            parsed.ClaudeOAuth.AccessToken = newAccessToken;
+
+            if (root.TryGetProperty("refresh_token", out var newRefreshEl))
+            {
+                var newRefresh = newRefreshEl.GetString();
+                if (!string.IsNullOrEmpty(newRefresh))
+                    parsed.ClaudeOAuth.RefreshToken = newRefresh;
+            }
+
+            if (root.TryGetProperty("expires_in", out var expiresInEl) && expiresInEl.TryGetInt64(out var expiresInSeconds))
+            {
+                parsed.ClaudeOAuth.ExpiresAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + (expiresInSeconds * 1000);
+            }
+
+            var updatedJson = JsonSerializer.Serialize(parsed, new JsonSerializerOptions { WriteIndented = true });
+            _credentialService.WriteCliCredentials(updatedJson);
+
+            LoggingService.Instance.Log("OAuth token refreshed successfully");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.LogError("Failed to refresh OAuth token", ex);
+            return false;
+        }
     }
 
     public string? ReadSystemCredentials()
@@ -35,7 +116,7 @@ public class ClaudeCodeSyncService
 
     public string? ExtractAccessToken(string? credentialsJson)
     {
-        return ParseCredentials(credentialsJson)?.ClaudeAiOauth?.AccessToken;
+        return ParseCredentials(credentialsJson)?.ClaudeOAuth?.AccessToken;
     }
 
     public string? ExtractOrganizationUuid(string? credentialsJson)
@@ -50,7 +131,7 @@ public class ClaudeCodeSyncService
         try
         {
             var parsed = ParseCredentials(credentialsJson);
-            if (parsed?.ClaudeAiOauth?.ExpiresAt is long expiresAtMs)
+            if (parsed?.ClaudeOAuth?.ExpiresAt is long expiresAtMs)
             {
                 // expiresAt is in milliseconds
                 var expiryTime = DateTimeOffset.FromUnixTimeMilliseconds(expiresAtMs);
@@ -71,16 +152,16 @@ public class ClaudeCodeSyncService
             return (null, null, null, true, null);
 
         var parsed = ParseCredentials(json);
-        if (parsed?.ClaudeAiOauth == null)
+        if (parsed?.ClaudeOAuth == null)
             return (null, null, null, true, null);
 
-        var token = parsed.ClaudeAiOauth.AccessToken;
+        var token = parsed.ClaudeOAuth.AccessToken;
         var orgUuid = parsed.OrganizationUuid;
-        var subType = parsed.ClaudeAiOauth.SubscriptionType;
+        var subType = parsed.ClaudeOAuth.SubscriptionType;
         var expired = IsTokenExpired(json);
 
         DateTime? expiresAt = null;
-        if (parsed.ClaudeAiOauth.ExpiresAt is long exp)
+        if (parsed.ClaudeOAuth.ExpiresAt is long exp)
             expiresAt = DateTimeOffset.FromUnixTimeMilliseconds(exp).UtcDateTime;
 
         return (token, orgUuid, subType, expired, expiresAt);
@@ -93,13 +174,13 @@ public class ClaudeCodeSyncService
             var json = ReadSystemCredentials();
             if (string.IsNullOrEmpty(json))
             {
-                LoggingService.Instance.Log("No CLI credentials found at ~/.claude/.credentials.json");
+                LoggingService.Instance.Log("No Claude OAuth credentials found at ~/.claude/.credentials.json");
                 return false;
             }
 
             if (IsTokenExpired(json))
             {
-                LoggingService.Instance.Log("CLI OAuth token is expired");
+                LoggingService.Instance.Log("Claude OAuth token is expired");
                 return false;
             }
 
@@ -116,8 +197,8 @@ public class ClaudeCodeSyncService
             if (profile == null) return false;
 
             profile.CliCredentialsJSON = json;
-            profile.HasCliAccount = true;
-            profile.CliAccountSyncedAt = DateTime.UtcNow;
+            profile.HasClaudeOAuth = true;
+            profile.ClaudeOAuthSyncedAt = DateTime.UtcNow;
 
             // Also set the organization ID if found
             if (!string.IsNullOrEmpty(orgUuid) && string.IsNullOrEmpty(profile.OrganizationId))

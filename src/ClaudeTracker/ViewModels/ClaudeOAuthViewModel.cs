@@ -5,7 +5,7 @@ using ClaudeTracker.Services.Interfaces;
 
 namespace ClaudeTracker.ViewModels;
 
-public partial class CliAccountViewModel : ObservableObject
+public partial class ClaudeOAuthViewModel : ObservableObject
 {
     private readonly ClaudeCodeSyncService _syncService;
     private readonly IProfileService _profileService;
@@ -16,7 +16,7 @@ public partial class CliAccountViewModel : ObservableObject
     [ObservableProperty] private string _expiresAtText = "";
     [ObservableProperty] private bool _isSyncing;
 
-    public CliAccountViewModel(ClaudeCodeSyncService syncService, IProfileService profileService)
+    public ClaudeOAuthViewModel(ClaudeCodeSyncService syncService, IProfileService profileService)
     {
         _syncService = syncService;
         _profileService = profileService;
@@ -67,16 +67,16 @@ public partial class CliAccountViewModel : ObservableObject
 
         if (token == null)
         {
-            TokenStatus = "No CLI credentials found at ~/.claude/.credentials.json";
+            TokenStatus = "No Claude OAuth credentials found at ~/.claude/.credentials.json";
         }
         else if (isExpired)
         {
-            TokenStatus = "Token expired - run 'claude' to refresh";
+            TokenStatus = "Claude OAuth token expired — run 'claude' to refresh";
         }
         else
         {
             var planLabel = !string.IsNullOrEmpty(subType) ? $" ({subType})" : "";
-            TokenStatus = $"Token valid{planLabel}";
+            TokenStatus = $"Claude OAuth token valid{planLabel}";
         }
 
         ExpiresAtText = expiresAt.HasValue

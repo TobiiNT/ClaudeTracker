@@ -39,9 +39,21 @@ public static class TerminalFocusHelper
         "Hyper", "Alacritty", "wezterm-gui", "ConEmu", "ConEmu64"
     };
 
-    public static void BringToFront(string cwd)
+    /// <summary>Bring a window to front by its handle (from HookBridge's GetConsoleWindow).</summary>
+    public static bool BringToFront(long windowHandle)
     {
-        if (string.IsNullOrEmpty(cwd)) return;
+        var hWnd = new IntPtr(windowHandle);
+        if (hWnd == IntPtr.Zero || !IsWindowVisible(hWnd)) return false;
+
+        if (IsIconic(hWnd))
+            ShowWindow(hWnd, 9); // SW_RESTORE
+        return SetForegroundWindow(hWnd);
+    }
+
+    /// <summary>Bring a terminal window to front by matching cwd/project name in the title.</summary>
+    public static bool BringToFront(string cwd)
+    {
+        if (string.IsNullOrEmpty(cwd)) return false;
 
         var projectName = System.IO.Path.GetFileName(cwd) ?? cwd;
         IntPtr found = IntPtr.Zero;
@@ -74,10 +86,12 @@ public static class TerminalFocusHelper
 
         if (found != IntPtr.Zero)
         {
-            // Only restore if minimized — otherwise just bring to front without resizing
             if (IsIconic(found))
                 ShowWindow(found, 9); // SW_RESTORE
             SetForegroundWindow(found);
+            return true;
         }
+
+        return false;
     }
 }

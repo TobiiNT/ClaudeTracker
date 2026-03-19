@@ -57,7 +57,7 @@ public partial class FloatingUsageWindow : Window
             var profile = App.Services.GetRequiredService<Services.Interfaces.IProfileService>().ActiveProfile;
             if (profile == null) return;
 
-            var usage = profile.HasClaudeAI ? profile.ClaudeUsage : null;
+            var usage = (profile.HasClaudeSessionKey || profile.HasClaudeOAuth) ? profile.ClaudeUsage : null;
             if (usage != null)
                 LastUpdatedText.Text = $"Updated {Utilities.FormatterHelper.FormatTimeAgo(usage.LastUpdated)}";
             else if (profile.ApiUsage != null)
@@ -148,8 +148,8 @@ public partial class FloatingUsageWindow : Window
             // Show subscription cards OR API cards, not both empty
             SessionPanel.Visibility = hasSubscription ? Visibility.Visible : Visibility.Collapsed;
             WeeklyPanel.Visibility = hasSubscription ? Visibility.Visible : Visibility.Collapsed;
-            ApiPanel.Visibility = (!hasSubscription && _viewModel.HasApiUsage) ? Visibility.Visible : Visibility.Collapsed;
-            PersonalPanel.Visibility = (!hasSubscription && _viewModel.HasPersonalMetrics) ? Visibility.Visible : Visibility.Collapsed;
+            ApiPanel.Visibility = _viewModel.HasApiUsage ? Visibility.Visible : Visibility.Collapsed;
+            PersonalPanel.Visibility = _viewModel.HasPersonalMetrics ? Visibility.Visible : Visibility.Collapsed;
 
             if (hasSubscription)
             {
@@ -170,6 +170,9 @@ public partial class FloatingUsageWindow : Window
 
             if (_viewModel.HasApiUsage)
             {
+                var profile = App.Services.GetRequiredService<IProfileService>().ActiveProfile;
+                var orgName = profile?.ApiOrganizationName;
+                ApiBudgetLabel.Text = string.IsNullOrEmpty(orgName) ? "Org Budget" : $"{orgName} Budget";
                 ApiPercentText.Text = $"{_viewModel.ApiPercentage:F0}%";
                 ApiBudgetText.Text = $"{_viewModel.ApiUsedText} / {_viewModel.ApiTotalText}";
             }
@@ -188,7 +191,13 @@ public partial class FloatingUsageWindow : Window
             }
 
             // Status line
-            if (_viewModel.IsRefreshing)
+            if (_viewModel.IsRateLimited)
+            {
+                var remaining = _viewModel.RateLimitedUntilLocal - DateTime.Now;
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+                LastUpdatedText.Text = $"Rate limited — {Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes))}m";
+            }
+            else if (_viewModel.IsRefreshing)
             {
                 StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
                 LastUpdatedText.Text = "Refreshing...";

@@ -14,6 +14,8 @@ public static class Constants
         public const string ConsoleBase = PlatformBase + "/api";
         public const string ClaudeCodeMetrics = ConsoleBase + "/claude_code/metrics_aggs";
         public const string OAuthUsage = "https://api.anthropic.com/api/oauth/usage";
+        public const string OAuthTokenEndpoint = "https://platform.claude.com/api/oauth/token";
+        public const string OAuthClientId = "9d1c250a-e61b-44d9-88ed-5944d1962f5e";
     }
 
     public static class RefreshIntervals
@@ -77,6 +79,12 @@ public static class Constants
     {
         public const string ClaudeCodeTarget = "Claude Code-credentials";
         public const string AppName = "ClaudeTracker";
+    }
+
+    public static class WebView2
+    {
+        public static string ProfilePath =>
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ClaudeTracker", "WebView2Profile");
     }
 
     public static class AutoStart
