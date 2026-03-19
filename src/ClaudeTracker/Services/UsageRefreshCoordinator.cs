@@ -20,6 +20,7 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     private bool _isRefreshing;
     private DateTime _rateLimitedUntil = DateTime.MinValue;
     private DispatcherTimer? _rateLimitTimer;
+    private int _consecutiveRateLimits;
     private long _lastApiFetchTicks = DateTime.MinValue.Ticks;
     private static readonly TimeSpan ApiRefreshInterval = TimeSpan.FromMinutes(5);
 
@@ -199,14 +200,17 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
                 _lastStatusFetch = DateTime.UtcNow;
             }
 
+            _consecutiveRateLimits = 0;
             RefreshCompleted?.Invoke(this, EventArgs.Empty);
         }
         catch (HttpRequestException ex) when (ex.Message.Contains("Rate limited"))
         {
-            // Back off for 5 minutes on rate limit — don't extend it with retries
-            _rateLimitedUntil = DateTime.UtcNow.AddMinutes(5);
-            LoggingService.Instance.LogWarning($"Rate limited — backing off until {_rateLimitedUntil:HH:mm:ss}");
-            RefreshFailed?.Invoke(this, "Rate limited — retrying in 5 minutes");
+            // Linear backoff: 5m → 7m → 9m → 11m → ... (capped at 15m)
+            _consecutiveRateLimits++;
+            var backoffMinutes = Math.Min(5 + (_consecutiveRateLimits - 1) * 2, 15);
+            _rateLimitedUntil = DateTime.UtcNow.AddMinutes(backoffMinutes);
+            LoggingService.Instance.LogWarning($"Rate limited (attempt {_consecutiveRateLimits}) — backing off {backoffMinutes}m until {_rateLimitedUntil:HH:mm:ss}");
+            RefreshFailed?.Invoke(this, $"Rate limited — retrying in {backoffMinutes}m");
             ScheduleRateLimitRefresh();
         }
         catch (Exception ex)
