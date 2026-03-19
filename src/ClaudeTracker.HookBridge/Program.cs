@@ -13,7 +13,10 @@ internal static class Program
     private const int ConnectionTimeoutMs = 3000;
     private const int ResponseTimeoutMs = 310_000;
 
-    // --- Win32 interop for parent process monitoring ---
+    // --- Win32 interop ---
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GetConsoleWindow();
+
     [DllImport("ntdll.dll")]
     private static extern int NtQueryInformationProcess(
         IntPtr hProcess, int processInformationClass,
@@ -128,12 +131,14 @@ internal static class Program
             return 0;
 
         // 3. Build IPC envelope
+        var consoleHwnd = GetConsoleWindow();
         var envelope = new JsonObject
         {
             ["requestId"] = Guid.NewGuid().ToString(),
             ["eventName"] = eventName,
             ["payload"] = rawInput,
-            ["timestamp"] = DateTime.UtcNow.ToString("O")
+            ["timestamp"] = DateTime.UtcNow.ToString("O"),
+            ["consoleWindowHandle"] = consoleHwnd != IntPtr.Zero ? consoleHwnd.ToInt64() : null
         };
 
         var envelopeJson = envelope.ToJsonString();

@@ -105,7 +105,7 @@ public class NotificationService : INotificationService
 
     public void SendNotification(string title, string message,
         NotificationPopup.NotificationLevel level = NotificationPopup.NotificationLevel.Warning,
-        string? cwd = null)
+        string? cwd = null, long? consoleWindowHandle = null)
     {
         try
         {
@@ -114,9 +114,12 @@ public class NotificationService : INotificationService
                 var popup = new NotificationPopup(title, message, level);
                 popup.NotificationClicked += (_, _) =>
                 {
-                    // Try to focus the terminal window; fall back to popover if not found
-                    if (string.IsNullOrEmpty(cwd) || !Utilities.TerminalFocusHelper.BringToFront(cwd))
-                        NotificationClicked?.Invoke(this, EventArgs.Empty);
+                    // Try direct window handle first, then title match, then popover
+                    if (consoleWindowHandle is > 0 && Utilities.TerminalFocusHelper.BringToFront(consoleWindowHandle.Value))
+                        return;
+                    if (!string.IsNullOrEmpty(cwd) && Utilities.TerminalFocusHelper.BringToFront(cwd))
+                        return;
+                    NotificationClicked?.Invoke(this, EventArgs.Empty);
                 };
                 popup.Show();
             });

@@ -39,6 +39,18 @@ public static class TerminalFocusHelper
         "Hyper", "Alacritty", "wezterm-gui", "ConEmu", "ConEmu64"
     };
 
+    /// <summary>Bring a window to front by its handle (from HookBridge's GetConsoleWindow).</summary>
+    public static bool BringToFront(long windowHandle)
+    {
+        var hWnd = new IntPtr(windowHandle);
+        if (hWnd == IntPtr.Zero || !IsWindowVisible(hWnd)) return false;
+
+        if (IsIconic(hWnd))
+            ShowWindow(hWnd, 9); // SW_RESTORE
+        return SetForegroundWindow(hWnd);
+    }
+
+    /// <summary>Bring a terminal window to front by matching cwd/project name in the title.</summary>
     public static bool BringToFront(string cwd)
     {
         if (string.IsNullOrEmpty(cwd)) return false;

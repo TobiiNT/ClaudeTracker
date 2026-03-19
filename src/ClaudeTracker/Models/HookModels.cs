@@ -19,6 +19,10 @@ public class HookEvent
 
     [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Console window handle from HookBridge (for SetForegroundWindow).</summary>
+    [JsonPropertyName("consoleWindowHandle")]
+    public long? ConsoleWindowHandle { get; set; }
 }
 
 /// <summary>IPC response sent back to Claude Code for interactive hook events.</summary>
