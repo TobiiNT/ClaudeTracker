@@ -29,7 +29,7 @@
 
             <!-- Setup (not connected) -->
             <StackPanel x:Name="SetupPanel">
-                <Border x:Name="DefaultSetupCard" Style="{StaticResource UsageCardStyle}" Padding="16">
+                <Border Style="{StaticResource UsageCardStyle}" Padding="16">
                     <StackPanel>
                         <TextBlock Text="Automatically syncs your Claude OAuth credentials."
                                    FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
@@ -43,48 +43,10 @@
                         </StackPanel>
                     </StackPanel>
                 </Border>
-
-                <!-- Setup: Additional profile — explicit method choice -->
-                <StackPanel x:Name="ExplicitSetupPanel" Visibility="Collapsed">
-                    <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
-                        <StackPanel>
-                            <TextBlock Text="Connect via Claude OAuth" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <TextBlock Text="Reads Claude OAuth credentials from ~/.claude/.credentials.json"
-                                       FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
-                            <StackPanel Orientation="Horizontal">
-                                <Button x:Name="ExplicitCliButton" Content="Connect via OAuth"
-                                        Style="{StaticResource MaterialDesignRaisedButton}"
-                                        Height="34" FontSize="12" />
-                                <TextBlock x:Name="ExplicitCliStatus" FontSize="12" Margin="12,0,0,0"
-                                           VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="300" />
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
-                        <StackPanel>
-                            <TextBlock Text="Connect via Claude Session Key" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,10"
-                                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                                <Run Text="Paste your session key from claude.ai (F12 → Application → Cookies)" />
-                            </TextBlock>
-                            <TextBox x:Name="SessionKeyInput"
-                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                     materialDesign:HintAssist.Hint="Session key..."
-                                     FontFamily="Consolas" FontSize="12" Margin="0,0,0,10" />
-                            <Button x:Name="SessionKeyTestButton" Content="Test Connection"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Height="34" FontSize="12" HorizontalAlignment="Left" />
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
             </StackPanel>
 
-            <!-- Loading -->
             <ProgressBar x:Name="LoadingBar" IsIndeterminate="True" Visibility="Collapsed"
-                         Style="{StaticResource MaterialDesignLinearProgressBar}"
-                         Margin="0,8" />
+                         Style="{StaticResource MaterialDesignLinearProgressBar}" Margin="0,8" />
 
             <!-- Claude Code API Usage Section -->
             <Border BorderThickness="0,0.5,0,0" BorderBrush="#22000000" Margin="0,24,0,0" />
@@ -93,6 +55,7 @@
                        FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
                        Margin="0,0,0,16" />
 
+            <!-- API Connected state -->
             <Border x:Name="ApiConnectedPanel" Visibility="Collapsed"
                     Style="{StaticResource UsageCardStyle}" Padding="16">
                 <StackPanel>
@@ -115,97 +78,78 @@
                 </StackPanel>
             </Border>
 
-            <TextBlock x:Name="ApiErrorText" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"
-                       Foreground="#F44336" />
+            <!-- API Setup (multi-step, same pattern as onboarding) -->
+            <Border x:Name="ApiSetupPanel" Style="{StaticResource UsageCardStyle}" Padding="16">
+                <StackPanel>
+                    <TextBlock x:Name="ApiSubtitle" Text="Sign in to API Console to track Claude Code spending."
+                               FontSize="12" Foreground="#999" TextWrapping="Wrap" Margin="0,0,0,10" />
 
-            <StackPanel x:Name="ApiSetupPanel">
-                <!-- Default profile: auto-launch WebView2 -->
-                <Border x:Name="ApiAutoDetectCard" Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
-                    <StackPanel>
-                        <TextBlock Text="Sign in to API Console to track Claude Code spending."
-                                   FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
-                        <StackPanel Orientation="Horizontal">
-                            <Button x:Name="ApiAutoDetectButton" Content="Connect"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Height="34" FontSize="12" />
-                            <TextBlock x:Name="ApiAutoDetectStatus" FontSize="12" Margin="12,0,0,0"
-                                       VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="300" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Additional profile: explicit options -->
-                <StackPanel x:Name="ApiExplicitSetupPanel" Visibility="Collapsed">
-                    <Border x:Name="ApiBrowserCard" Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8"
-                            Visibility="Collapsed">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                <materialDesign:PackIcon Kind="Web" Width="18" Height="18"
-                                                         Foreground="#2196F3" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                <TextBlock Text="Sign in with Browser" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
-                            </StackPanel>
-                            <TextBlock Text="Sign in to API Console — session key is captured automatically"
-                                       FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
-                            <Button x:Name="ApiBrowserButton" Content="Open Browser"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
-                                    HorizontalAlignment="Left" Height="34" FontSize="12" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,8">
-                        <StackPanel>
-                            <TextBlock Text="Manual Session Key" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"
-                                       Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
-                                <Run Text="1. Open " /><Run Text="platform.claude.com" FontWeight="SemiBold" />
-                                <LineBreak />
-                                <Run Text="2. Open DevTools (F12) → Application → Cookies" />
-                                <LineBreak />
-                                <Run Text="3. Copy the value of " /><Run Text="sessionKey" FontWeight="SemiBold" />
-                            </TextBlock>
+                    <!-- Step 1: Session key -->
+                    <StackPanel x:Name="ApiStep1">
+                        <Grid Margin="0,0,0,8">
                             <TextBox x:Name="ApiKeyInput"
                                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                      materialDesign:HintAssist.Hint="Session key..."
-                                     FontFamily="Consolas" FontSize="12" Margin="0,0,0,12" />
-                            <Button x:Name="ApiTestButton" Content="Test Connection"
+                                     FontFamily="Consolas" FontSize="12" Margin="0,0,80,0" />
+                            <Button x:Name="ApiConnectButton" Content="Connect"
                                     Style="{StaticResource MaterialDesignRaisedButton}"
-                                    HorizontalAlignment="Left" Height="36" Margin="0,0,0,12" />
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Height="34" FontSize="12" />
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Button x:Name="ApiAutoSignInButton" Height="28" FontSize="11"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,8,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Login" Width="14" Height="14"
+                                                             Margin="0,0,4,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Sign in to Console" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="ApiOpenConsoleButton" Height="28" FontSize="11"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    ToolTip="Open platform.claude.com with DevTools to copy sessionKey">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="OpenInNew" Width="14" Height="14"
+                                                             Margin="0,0,4,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Copy from Console" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
-                    </Border>
+                    </StackPanel>
+
+                    <!-- Step 2: Organization picker -->
+                    <StackPanel x:Name="ApiStep2" Visibility="Collapsed">
+                        <TextBlock Text="Select Organization" FontSize="12" FontWeight="Medium"
+                                   Foreground="#888" Margin="0,0,0,6" />
+                        <ComboBox x:Name="ApiOrgCombo"
+                                  Style="{StaticResource MaterialDesignFilledComboBox}"
+                                  DisplayMemberPath="DisplayName" FontSize="12" />
+                    </StackPanel>
+
+                    <!-- Step 3: User picker -->
+                    <StackPanel x:Name="ApiStep3" Visibility="Collapsed">
+                        <TextBlock Text="Select your identity" FontSize="12" FontWeight="Medium"
+                                   Foreground="#888" Margin="0,4,0,6" />
+                        <Grid>
+                            <ComboBox x:Name="ApiUserCombo"
+                                      Style="{StaticResource MaterialDesignFilledComboBox}"
+                                      DisplayMemberPath="DisplayName" FontSize="12"
+                                      Margin="0,0,80,0" />
+                            <Button x:Name="ApiConfirmButton" Content="Confirm"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Height="34" FontSize="12" />
+                        </Grid>
+                    </StackPanel>
+
+                    <TextBlock x:Name="ApiTip" Visibility="Collapsed"
+                               FontSize="11" Foreground="#888" TextWrapping="Wrap" Margin="0,8,0,0"
+                               FontStyle="Italic" />
+
+                    <ProgressBar x:Name="ApiLoadingBar" IsIndeterminate="True" Visibility="Collapsed"
+                                 Style="{StaticResource MaterialDesignLinearProgressBar}" Margin="0,8,0,0" />
                 </StackPanel>
-
-                <TextBlock x:Name="ApiStatusText" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12" />
-
-                <StackPanel x:Name="ApiOrgPickerPanel" Visibility="Collapsed">
-                    <TextBlock Text="Select Organization" FontSize="12" FontWeight="Medium" Margin="0,0,0,6"
-                               Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
-                    <ComboBox x:Name="ApiOrgCombo"
-                              Style="{StaticResource MaterialDesignFilledComboBox}"
-                              DisplayMemberPath="DisplayName"
-                              Margin="0,0,0,12" />
-                </StackPanel>
-
-            </StackPanel>
-
-            <ProgressBar x:Name="ApiUserLoadingBar" IsIndeterminate="True" Visibility="Collapsed"
-                         Style="{StaticResource MaterialDesignLinearProgressBar}" Margin="0,0,0,8" />
-
-            <StackPanel x:Name="ApiUserPickerPanel" Visibility="Collapsed">
-                <TextBlock Text="Select your identity" FontSize="12" FontWeight="Medium" Margin="0,0,0,6"
-                           Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
-                <ComboBox x:Name="ApiUserCombo"
-                          Style="{StaticResource MaterialDesignFilledComboBox}"
-                          DisplayMemberPath="DisplayName"
-                          Margin="0,0,0,12" />
-                <Button x:Name="ApiUserSaveButton" Content="Confirm"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
-                        HorizontalAlignment="Left" Height="36" />
-            </StackPanel>
-
-            <ProgressBar x:Name="ApiLoadingBar" IsIndeterminate="True" Visibility="Collapsed"
-                         Style="{StaticResource MaterialDesignLinearProgressBar}" Margin="0,8" />
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

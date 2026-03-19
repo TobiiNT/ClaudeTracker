@@ -1,8 +1,11 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
+using ClaudeTracker.Models;
+using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.Utilities;
 using ClaudeTracker.ViewModels;
@@ -12,178 +15,56 @@ namespace ClaudeTracker.Views.Settings;
 public partial class PersonalUsageView : UserControl
 {
     private readonly PersonalUsageViewModel _vm;
-    private readonly ApiBillingViewModel _apiVm;
+    private readonly IClaudeApiService _apiService;
+    private readonly IProfileService _profileService;
+    private readonly ISettingsService _settingsService;
+    private readonly IUsageRefreshCoordinator _refreshCoordinator;
+
+    // API Console state
+    private string _apiSessionKey = "";
+    private APIOrganization? _selectedOrg;
 
     public PersonalUsageView()
     {
         InitializeComponent();
         _vm = App.Services.GetRequiredService<PersonalUsageViewModel>();
-        _apiVm = App.Services.GetRequiredService<ApiBillingViewModel>();
+        _apiService = App.Services.GetRequiredService<IClaudeApiService>();
+        _profileService = App.Services.GetRequiredService<IProfileService>();
+        _settingsService = App.Services.GetRequiredService<ISettingsService>();
+        _refreshCoordinator = App.Services.GetRequiredService<IUsageRefreshCoordinator>();
         DataContext = _vm;
 
-        // --- Profile detection for UI mode ---
-        var isDefault = IsDefaultProfile();
-
-        // Section 1: Show unified or explicit setup
-        if (!isDefault)
-        {
-            DefaultSetupCard.Visibility = Visibility.Collapsed;
-            ExplicitSetupPanel.Visibility = Visibility.Visible;
-        }
-
-        // Section 2: Show unified or explicit setup
-        if (isDefault)
-        {
-            ApiAutoDetectCard.Visibility = Visibility.Visible;
-            ApiExplicitSetupPanel.Visibility = Visibility.Collapsed;
-        }
-        else
-        {
-            ApiAutoDetectCard.Visibility = Visibility.Collapsed;
-            ApiExplicitSetupPanel.Visibility = Visibility.Visible;
-            if (BrowserSignInWindow.IsWebView2Available())
-                ApiBrowserCard.Visibility = Visibility.Visible;
-        }
-
-        // --- Claude.ai Subscription (CLI auto-detect only) ---
+        // --- Subscription section ---
         AutoDetectButton.Click += async (_, _) =>
         {
             LoadingBar.Visibility = Visibility.Visible;
             await _vm.AutoDetectCommand.ExecuteAsync(null);
             LoadingBar.Visibility = Visibility.Collapsed;
         };
-
         DisconnectButton.Click += (_, _) => _vm.DisconnectCommand.Execute(null);
+        _vm.PropertyChanged += (_, _) => UpdateSubscriptionUI();
 
-        _vm.PropertyChanged += (_, _) => UpdateUI();
+        // --- API Console section ---
+        ApiConnectButton.Click += async (_, _) => await OnApiConnect();
+        ApiAutoSignInButton.Click += async (_, _) => await OnApiAutoSignIn();
+        ApiOpenConsoleButton.Click += (_, _) => OnOpenConsole();
 
-        // --- Claude Code API Usage ---
+        ApiOrgCombo.PreviewMouseWheel += BlockScrollWheel;
+        ApiOrgCombo.SelectionChanged += async (_, _) => await OnOrgSelected();
 
-        // Default profile: API section Connect opens WebView2 directly
-        ApiAutoDetectButton.Click += async (_, _) =>
-        {
-            if (!BrowserSignInWindow.IsWebView2Available())
-            {
-                ApiAutoDetectStatus.Text = "WebView2 not available. Use manual paste below.";
-                ApiAutoDetectCard.Visibility = Visibility.Collapsed;
-                ApiExplicitSetupPanel.Visibility = Visibility.Visible;
-                return;
-            }
+        ApiUserCombo.PreviewMouseWheel += BlockScrollWheel;
+        ApiConfirmButton.Click += (_, _) => OnApiConfirm();
 
-            var window = new BrowserSignInWindow(Constants.APIEndpoints.PlatformLogin, "platform.claude.com");
-            window.Owner = Window.GetWindow(this);
-            window.Show();
-            var result = await window.ResultTask;
-            if (result.HasValue)
-            {
-                _apiVm.ApiKey = result.Value.sessionKey;
-                var profile = App.Services.GetRequiredService<IProfileService>().ActiveProfile;
-                if (profile != null && result.Value.expiry.HasValue)
-                    profile.ApiSessionKeyExpiry = result.Value.expiry;
+        ApiDisconnectButton.Click += (_, _) => OnApiDisconnect();
+        ApiChangeUserButton.Click += async (_, _) => await OnApiChangeUser();
 
-                ApiLoadingBar.Visibility = Visibility.Visible;
-                await _apiVm.TestConnectionCommand.ExecuteAsync(null);
-                ApiLoadingBar.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                // User closed WebView2 without completing sign-in — show manual fallback
-                ApiAutoDetectStatus.Text = "Sign-in cancelled. You can try again or use manual paste.";
-                ApiAutoDetectCard.Visibility = Visibility.Collapsed;
-                ApiExplicitSetupPanel.Visibility = Visibility.Visible;
-                if (BrowserSignInWindow.IsWebView2Available())
-                    ApiBrowserCard.Visibility = Visibility.Visible;
-            }
-        };
-
-        // Additional profile: explicit CLI button (for Section 1)
-        ExplicitCliButton.Click += async (_, _) =>
-        {
-            LoadingBar.Visibility = Visibility.Visible;
-            await _vm.AutoDetectCommand.ExecuteAsync(null);
-            LoadingBar.Visibility = Visibility.Collapsed;
-            ExplicitCliStatus.Text = _vm.AutoDetectStatusText;
-        };
-
-        // Additional profile: explicit session key test (for Section 1)
-        SessionKeyTestButton.Click += async (_, _) =>
-        {
-            _vm.SessionKey = SessionKeyInput.Text;
-            LoadingBar.Visibility = Visibility.Visible;
-            await _vm.TestConnectionCommand.ExecuteAsync(null);
-            LoadingBar.Visibility = Visibility.Collapsed;
-        };
-
-        // Additional profile: API browser sign-in (for Section 2)
-        ApiBrowserButton.Click += async (_, _) =>
-        {
-            var window = new BrowserSignInWindow(Constants.APIEndpoints.PlatformLogin, "platform.claude.com");
-            window.Owner = Window.GetWindow(this);
-            window.Show();
-            var result = await window.ResultTask;
-            if (result.HasValue)
-            {
-                ApiKeyInput.Text = result.Value.sessionKey;
-                _apiVm.ApiKey = result.Value.sessionKey;
-                var profile = App.Services.GetRequiredService<IProfileService>().ActiveProfile;
-                if (profile != null && result.Value.expiry.HasValue)
-                    profile.ApiSessionKeyExpiry = result.Value.expiry;
-
-                ApiLoadingBar.Visibility = Visibility.Visible;
-                await _apiVm.TestConnectionCommand.ExecuteAsync(null);
-                ApiLoadingBar.Visibility = Visibility.Collapsed;
-            }
-        };
-
-        ApiTestButton.Click += async (_, _) =>
-        {
-            _apiVm.ApiKey = ApiKeyInput.Text;
-            ApiLoadingBar.Visibility = Visibility.Visible;
-            await _apiVm.TestConnectionCommand.ExecuteAsync(null);
-            ApiLoadingBar.Visibility = Visibility.Collapsed;
-        };
-
-        ApiDisconnectButton.Click += (_, _) => _apiVm.DisconnectCommand.Execute(null);
-        ApiChangeUserButton.Click += async (_, _) =>
-        {
-            await _apiVm.ChangeUserCommand.ExecuteAsync(null);
-        };
-
-        // Org dropdown: only fetch on deliberate click selection, block scroll wheel
-        ApiOrgCombo.PreviewMouseWheel += ComboBox_BlockScrollWheel;
-        ApiOrgCombo.DropDownClosed += async (_, _) =>
-        {
-            var selected = ApiOrgCombo.SelectedItem as Models.APIOrganization;
-            if (selected == null || selected == _apiVm.SelectedOrg) return;
-            _apiVm.SelectedOrg = selected;
-            await _apiVm.SelectOrganizationCommand.ExecuteAsync(null);
-        };
-
-        ApiUserCombo.PreviewMouseWheel += ComboBox_BlockScrollWheel;
-
-        ApiOrgCombo.ItemsSource = _apiVm.Organizations;
-        ApiUserCombo.ItemsSource = _apiVm.ClaudeCodeUsers;
-
-        ApiUserSaveButton.Click += (_, _) =>
-        {
-            _apiVm.SelectedUser = ApiUserCombo.SelectedItem as Models.ClaudeCodeUserMetrics;
-            _apiVm.SaveUserSelectionCommand.Execute(null);
-        };
-
-        _apiVm.PropertyChanged += (_, _) => UpdateApiUI();
-
-        UpdateUI();
-        UpdateApiUI();
+        UpdateSubscriptionUI();
+        UpdateApiConnectedUI();
     }
 
-    /// <summary>Prevents mouse wheel from changing ComboBox selection when dropdown is closed.</summary>
-    private static void ComboBox_BlockScrollWheel(object sender, MouseWheelEventArgs e)
-    {
-        if (sender is ComboBox combo && !combo.IsDropDownOpen)
-            e.Handled = true;
-    }
+    // ── Subscription UI ──
 
-    private void UpdateUI()
+    private void UpdateSubscriptionUI()
     {
         Dispatcher.Invoke(() =>
         {
@@ -199,40 +80,289 @@ public partial class PersonalUsageView : UserControl
         });
     }
 
-    private bool IsDefaultProfile()
+    // ── API Console: Connected state ──
+
+    private void UpdateApiConnectedUI()
     {
-        var profileService = App.Services.GetRequiredService<IProfileService>();
-        var profiles = profileService.Profiles;
-        if (profiles.Count <= 1) return true;
-        var active = profileService.ActiveProfile;
-        return active != null && profiles.Count > 0 && profiles[0].Id == active.Id;
+        var profile = _profileService.ActiveProfile;
+        var isConfigured = profile?.HasAPIConsole == true;
+
+        ApiConnectedPanel.Visibility = isConfigured ? Visibility.Visible : Visibility.Collapsed;
+        ApiSetupPanel.Visibility = isConfigured ? Visibility.Collapsed : Visibility.Visible;
+
+        if (isConfigured && profile != null)
+        {
+            var orgName = profile.ApiOrganizationName;
+            var userLabel = profile.ApiUserSearch;
+            ApiConnectedText.Text = string.IsNullOrEmpty(orgName) ? "Connected" : $"Connected to {orgName}";
+            ApiTrackedUserText.Text = string.IsNullOrEmpty(userLabel) ? "" : $"Tracking: {userLabel}";
+        }
     }
 
-    private void UpdateApiUI()
+    private void OnApiDisconnect()
     {
-        Dispatcher.Invoke(() =>
+        var profile = _profileService.ActiveProfile;
+        if (profile == null) return;
+
+        var credentials = _profileService.LoadCredentials(profile.Id);
+        credentials.ApiSessionKey = null;
+        credentials.ApiOrganizationId = null;
+        _profileService.SaveCredentials(profile.Id, credentials);
+
+        profile.ApiUserSearch = null;
+        profile.ApiOrganizationName = null;
+        profile.ApiUsage = null;
+        profile.PersonalMetrics = null;
+        profile.DailyMetrics = null;
+        _settingsService.Save();
+
+        _refreshCoordinator.InvalidateApiCache();
+        _refreshCoordinator.RefreshNow();
+
+        // Reset setup UI
+        ResetApiSetup();
+        UpdateApiConnectedUI();
+    }
+
+    private async Task OnApiChangeUser()
+    {
+        var profile = _profileService.ActiveProfile;
+        if (profile == null) return;
+
+        var credentials = _profileService.LoadCredentials(profile.Id);
+        if (string.IsNullOrEmpty(credentials.ApiSessionKey) || string.IsNullOrEmpty(credentials.ApiOrganizationId))
+            return;
+
+        _apiSessionKey = credentials.ApiSessionKey;
+        _selectedOrg = new APIOrganization { Id = credentials.ApiOrganizationId, Name = profile.ApiOrganizationName ?? "" };
+
+        // Show setup panel with step 3 directly
+        ApiConnectedPanel.Visibility = Visibility.Collapsed;
+        ApiSetupPanel.Visibility = Visibility.Visible;
+        ApiStep1.Visibility = Visibility.Collapsed;
+        ApiStep2.Visibility = Visibility.Collapsed;
+        ApiSubtitle.Text = $"Connected to {_selectedOrg.DisplayName}";
+        ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+
+        await FetchUsersForOrg(_selectedOrg);
+    }
+
+    // ── API Console Step 1: Session Key ──
+
+    private async Task OnApiAutoSignIn()
+    {
+        var window = new BrowserSignInWindow(Constants.APIEndpoints.PlatformLogin, "platform.claude.com");
+        window.Owner = Window.GetWindow(this);
+        window.Show();
+        var result = await window.ResultTask;
+
+        if (!result.HasValue) return;
+
+        ApiKeyInput.Text = result.Value.sessionKey;
+        await OnApiConnect();
+    }
+
+    private void OnOpenConsole()
+    {
+        try
         {
-            ApiConnectedPanel.Visibility = _apiVm.IsConfigured ? Visibility.Visible : Visibility.Collapsed;
-            ApiSetupPanel.Visibility = _apiVm.IsConfigured ? Visibility.Collapsed : Visibility.Visible;
-            ApiStatusText.Text = _apiVm.TestStatus;
-            ApiStatusText.Foreground = _apiVm.TestSuccess
-                ? new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50))
-                : new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36));
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "msedge.exe",
+                Arguments = "--auto-open-devtools-for-tabs https://platform.claude.com",
+                UseShellExecute = true
+            });
+        }
+        catch
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://platform.claude.com",
+                UseShellExecute = true
+            });
+        }
+    }
 
-            var wasOrgHidden = ApiOrgPickerPanel.Visibility != Visibility.Visible;
-            var wasUserHidden = ApiUserPickerPanel.Visibility != Visibility.Visible;
+    private async Task OnApiConnect()
+    {
+        var key = ApiKeyInput.Text.Trim();
+        if (string.IsNullOrEmpty(key))
+        {
+            ApiSubtitle.Text = "Please enter a session key";
+            return;
+        }
 
-            ApiOrgPickerPanel.Visibility = _apiVm.ShowOrgPicker ? Visibility.Visible : Visibility.Collapsed;
-            ApiUserPickerPanel.Visibility = _apiVm.ShowUserPicker ? Visibility.Visible : Visibility.Collapsed;
-            ApiUserLoadingBar.Visibility = _apiVm.IsLoadingUsers ? Visibility.Visible : Visibility.Collapsed;
-            ApiTrackedUserText.Text = string.IsNullOrEmpty(_apiVm.TrackedUserLabel) ? "" : $"Tracking: {_apiVm.TrackedUserLabel}";
-            ApiErrorText.Text = _apiVm.IsConfigured && !_apiVm.TestSuccess ? _apiVm.TestStatus : "";
+        ApiSubtitle.Text = "Validating session key...";
+        ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
+        ApiLoadingBar.Visibility = Visibility.Visible;
+        ApiConnectButton.IsEnabled = false;
 
-            // Auto-scroll into view when panels first appear
-            if (wasUserHidden && _apiVm.ShowUserPicker)
-                ApiUserPickerPanel.BringIntoView();
-            else if (wasOrgHidden && _apiVm.ShowOrgPicker)
-                ApiOrgPickerPanel.BringIntoView();
+        try
+        {
+            var orgs = await _apiService.FetchConsoleOrganizations(key);
+            if (orgs.Count == 0)
+            {
+                ApiSubtitle.Text = "No organizations found.";
+                return;
+            }
+
+            _apiSessionKey = key;
+
+            ApiSubtitle.Text = "Fetching billing data...";
+            ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+            ApiStep1.Visibility = Visibility.Collapsed;
+
+            // Enrich orgs with spend data (best-effort)
+            await EnrichOrgsWithSpend(orgs, key);
+
+            if (orgs.Count == 1)
+            {
+                _selectedOrg = orgs[0];
+                SaveApiConsoleOrg(orgs[0]);
+                ApiSubtitle.Text = $"Connected to {orgs[0].DisplayName}";
+                await FetchUsersForOrg(orgs[0]);
+            }
+            else
+            {
+                ApiSubtitle.Text = "Select your organization";
+                ApiOrgCombo.ItemsSource = orgs;
+                ApiStep2.Visibility = Visibility.Visible;
+            }
+        }
+        catch (Exception ex)
+        {
+            ApiSubtitle.Text = $"Failed: {ex.Message}";
+            ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36));
+        }
+        finally
+        {
+            ApiLoadingBar.Visibility = Visibility.Collapsed;
+            ApiConnectButton.IsEnabled = true;
+        }
+    }
+
+    // ── API Console Step 2: Organization ──
+
+    private async Task OnOrgSelected()
+    {
+        if (ApiOrgCombo.SelectedItem is not APIOrganization org) return;
+        _selectedOrg = org;
+
+        // Save org immediately so API usage/limit refreshes right away
+        SaveApiConsoleOrg(org);
+
+        await FetchUsersForOrg(org);
+    }
+
+    private async Task FetchUsersForOrg(APIOrganization org)
+    {
+        ApiLoadingBar.Visibility = Visibility.Visible;
+        ApiStep3.Visibility = Visibility.Collapsed;
+        ApiTip.Visibility = Visibility.Collapsed;
+
+        try
+        {
+            var users = await _apiService.FetchClaudeCodeAllUsers(org.Id, _apiSessionKey);
+            if (users.Count > 0)
+            {
+                ApiUserCombo.ItemsSource = users;
+                ApiStep2.Visibility = Visibility.Collapsed;
+                ApiStep3.Visibility = Visibility.Visible;
+                ApiStep3.BringIntoView();
+            }
+            else
+            {
+                ApiSubtitle.Text = $"Connected to {org.DisplayName}";
+                ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+                ApiTip.Text = "No users found. Org spending will still be tracked. You can select a user later.";
+                ApiTip.Visibility = Visibility.Visible;
+                SaveApiConsoleOrg(org);
+            }
+        }
+        catch (Exception ex)
+        {
+            ApiSubtitle.Text = $"Connected to {org.DisplayName}";
+            ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+            ApiTip.Text = $"Could not load users: {ex.Message}. Org spending will still be tracked.";
+            ApiTip.Visibility = Visibility.Visible;
+            SaveApiConsoleOrg(org);
+        }
+        finally
+        {
+            ApiLoadingBar.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private async Task EnrichOrgsWithSpend(List<APIOrganization> orgs, string sessionKey)
+    {
+        var tasks = orgs.Select(async org =>
+        {
+            try
+            {
+                var usage = await _apiService.FetchAPIUsageData(org.Id, sessionKey);
+                org.SpendSummary = usage.SpendLimitCents > 0
+                    ? $"{usage.FormattedUsed} of {usage.FormattedTotal}"
+                    : usage.FormattedUsed;
+            }
+            catch { /* best-effort */ }
         });
+        await Task.WhenAll(tasks);
+    }
+
+    // ── API Console Step 3: Confirm ──
+
+    private void OnApiConfirm()
+    {
+        if (ApiUserCombo.SelectedItem is not ClaudeCodeUserMetrics user || _selectedOrg == null) return;
+
+        var profile = _profileService.ActiveProfile;
+        if (profile == null) return;
+
+        SaveApiConsoleOrg(_selectedOrg);
+        profile.ApiUserSearch = user.DisplayName;
+        _settingsService.Save();
+
+        ResetApiSetup();
+        UpdateApiConnectedUI();
+    }
+
+    // ── Helpers ──
+
+    private void SaveApiConsoleOrg(APIOrganization org)
+    {
+        var profile = _profileService.ActiveProfile;
+        if (profile == null) return;
+
+        profile.ApiOrganizationName = org.Name;
+        var credentials = _profileService.LoadCredentials(profile.Id);
+        credentials.ApiSessionKey = _apiSessionKey;
+        credentials.ApiOrganizationId = org.Id;
+        _profileService.SaveCredentials(profile.Id, credentials);
+        _settingsService.Save();
+
+        _refreshCoordinator.InvalidateApiCache();
+        _refreshCoordinator.RefreshNow();
+
+        ResetApiSetup();
+        UpdateApiConnectedUI();
+    }
+
+    private void ResetApiSetup()
+    {
+        ApiStep1.Visibility = Visibility.Visible;
+        ApiStep2.Visibility = Visibility.Collapsed;
+        ApiStep3.Visibility = Visibility.Collapsed;
+        ApiTip.Visibility = Visibility.Collapsed;
+        ApiKeyInput.Text = "";
+        ApiSubtitle.Text = "Sign in to API Console to track Claude Code spending.";
+        ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
+        _apiSessionKey = "";
+        _selectedOrg = null;
+    }
+
+    private static void BlockScrollWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (sender is ComboBox combo && !combo.IsDropDownOpen)
+            e.Handled = true;
     }
 }
