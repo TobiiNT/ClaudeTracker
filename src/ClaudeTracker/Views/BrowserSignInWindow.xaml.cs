@@ -35,7 +35,9 @@ public partial class BrowserSignInWindow : Window
     {
         try
         {
-            await WebView.EnsureCoreWebView2Async();
+            var env = await CoreWebView2Environment.CreateAsync(
+                userDataFolder: Utilities.Constants.WebView2.ProfilePath);
+            await WebView.EnsureCoreWebView2Async(env);
             WebView.CoreWebView2.NavigationCompleted += OnNavigationCompleted;
             WebView.CoreWebView2.Navigate(_targetUrl);
         }
