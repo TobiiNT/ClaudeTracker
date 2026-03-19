@@ -12,6 +12,7 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
     private readonly IProfileService _profileService;
     private readonly INotificationService _notificationService;
     private readonly IClaudeStatusService _statusService;
+    private readonly ClaudeCodeSyncService _cliSyncService;
     private DispatcherTimer? _timer;
     private DispatcherTimer? _resetTimer;
     private ClaudeStatus _cachedStatus = ClaudeStatus.Unknown;
@@ -32,12 +33,14 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
         IClaudeApiService apiService,
         IProfileService profileService,
         INotificationService notificationService,
-        IClaudeStatusService statusService)
+        IClaudeStatusService statusService,
+        ClaudeCodeSyncService cliSyncService)
     {
         _apiService = apiService;
         _profileService = profileService;
         _notificationService = notificationService;
         _statusService = statusService;
+        _cliSyncService = cliSyncService;
 
         Microsoft.Win32.SystemEvents.PowerModeChanged += OnPowerModeChanged;
     }
@@ -115,6 +118,21 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
             // Fetch Claude.ai subscription usage (session key or CLI auto-detect)
             if (profile.HasClaudeAI || profile.HasCliAccount)
             {
+                // Silent refresh for default profile if token expired
+                if (!string.IsNullOrEmpty(profile.CliCredentialsJSON) && _cliSyncService.IsTokenExpired(profile.CliCredentialsJSON))
+                {
+                    var isDefault = _profileService.Profiles.Count <= 1 || _profileService.Profiles[0].Id == profile.Id;
+                    if (isDefault)
+                    {
+                        var refreshed = await _cliSyncService.TryRefreshTokenAsync();
+                        if (refreshed)
+                        {
+                            _cliSyncService.SyncToProfile(_profileService, profile.Id);
+                            LoggingService.Instance.Log("Auto-refreshed expired OAuth token during usage poll");
+                        }
+                    }
+                }
+
                 var usage = await _apiService.FetchUsageData();
                 _profileService.UpdateUsageData(profile.Id, claudeUsage: usage);
                 _notificationService.CheckAndNotify(profile, usage);
