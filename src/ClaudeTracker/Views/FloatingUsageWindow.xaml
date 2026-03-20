@@ -9,10 +9,19 @@
         Topmost="True"
         ResizeMode="NoResize"
         SizeToContent="Height"
-        Width="280">
+        Width="300">
 
-    <Border Style="{StaticResource FloatingBorderStyle}" Padding="14,10,14,12"
-            MouseLeftButtonDown="DragHandle_MouseLeftButtonDown">
+    <Grid Margin="10">
+        <!-- Shadow layer -->
+        <Border CornerRadius="12" Background="#F5F5F5">
+            <Border.Effect>
+                <DropShadowEffect ShadowDepth="3" Opacity="0.18" BlurRadius="14" Direction="270" />
+            </Border.Effect>
+        </Border>
+        <!-- Content layer with clipping -->
+        <Border CornerRadius="12" Background="#F5F5F5" BorderBrush="#22000000" BorderThickness="0.5"
+                Padding="14,10,14,12" ClipToBounds="True"
+                MouseLeftButtonDown="DragHandle_MouseLeftButtonDown">
         <StackPanel>
 
             <!-- Drag handle + close button -->
@@ -153,5 +162,6 @@
                 <TextBlock x:Name="LastUpdatedText" FontSize="10" Foreground="#BBB" VerticalAlignment="Center" />
             </StackPanel>
         </StackPanel>
-    </Border>
+        </Border>
+    </Grid>
 </Window>

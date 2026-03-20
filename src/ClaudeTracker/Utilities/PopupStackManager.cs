@@ -27,13 +27,30 @@ public static class PopupStackManager
         catch { return "BottomRight"; }
     }
 
+    /// <summary>Returns the index of the primary monitor in Screen.AllScreens.</summary>
+    public static int GetPrimaryMonitorIndex()
+    {
+        var screens = System.Windows.Forms.Screen.AllScreens;
+        for (int i = 0; i < screens.Length; i++)
+        {
+            if (screens[i].Primary) return i;
+        }
+        return 0;
+    }
+
+    /// <summary>Resolves the effective monitor index (-1 means primary).</summary>
+    public static int ResolveMonitorIndex(int monitorIndex)
+    {
+        return monitorIndex < 0 ? GetPrimaryMonitorIndex() : monitorIndex;
+    }
+
     /// <summary>Returns the work area for the configured monitor (WPF device-independent units).</summary>
     public static Rect GetWorkArea()
     {
         try
         {
             var settings = App.Services.GetRequiredService<ISettingsService>();
-            var monitorIndex = settings.Settings.HookPopupMonitor;
+            var monitorIndex = ResolveMonitorIndex(settings.Settings.HookPopupMonitor);
 
             var screens = System.Windows.Forms.Screen.AllScreens;
             if (monitorIndex >= 0 && monitorIndex < screens.Length)

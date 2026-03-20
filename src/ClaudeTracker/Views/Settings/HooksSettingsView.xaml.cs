@@ -45,7 +45,8 @@ public partial class HooksSettingsView : UserControl
         // Popup monitor
         var monitorNames = Utilities.PopupStackManager.GetMonitorNames();
         PopupMonitorCombo.ItemsSource = monitorNames;
-        PopupMonitorCombo.SelectedIndex = Math.Min(_vm.PopupMonitor, monitorNames.Length - 1);
+        var resolvedIndex = Utilities.PopupStackManager.ResolveMonitorIndex(_vm.PopupMonitor);
+        PopupMonitorCombo.SelectedIndex = Math.Min(resolvedIndex, monitorNames.Length - 1);
         PopupMonitorCombo.SelectionChanged += (_, _) =>
         {
             _vm.PopupMonitor = PopupMonitorCombo.SelectedIndex;
