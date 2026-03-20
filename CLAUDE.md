@@ -162,6 +162,11 @@ Format: `<type>: <concise description>` — lowercase, imperative mood, no perio
 - PR title follows the same `<type>: <description>` format as commits
 - The `## Test plan` section is auto-stripped from GitHub Release notes by release.yml
 
+## Documentation
+
+- Design specs and implementation plans go in `docs/plans/` with naming format `YYYY-MM-DD-<topic>.md`
+- Do NOT create docs in other locations (e.g., `docs/superpowers/`, `docs/specs/`)
+
 ## CI/CD
 
 - **build.yml**: Push to main / PR → restore → build → test
