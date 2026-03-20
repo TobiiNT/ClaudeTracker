@@ -71,7 +71,7 @@ public partial class PersonalUsageViewModel : ObservableObject
 
             if (string.IsNullOrEmpty(token))
             {
-                AutoDetectStatusText = "No Claude OAuth credentials found.\nMake sure Claude Code is installed and logged in.";
+                AutoDetectStatusText = "No subscription plan credentials found.\nMake sure Claude Code is installed and logged in.";
                 return;
             }
 
@@ -87,7 +87,7 @@ public partial class PersonalUsageViewModel : ObservableObject
 
                 if (isExpired)
                 {
-                    AutoDetectStatusText = "Claude OAuth token is expired and refresh failed.\nRun 'claude auth login' to re-authenticate.";
+                    AutoDetectStatusText = "Subscription plan token is expired and refresh failed.\nRun 'claude auth login' to re-authenticate.";
                     return;
                 }
             }
