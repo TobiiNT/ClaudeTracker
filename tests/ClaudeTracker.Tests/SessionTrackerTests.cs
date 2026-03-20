@@ -27,7 +27,7 @@ public class SessionTrackerTests
 
         _tracker.Observe(evt);
 
-        _sessionTracking.Verify(s => s.RegisterSession("s1", "/project", "default", "opus"), Times.Once);
+        _sessionTracking.Verify(s => s.RegisterSession("s1", "/project", "default", "opus", null), Times.Once);
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class SessionTrackerTests
 
         _tracker.Observe(evt);
 
-        _sessionTracking.Verify(s => s.RegisterSession(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()), Times.Never);
+        _sessionTracking.Verify(s => s.RegisterSession(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<long?>()), Times.Never);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class SessionTrackerTests
 
         _tracker.Observe(evt);
 
-        _sessionTracking.Verify(s => s.RegisterSession(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()), Times.Never);
+        _sessionTracking.Verify(s => s.RegisterSession(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<long?>()), Times.Never);
         _sessionTracking.Verify(s => s.EndSession(It.IsAny<string>()), Times.Never);
     }
 }

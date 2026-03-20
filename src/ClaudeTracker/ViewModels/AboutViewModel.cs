@@ -16,6 +16,7 @@ public partial class AboutViewModel : ObservableObject
     [ObservableProperty] private bool _isUpdateAvailable;
     [ObservableProperty] private bool _isUpdateBusy;
     [ObservableProperty] private bool _isInstalled;
+    [ObservableProperty] private string? _availableVersion;
 
     public string Version => Constants.AppVersion;
     public string GitHubUrl => Constants.GitHub.RepoUrl;
@@ -39,6 +40,7 @@ public partial class AboutViewModel : ObservableObject
         IsUpdateAvailable = _updateService.IsUpdateAvailable;
         IsUpdateBusy = _updateService.IsBusy;
         IsInstalled = _updateService.IsInstalled;
+        AvailableVersion = _updateService.AvailableVersion;
     }
 
     [RelayCommand]

@@ -78,6 +78,7 @@ public class SessionState
     public int SubagentCount { get; set; }
     public string CurrentActivity { get; set; } = string.Empty;
     public DateTime LastActivityTime { get; set; } = DateTime.UtcNow;
+    public long? ConsoleWindowHandle { get; set; }
     public List<string> ActiveSubagents { get; set; } = new();
 
     [JsonIgnore]

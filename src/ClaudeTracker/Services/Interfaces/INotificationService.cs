@@ -10,7 +10,7 @@ public interface INotificationService
     /// <summary>Checks whether session keys are expiring within 24 hours and notifies.</summary>
     void CheckKeyExpiry(Profile profile);
     /// <summary>Sends a Windows toast notification with the given title and message.</summary>
-    void SendNotification(string title, string message);
+    void SendNotification(string title, string message, Action? onClick = null);
     /// <summary>Raised when the user clicks on a notification popup.</summary>
     event EventHandler? NotificationClicked;
 }

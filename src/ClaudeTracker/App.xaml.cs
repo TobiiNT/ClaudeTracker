@@ -232,8 +232,8 @@ public partial class App : Application
                 if (e.NewItems == null) return;
                 foreach (Models.ActivityEntry entry in e.NewItems)
                 {
-                    // Suppress notifications while a permission popup is active
-                    if (pendingPopups.Count > 0)
+                    // Suppress notifications for sessions that have a permission popup active
+                    if (pendingPopups.ContainsKey(entry.SessionId))
                         continue;
 
                     var prefs = settingsService.Settings.HookNotificationPreferences;
@@ -264,12 +264,13 @@ public partial class App : Application
                         var body = !string.IsNullOrEmpty(entry.Detail)
                             ? $"{entry.Summary}\n{entry.Detail}" : entry.Summary;
 
-                        // Find cwd from session so clicking notification focuses the right terminal
-                        var sessionCwd = sessionTracking.ActiveSessions
-                            .FirstOrDefault(s => s.SessionId == entry.SessionId)?.Cwd;
+                        // Find session so clicking notification focuses the right terminal
+                        var session = sessionTracking.ActiveSessions
+                            .FirstOrDefault(s => s.SessionId == entry.SessionId);
 
                         ((NotificationService)notificationServiceForHooks).SendNotification(
-                            title, body, level, cwd: sessionCwd);
+                            title, body, level, cwd: session?.Cwd,
+                            consoleWindowHandle: session?.ConsoleWindowHandle);
                     }
                 }
             };

@@ -8,15 +8,17 @@ public partial class SettingsWindow : Window
 {
     private static SettingsWindow? _instance;
 
-    public static void ShowInstance()
+    public static void ShowInstance(string? tab = null)
     {
         if (_instance != null && _instance.IsVisible)
         {
+            if (tab != null) _instance.NavigateToTab(tab);
             _instance.Activate();
             return;
         }
 
         _instance = new SettingsWindow();
+        if (tab != null) _instance.NavigateToTab(tab);
         _instance.Show();
         _instance.Activate();
     }
@@ -37,6 +39,21 @@ public partial class SettingsWindow : Window
         ShowView<PersonalUsageView>();
 
         Closed += (_, _) => _instance = null;
+    }
+
+    private void NavigateToTab(string tab)
+    {
+        var radio = tab switch
+        {
+            "about" => NavAbout,
+            "hooks" => NavHooks,
+            "appearance" => NavAppearance,
+            "general" => NavGeneral,
+            "profiles" => NavProfiles,
+            "connect" => NavPersonal,
+            _ => null
+        };
+        if (radio != null) radio.IsChecked = true;
     }
 
     private void ShowView<T>() where T : UserControl, new()

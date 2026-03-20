@@ -38,6 +38,11 @@
                 <Button x:Name="ApplyUpdateButton" Content="Update &amp; Restart"
                         Style="{StaticResource MaterialDesignFlatMidBgButton}"
                         Margin="0,4" Width="200" Visibility="Collapsed" />
+                <TextBlock x:Name="ReleaseNotesLink" HorizontalAlignment="Center"
+                           Margin="0,4,0,0" Visibility="Collapsed">
+                    <Hyperlink x:Name="ReleaseNotesHyperlink" TextDecorations="None"
+                               Foreground="{DynamicResource PrimaryHueMidBrush}">View release notes</Hyperlink>
+                </TextBlock>
             </StackPanel>
 
             <!-- Actions -->

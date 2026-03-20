@@ -19,7 +19,7 @@ public class SessionTrackingService : ISessionTrackingService
     public int ActiveSessionCount => ActiveSessions.Count;
     public event EventHandler? SessionsChanged;
 
-    public void RegisterSession(string sessionId, string projectDirectory, string permissionMode, string? model)
+    public void RegisterSession(string sessionId, string projectDirectory, string permissionMode, string? model, long? consoleWindowHandle = null)
     {
         Application.Current?.Dispatcher.Invoke(() =>
         {
@@ -37,7 +37,8 @@ public class SessionTrackingService : ISessionTrackingService
                 {
                     SessionId = sessionId,
                     Cwd = projectDirectory,
-                    Model = model ?? ""
+                    Model = model ?? "",
+                    ConsoleWindowHandle = consoleWindowHandle
                 };
                 ActiveSessions.Add(session);
             }
