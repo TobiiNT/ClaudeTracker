@@ -12,6 +12,7 @@ public partial class BrowserSignInWindow : Window
     private readonly TaskCompletionSource<(string sessionKey, DateTime? expiry)?> _result = new();
     private bool _ssoRedirectAttempted;
     private CoreWebView2Cookie? _fallbackCookie;
+    private bool _captured;
 
     public Task<(string sessionKey, DateTime? expiry)?> ResultTask => _result.Task;
 
@@ -49,13 +50,16 @@ public partial class BrowserSignInWindow : Window
                 userDataFolder: Utilities.Constants.WebView2.ProfilePath);
             await WebView.EnsureCoreWebView2Async(env);
             WebView.CoreWebView2.NavigationCompleted += OnNavigationCompleted;
+            WebView.CoreWebView2.SourceChanged += OnSourceChanged;
 #if DEBUG
             WebView.CoreWebView2.NavigationStarting += (_, args) =>
                 LoggingService.Instance.Log($"[DEBUG][BrowserSignIn] NavigationStarting — uri: {args.Uri}");
-            WebView.CoreWebView2.SourceChanged += (_, _) =>
-                LoggingService.Instance.Log($"[DEBUG][BrowserSignIn] SourceChanged — source: {WebView.CoreWebView2.Source}");
 #endif
-            Closed += (_, _) => WebView.CoreWebView2.NavigationCompleted -= OnNavigationCompleted;
+            Closed += (_, _) =>
+            {
+                WebView.CoreWebView2.NavigationCompleted -= OnNavigationCompleted;
+                WebView.CoreWebView2.SourceChanged -= OnSourceChanged;
+            };
             WebView.CoreWebView2.Navigate(_targetUrl);
         }
         catch (Exception ex)
@@ -65,8 +69,43 @@ public partial class BrowserSignInWindow : Window
         }
     }
 
+    private async void OnSourceChanged(object? sender, CoreWebView2SourceChangedEventArgs e)
+    {
+        // SPA navigations (e.g. login → dashboard) don't fire NavigationCompleted.
+        // Check for the target domain's sessionKey cookie whenever the URL changes.
+        if (_captured) return;
+
+        var source = WebView.CoreWebView2.Source;
+#if DEBUG
+        LoggingService.Instance.Log($"[DEBUG][BrowserSignIn] SourceChanged — source: {source}");
+#endif
+        if (!source.Contains(_cookieDomain)) return;
+
+        try
+        {
+            var cookies = await WebView.CoreWebView2.CookieManager.GetCookiesAsync(source);
+            foreach (var cookie in cookies)
+            {
+                if (cookie.Name == "sessionKey" && cookie.Domain.Contains(_cookieDomain))
+                {
+#if DEBUG
+                    LoggingService.Instance.Log($"[DEBUG][BrowserSignIn] SourceChanged HIT — sessionKey on {cookie.Domain}");
+#endif
+                    _captured = true;
+                    await CaptureAndClose(cookie);
+                    return;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.LogError("SourceChanged cookie check failed", ex);
+        }
+    }
+
     private async void OnNavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
     {
+        if (_captured) return;
         try
         {
             var currentUrl = WebView.CoreWebView2.Source;
@@ -87,6 +126,7 @@ public partial class BrowserSignInWindow : Window
 #if DEBUG
                     LoggingService.Instance.Log($"[DEBUG][BrowserSignIn] Step1 HIT — target domain sessionKey found, domain: {cookie.Domain}");
 #endif
+                    _captured = true;
                     await CaptureAndClose(cookie);
                     return;
                 }
@@ -120,6 +160,7 @@ public partial class BrowserSignInWindow : Window
                     LoggingService.Instance.Log($"[DEBUG][BrowserSignIn] Step2 fallback — SSO already attempted, capturing current cookie domain: {cookie.Domain}");
 #endif
                     // SSO redirect already attempted — fall back to the cookie we have
+                    _captured = true;
                     await CaptureAndClose(cookie);
                     return;
                 }
@@ -132,6 +173,7 @@ public partial class BrowserSignInWindow : Window
 #if DEBUG
                 LoggingService.Instance.Log($"[DEBUG][BrowserSignIn] Step3 — no sessionKey anywhere, using saved fallback cookie domain: {_fallbackCookie.Domain}");
 #endif
+                _captured = true;
                 await CaptureAndClose(_fallbackCookie);
                 return;
             }
