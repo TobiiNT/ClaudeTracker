@@ -101,7 +101,13 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
 
     private async Task RefreshAsync()
     {
-        if (_isRefreshing) return; // Prevent overlapping requests
+        if (_isRefreshing)
+        {
+#if DEBUG
+            LoggingService.Instance.Log("[DEBUG] RefreshAsync skipped — already refreshing");
+#endif
+            return; // Prevent overlapping requests
+        }
 
         // Skip if rate-limited — don't make requests that extend the limit
         if (DateTime.UtcNow < _rateLimitedUntil)
@@ -117,9 +123,16 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
         var profile = _profileService.ActiveProfile;
         if (profile == null || !profile.HasUsageCredentials)
         {
+#if DEBUG
+            LoggingService.Instance.Log($"[DEBUG] RefreshAsync skipped — profile null: {profile == null}, hasCredentials: {profile?.HasUsageCredentials}");
+#endif
             _isRefreshing = false;
             return;
         }
+
+#if DEBUG
+        LoggingService.Instance.Log($"[DEBUG] RefreshAsync started — HasClaude: {profile.HasClaudeSessionKey || profile.HasClaudeOAuth}, HasAPI: {profile.HasAPIConsole}, ApiUserSearch: '{profile.ApiUserSearch}'");
+#endif
 
         RefreshStarted?.Invoke(this, EventArgs.Empty);
 
@@ -157,6 +170,9 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
             var lastApiFetch = new DateTime(Interlocked.Read(ref _lastApiFetchTicks));
             var shouldFetchApi = profile.HasAPIConsole
                 && (DateTime.UtcNow - lastApiFetch) >= ApiRefreshInterval;
+#if DEBUG
+            LoggingService.Instance.Log($"[DEBUG] API fetch check — HasAPIConsole: {profile.HasAPIConsole}, timeSinceLast: {(DateTime.UtcNow - lastApiFetch).TotalSeconds:F0}s, shouldFetch: {shouldFetchApi}");
+#endif
             if (shouldFetchApi)
             {
                 try
@@ -170,6 +186,10 @@ public class UsageRefreshCoordinator : IUsageRefreshCoordinator, IDisposable
                     LoggingService.Instance.LogWarning($"API Console usage fetch failed (non-fatal): {ex.Message}");
                 }
 
+
+#if DEBUG
+                LoggingService.Instance.Log($"[DEBUG] Personal metrics check — ApiUserSearch: '{profile.ApiUserSearch}'");
+#endif
                 if (!string.IsNullOrEmpty(profile.ApiUserSearch))
                 {
                     try

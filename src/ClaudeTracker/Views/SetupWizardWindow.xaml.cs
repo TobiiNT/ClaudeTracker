@@ -303,6 +303,9 @@ public partial class SetupWizardWindow : Window
     {
         if (ApiOrgCombo.SelectedItem is not APIOrganization org) return;
         _selectedOrg = org;
+#if DEBUG
+        LoggingService.Instance.Log($"[DEBUG] OnOrgSelected — org: {org.Name}, id: {org.Id}");
+#endif
         SaveApiConsoleOrg(org);
         await FetchUsersForOrg(org);
     }
@@ -371,6 +374,9 @@ public partial class SetupWizardWindow : Window
         var profile = _profileService.ActiveProfile;
         if (profile == null) return;
 
+#if DEBUG
+        LoggingService.Instance.Log($"[DEBUG] SaveApiConsoleOrg — org: {org.Name}, ApiUserSearch: '{profile.ApiUserSearch}'");
+#endif
         profile.ApiOrganizationName = org.Name;
         var credentials = _profileService.LoadCredentials(profile.Id);
         credentials.ApiSessionKey = _apiSessionKey;
@@ -389,9 +395,12 @@ public partial class SetupWizardWindow : Window
         var profile = _profileService.ActiveProfile;
         if (profile == null) return;
 
-        SaveApiConsoleOrg(_selectedOrg);
+#if DEBUG
+        LoggingService.Instance.Log($"[DEBUG] OnApiConfirm — user: {user.DisplayName}, org: {_selectedOrg.Name}");
+#endif
         profile.ApiUserSearch = user.DisplayName;
-        _settingsService.Save();
+        _refreshCoordinator.InvalidateApiCache();
+        SaveApiConsoleOrg(_selectedOrg);
 
         ApiStep3.Visibility = Visibility.Collapsed;
         ApiSubtitle.Text = $"Tracking: {user.DisplayName} @ {_selectedOrg.DisplayName}";
