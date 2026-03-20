@@ -442,8 +442,8 @@ public partial class App : Application
         {
             var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {
-                FileName = "claude",
-                Arguments = "--version",
+                FileName = "cmd.exe",
+                Arguments = "/c claude --version",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
