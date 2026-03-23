@@ -26,7 +26,7 @@ public class ClaudeStatusTests
     [InlineData(StatusIndicator.Minor, "#FFC107")]
     [InlineData(StatusIndicator.Major, "#FF9800")]
     [InlineData(StatusIndicator.Critical, "#F44336")]
-    [InlineData(StatusIndicator.Unknown, "#9E9E9E")]
+    [InlineData(StatusIndicator.Unknown, "#888888")]
     public void GetColorHex_ReturnsCorrectColor(StatusIndicator indicator, string expectedHex)
     {
         Assert.Equal(expectedHex, ClaudeStatus.GetColorHex(indicator));

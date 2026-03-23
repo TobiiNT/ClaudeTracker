@@ -23,6 +23,11 @@ public partial class AboutView : UserControl
         LogsButton.Click += (_, _) => vm.OpenLogsCommand.Execute(null);
         CheckUpdateButton.Click += (_, _) => vm.CheckForUpdatesCommand.Execute(null);
         ApplyUpdateButton.Click += (_, _) => vm.ApplyUpdateCommand.Execute(null);
+        ReleaseNotesHyperlink.Click += (_, _) =>
+        {
+            if (vm.AvailableVersion is string ver)
+                Process.Start(new ProcessStartInfo($"{Utilities.Constants.GitHub.RepoUrl}/releases/tag/v{ver}") { UseShellExecute = true });
+        };
         CreditsLink.Click += (_, _) => Process.Start(new ProcessStartInfo("https://github.com/hamed-elfayome/Claude-Usage-Tracker") { UseShellExecute = true });
 
         vm.PropertyChanged += OnViewModelPropertyChanged;
@@ -55,5 +60,8 @@ public partial class AboutView : UserControl
         ApplyUpdateButton.Visibility = _vm.IsUpdateAvailable
             ? Visibility.Visible : Visibility.Collapsed;
         ApplyUpdateButton.IsEnabled = !_vm.IsUpdateBusy;
+
+        ReleaseNotesLink.Visibility = _vm.IsUpdateAvailable
+            ? Visibility.Visible : Visibility.Collapsed;
     }
 }

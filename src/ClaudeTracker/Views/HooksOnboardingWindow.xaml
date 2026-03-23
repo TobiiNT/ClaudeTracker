@@ -11,7 +11,7 @@
         <!-- Icon -->
         <materialDesign:PackIcon Kind="Connection" Width="40" Height="40"
                                  HorizontalAlignment="Center" Margin="0,0,0,16"
-                                 Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                 Foreground="{DynamicResource AccentTeal}" />
 
         <!-- Title -->
         <TextBlock Text="Connect to Claude Code" FontSize="20" FontWeight="Bold"
@@ -30,7 +30,7 @@
             <StackPanel Margin="0,0,0,10">
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
                     <materialDesign:PackIcon Kind="ShieldCheck" Width="16" Height="16"
-                                             Foreground="#7C4DFF" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                             Foreground="{DynamicResource AccentPurple}" VerticalAlignment="Center" Margin="0,0,6,0" />
                     <TextBlock Text="Permission popups" FontSize="13" FontWeight="SemiBold" />
                 </StackPanel>
                 <TextBlock Text="Approve tool calls from any window — no terminal switching"
@@ -40,7 +40,7 @@
             <StackPanel Margin="0,0,0,10">
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
                     <materialDesign:PackIcon Kind="BellRing" Width="16" Height="16"
-                                             Foreground="#2196F3" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                             Foreground="{DynamicResource AccentBlue}" VerticalAlignment="Center" Margin="0,0,6,0" />
                     <TextBlock Text="Task notifications" FontSize="13" FontWeight="SemiBold" />
                 </StackPanel>
                 <TextBlock Text="Know when Claude finishes without checking each session"
@@ -50,7 +50,7 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
                     <materialDesign:PackIcon Kind="FormatListBulleted" Width="16" Height="16"
-                                             Foreground="#4CAF50" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                             Foreground="{DynamicResource StatusSafe}" VerticalAlignment="Center" Margin="0,0,6,0" />
                     <TextBlock Text="Activity feed" FontSize="13" FontWeight="SemiBold" />
                 </StackPanel>
                 <TextBlock Text="Live view of what each Claude session is doing right now"
@@ -72,7 +72,7 @@
         <StackPanel x:Name="SuccessPanel" Visibility="Collapsed"
                     HorizontalAlignment="Center" Margin="0,0,0,8">
             <materialDesign:PackIcon Kind="CheckCircle" Width="32" Height="32"
-                                     Foreground="#4CAF50" HorizontalAlignment="Center"
+                                     Foreground="{DynamicResource StatusSafe}" HorizontalAlignment="Center"
                                      Margin="0,0,0,8" />
             <TextBlock Text="Hooks enabled successfully!"
                        FontSize="13" FontWeight="SemiBold"

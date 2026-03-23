@@ -32,6 +32,21 @@ public class ProfileService : IProfileService
             _settingsService.Save();
         }
 
+        // Migrate profiles after property renames (v2.1.2 → v2.2.1: hasCliAccount → hasClaudeOAuth)
+        // Old JSON key is silently ignored by System.Text.Json, so HasClaudeOAuth defaults to false
+        // even though CliCredentialsJSON is still present — fix the inconsistency
+        var needsMigration = false;
+        foreach (var profile in settings.Profiles)
+        {
+            if (!profile.HasClaudeOAuth && !string.IsNullOrEmpty(profile.CliCredentialsJSON))
+            {
+                profile.HasClaudeOAuth = true;
+                needsMigration = true;
+                LoggingService.Instance.Log($"Migrated profile '{profile.Name}': restored HasClaudeOAuth flag from CliCredentialsJSON");
+            }
+        }
+        if (needsMigration) _settingsService.Save();
+
         if (settings.ActiveProfileId.HasValue)
         {
             _activeProfile = settings.Profiles.FirstOrDefault(p => p.Id == settings.ActiveProfileId.Value);

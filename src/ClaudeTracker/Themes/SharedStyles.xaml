@@ -1,11 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Status Colors -->
-    <SolidColorBrush x:Key="StatusSafeBrush" Color="#4CAF50" />
-    <SolidColorBrush x:Key="StatusModerateBrush" Color="#FF9800" />
-    <SolidColorBrush x:Key="StatusCriticalBrush" Color="#F44336" />
-
     <!-- Soft card background (semi-transparent for frosted look) -->
     <SolidColorBrush x:Key="SoftCardBackground" Color="#E8FFFFFF" />
     <SolidColorBrush x:Key="SoftCardBackgroundDark" Color="#E8202020" />
@@ -14,7 +9,7 @@
 
     <!-- Usage card style - soft/rounded like macOS -->
     <Style x:Key="UsageCardStyle" TargetType="Border">
-        <Setter Property="Background" Value="#0A000000" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceCard}" />
         <Setter Property="CornerRadius" Value="12" />
         <Setter Property="Padding" Value="14" />
         <Setter Property="Margin" Value="0,4" />
@@ -29,9 +24,9 @@
 
     <!-- Popover window style - clean Warp-like with soft shadow -->
     <Style x:Key="PopoverBorderStyle" TargetType="Border">
-        <Setter Property="Background" Value="#F5F5F5" />
+        <Setter Property="Background" Value="{DynamicResource SurfacePopover}" />
         <Setter Property="CornerRadius" Value="14" />
-        <Setter Property="BorderBrush" Value="#22000000" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtle}" />
         <Setter Property="BorderThickness" Value="0.5" />
         <Setter Property="Effect">
             <Setter.Value>
@@ -42,18 +37,18 @@
 
     <!-- Popover footer - Warp style bar -->
     <Style x:Key="PopoverFooterStyle" TargetType="Border">
-        <Setter Property="Background" Value="#EEEEEE" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceFooter}" />
         <Setter Property="CornerRadius" Value="0,0,14,14" />
         <Setter Property="Padding" Value="14,8" />
         <Setter Property="BorderThickness" Value="0,0.5,0,0" />
-        <Setter Property="BorderBrush" Value="#18000000" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderFooter}" />
     </Style>
 
     <!-- Floating widget window border -->
     <Style x:Key="FloatingBorderStyle" TargetType="Border">
-        <Setter Property="Background" Value="#F5F5F5" />
+        <Setter Property="Background" Value="{DynamicResource SurfacePopover}" />
         <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="BorderBrush" Value="#22000000" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtle}" />
         <Setter Property="BorderThickness" Value="0.5" />
         <Setter Property="Effect">
             <Setter.Value>
@@ -64,8 +59,8 @@
 
     <!-- Tray context menu — compact, native-looking -->
     <Style x:Key="TrayContextMenuStyle" TargetType="ContextMenu">
-        <Setter Property="Background" Value="#F5F5F5" />
-        <Setter Property="BorderBrush" Value="#CCCCCC" />
+        <Setter Property="Background" Value="{DynamicResource SurfacePopover}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderDefault}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="0,4" />
         <Setter Property="MinWidth" Value="160" />
@@ -93,7 +88,7 @@
     <Style x:Key="TrayMenuItemStyle" TargetType="MenuItem">
         <Setter Property="Padding" Value="12,6" />
         <Setter Property="FontSize" Value="12" />
-        <Setter Property="Foreground" Value="#333333" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Template">
             <Setter.Value>
@@ -117,7 +112,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="#E0E0E0" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SurfaceHover}" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Checkmark" Property="Visibility" Value="Visible" />
@@ -130,7 +125,7 @@
 
     <Style x:Key="TrayMenuSeparatorStyle" TargetType="Separator">
         <Setter Property="Margin" Value="8,3" />
-        <Setter Property="BorderBrush" Value="#DDDDDD" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderSeparator}" />
         <Setter Property="BorderThickness" Value="0,1,0,0" />
         <Setter Property="Template">
             <Setter.Value>
@@ -148,6 +143,7 @@
         <Setter Property="Padding" Value="16,10" />
         <Setter Property="Height" Value="40" />
         <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
     </Style>
 
     <!-- Compact switch toggle (scaled down from default MaterialDesign) -->
@@ -164,7 +160,7 @@
     <Style x:Key="SectionHeader" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSubtle}" />
         <Setter Property="Margin" Value="16,12,16,4" />
     </Style>
 

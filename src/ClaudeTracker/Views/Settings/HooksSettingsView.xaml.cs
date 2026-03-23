@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using ClaudeTracker.Services.Interfaces;
+using ClaudeTracker.Utilities;
 using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views.Settings;
@@ -34,6 +35,7 @@ public partial class HooksSettingsView : UserControl
         ElicitationPopupsToggle.Unchecked += (_, _) => _vm.ElicitationPopupsEnabled = false;
 
         // Popup position
+        PopupPositionCombo.PreviewMouseWheel += ScrollHelper.RouteMouseWheelToParent;
         PopupPositionCombo.ItemsSource = new[] { "Top Right", "Top Left", "Bottom Right", "Bottom Left" };
         PopupPositionCombo.SelectedItem = FormatPosition(_vm.PopupPosition);
         PopupPositionCombo.SelectionChanged += (_, _) =>
@@ -43,9 +45,11 @@ public partial class HooksSettingsView : UserControl
         };
 
         // Popup monitor
+        PopupMonitorCombo.PreviewMouseWheel += ScrollHelper.RouteMouseWheelToParent;
         var monitorNames = Utilities.PopupStackManager.GetMonitorNames();
         PopupMonitorCombo.ItemsSource = monitorNames;
-        PopupMonitorCombo.SelectedIndex = Math.Min(_vm.PopupMonitor, monitorNames.Length - 1);
+        var resolvedIndex = Utilities.PopupStackManager.ResolveMonitorIndex(_vm.PopupMonitor);
+        PopupMonitorCombo.SelectedIndex = Math.Min(resolvedIndex, monitorNames.Length - 1);
         PopupMonitorCombo.SelectionChanged += (_, _) =>
         {
             _vm.PopupMonitor = PopupMonitorCombo.SelectedIndex;
@@ -94,6 +98,7 @@ public partial class HooksSettingsView : UserControl
         };
 
         // Max feed entries slider
+        MaxFeedSlider.PreviewMouseWheel += ScrollHelper.RouteMouseWheelToParent;
         MaxFeedSlider.Value = _vm.MaxFeedEntries;
         MaxFeedValueText.Text = $"{_vm.MaxFeedEntries}";
         MaxFeedSlider.ValueChanged += (_, e) =>

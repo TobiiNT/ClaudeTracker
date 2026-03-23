@@ -276,7 +276,7 @@ public class TrayIconRenderer
         {
             return new SKColor(r, g, b);
         }
-        return new SKColor(0x4C, 0xAF, 0x50); // fallback green
+        return ThemeColors.GetSKColor("StatusSafe"); // fallback green
     }
 
     private static SKColor GetStatusColor(UsageStatusLevel status, bool monochrome, bool isDarkMode)
@@ -286,10 +286,10 @@ public class TrayIconRenderer
 
         return status switch
         {
-            UsageStatusLevel.Safe => new SKColor(0x4C, 0xAF, 0x50),      // Green
-            UsageStatusLevel.Moderate => new SKColor(0xFF, 0x98, 0x00),   // Orange
-            UsageStatusLevel.Critical => new SKColor(0xF4, 0x43, 0x36),   // Red
-            _ => new SKColor(0x4C, 0xAF, 0x50)
+            UsageStatusLevel.Safe => ThemeColors.GetSKColor("StatusSafe"),
+            UsageStatusLevel.Moderate => ThemeColors.GetSKColor("StatusModerate"),
+            UsageStatusLevel.Critical => ThemeColors.GetSKColor("StatusCritical"),
+            _ => ThemeColors.GetSKColor("StatusSafe")
         };
     }
 

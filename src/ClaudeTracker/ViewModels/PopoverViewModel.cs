@@ -67,7 +67,7 @@ public partial class PopoverViewModel : ObservableObject
     [ObservableProperty] private double _weeklyElapsedFraction;
 
     [ObservableProperty] private string _claudeStatusDescription = "";
-    [ObservableProperty] private string _claudeStatusColorHex = "#9E9E9E";
+    [ObservableProperty] private string _claudeStatusColorHex = "#888888";
     [ObservableProperty] private bool _showClaudeStatus;
 
     [ObservableProperty] private int _activeSessionCount;

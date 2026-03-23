@@ -15,7 +15,7 @@
         </Border.Effect>
         <StackPanel>
             <materialDesign:PackIcon Kind="StarOutline" Width="40" Height="40"
-                                     Foreground="#FFC107" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                                     Foreground="{DynamicResource AccentAmber}" HorizontalAlignment="Center" Margin="0,0,0,12" />
             <TextBlock Text="Enjoying Claude Tracker?" FontSize="18" FontWeight="Bold"
                        HorizontalAlignment="Center" Margin="0,0,0,8" />
             <TextBlock TextWrapping="Wrap" TextAlignment="Center" FontSize="13" Margin="0,0,0,20"

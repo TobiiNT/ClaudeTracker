@@ -5,13 +5,13 @@
              xmlns:localization="clr-namespace:ClaudeTracker.Localization">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
         <StackPanel MaxWidth="480">
-            <TextBlock Text="{x:Static localization:Strings.General}" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="{x:Static localization:Strings.General}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4" />
             <TextBlock Text="Configure refresh, startup, and notifications"
                        FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
                        Margin="0,0,0,20" />
 
             <!-- Refresh Interval -->
-            <TextBlock Text="{x:Static localization:Strings.RefreshInterval}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+            <TextBlock Text="{x:Static localization:Strings.RefreshInterval}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4" />
             <Grid Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -19,18 +19,18 @@
                 </Grid.ColumnDefinitions>
                 <Slider x:Name="RefreshSlider" Minimum="10" Maximum="300"
                         TickFrequency="10" IsSnapToTickEnabled="True"
-                        TickPlacement="BottomRight" />
+                        TickPlacement="BottomRight" IsMoveToPointEnabled="True" />
                 <TextBlock Grid.Column="1" x:Name="RefreshValueText" FontSize="13"
                            VerticalAlignment="Center" HorizontalAlignment="Center" />
             </Grid>
 
             <!-- Startup -->
-            <TextBlock Text="{x:Static localization:Strings.Startup}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="{x:Static localization:Strings.Startup}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="{x:Static localization:Strings.LaunchAtLogin}" FontSize="13" />
                     <TextBlock Text="Automatically start Claude Tracker when you log in to Windows"
-                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                               FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <ToggleButton x:Name="LaunchToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
@@ -39,7 +39,7 @@
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="{x:Static localization:Strings.AutoStartSession}" FontSize="13" />
                     <TextBlock Text="When usage resets to 0%, automatically send a message to start a new session so tracking begins immediately"
-                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                               FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <ToggleButton x:Name="AutoStartToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
@@ -48,14 +48,14 @@
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="{x:Static localization:Strings.CheckOverageLimit}" FontSize="13" />
                     <TextBlock Text="Track and display overage costs when you exceed your plan's included usage"
-                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                               FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <ToggleButton x:Name="OverageToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
             </Grid>
 
             <!-- Time & Display -->
-            <TextBlock Text="{x:Static localization:Strings.TimeAndDisplay}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="{x:Static localization:Strings.TimeAndDisplay}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
                 <TextBlock Text="{x:Static localization:Strings.ResetTimeFormat}" VerticalAlignment="Center" FontSize="13" />
                 <ComboBox x:Name="TimeDisplayCombo" HorizontalAlignment="Right" Width="160"
@@ -68,7 +68,7 @@
             </Grid>
 
             <!-- Notifications -->
-            <TextBlock Text="{x:Static localization:Strings.Notifications}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="{x:Static localization:Strings.Notifications}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
                 <TextBlock Text="{x:Static localization:Strings.EnableNotifications}" VerticalAlignment="Center" FontSize="13" />
                 <ToggleButton x:Name="NotifyToggle" HorizontalAlignment="Right"

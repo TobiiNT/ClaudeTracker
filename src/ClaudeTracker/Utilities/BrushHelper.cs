@@ -15,17 +15,17 @@ public static class BrushHelper
         {
             return new SolidColorBrush(Color.FromRgb(r, g, b));
         }
-        return new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+        return new SolidColorBrush(ThemeColors.Get("StatusSafe"));
     }
 
     public static SolidColorBrush GetStatusBrush(UsageStatusLevel status)
     {
         return status switch
         {
-            UsageStatusLevel.Safe => new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)),
-            UsageStatusLevel.Moderate => new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00)),
-            UsageStatusLevel.Critical => new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36)),
-            _ => new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50))
+            UsageStatusLevel.Safe => new SolidColorBrush(ThemeColors.Get("StatusSafe")),
+            UsageStatusLevel.Moderate => new SolidColorBrush(ThemeColors.Get("StatusModerate")),
+            UsageStatusLevel.Critical => new SolidColorBrush(ThemeColors.Get("StatusCritical")),
+            _ => new SolidColorBrush(ThemeColors.Get("StatusSafe"))
         };
     }
 }

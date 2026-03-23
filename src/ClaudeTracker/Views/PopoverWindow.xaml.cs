@@ -6,6 +6,7 @@ using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services;
+using ClaudeTracker.Utilities;
 using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views;
@@ -212,22 +213,22 @@ public partial class PopoverWindow : Window
             if (_viewModel.IsRateLimited)
             {
                 var remaining = _viewModel.RateLimitedUntilLocal - DateTime.Now;
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00)); // orange
+                StatusDot.Fill = new SolidColorBrush(ThemeColors.Get("StatusModerate")); // orange
                 StatusText.Text = $"Rate limited — retrying in {Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes))}m";
             }
             else if (_viewModel.IsRefreshing)
             {
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3)); // blue
+                StatusDot.Fill = new SolidColorBrush(ThemeColors.Get("AccentBlue")); // blue
                 StatusText.Text = "Refreshing...";
             }
             else if (!_viewModel.HasCredentials)
             {
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99)); // gray
+                StatusDot.Fill = new SolidColorBrush(ThemeColors.Get("TextMuted")); // gray
                 StatusText.Text = "No account connected";
             }
             else if (!_viewModel.HasClaudeUsage && !_viewModel.HasApiUsage && !_viewModel.HasPersonalMetrics)
             {
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00)); // orange
+                StatusDot.Fill = new SolidColorBrush(ThemeColors.Get("StatusModerate")); // orange
                 // Show error/rate-limit message if available, otherwise generic waiting text
                 StatusText.Text = !string.IsNullOrEmpty(_viewModel.LastUpdatedText)
                     ? _viewModel.LastUpdatedText
@@ -235,7 +236,7 @@ public partial class PopoverWindow : Window
             }
             else
             {
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)); // green = connected
+                StatusDot.Fill = new SolidColorBrush(ThemeColors.Get("StatusSafe")); // green = connected
                 StatusText.Text = _viewModel.LastUpdatedText;
             }
 

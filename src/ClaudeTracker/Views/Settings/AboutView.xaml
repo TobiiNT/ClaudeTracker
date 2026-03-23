@@ -7,7 +7,7 @@
             <!-- Logo area -->
             <materialDesign:PackIcon Kind="Robot" Width="64" Height="64"
                                      HorizontalAlignment="Center" Margin="0,20,0,12"
-                                     Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                     Foreground="{DynamicResource AccentTeal}" />
 
             <TextBlock Text="Claude Tracker" FontSize="24" FontWeight="Bold"
                        HorizontalAlignment="Center" Margin="0,0,0,4" />
@@ -24,7 +24,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
                     <materialDesign:PackIcon x:Name="UpdateIcon" Kind="Update" Width="18" Height="18"
                                              VerticalAlignment="Center" Margin="0,0,6,0"
-                                             Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                             Foreground="{DynamicResource AccentTeal}" />
                     <TextBlock x:Name="UpdateStatusText" FontSize="13" VerticalAlignment="Center"
                                Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
                     <ProgressBar x:Name="UpdateSpinner" IsIndeterminate="True"
@@ -38,6 +38,11 @@
                 <Button x:Name="ApplyUpdateButton" Content="Update &amp; Restart"
                         Style="{StaticResource MaterialDesignFlatMidBgButton}"
                         Margin="0,4" Width="200" Visibility="Collapsed" />
+                <TextBlock x:Name="ReleaseNotesLink" HorizontalAlignment="Center"
+                           Margin="0,4,0,0" Visibility="Collapsed">
+                    <Hyperlink x:Name="ReleaseNotesHyperlink" TextDecorations="None"
+                               Foreground="{DynamicResource AccentTeal}">View release notes</Hyperlink>
+                </TextBlock>
             </StackPanel>
 
             <!-- Actions -->
@@ -55,7 +60,7 @@
                        Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}">
                 <Run Text="Based on " /><Hyperlink x:Name="CreditsLink"
                     TextDecorations="None"
-                    Foreground="{DynamicResource PrimaryHueMidBrush}">Claude Usage Tracker by hamed-elfayome</Hyperlink>
+                    Foreground="{DynamicResource AccentTeal}">Claude Usage Tracker by hamed-elfayome</Hyperlink>
             </TextBlock>
         </StackPanel>
     </ScrollViewer>

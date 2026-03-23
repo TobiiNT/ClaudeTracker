@@ -1,0 +1,43 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Text hierarchy -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#333333" />
+    <SolidColorBrush x:Key="TextData" Color="#444444" />
+    <SolidColorBrush x:Key="TextSecondary" Color="#555555" />
+    <SolidColorBrush x:Key="TextTertiary" Color="#666666" />
+    <SolidColorBrush x:Key="TextMuted" Color="#888888" />
+    <SolidColorBrush x:Key="TextSubtle" Color="#999999" />
+    <SolidColorBrush x:Key="TextFaint" Color="#BBBBBB" />
+
+    <!-- Surfaces -->
+    <SolidColorBrush x:Key="SurfacePopover" Color="#F5F5F5" />
+    <SolidColorBrush x:Key="SurfaceFooter" Color="#EEEEEE" />
+    <SolidColorBrush x:Key="SurfaceHover" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="SurfaceCard" Color="#0A000000" />
+    <SolidColorBrush x:Key="SurfacePreview" Color="#333333" />
+
+    <!-- Borders -->
+    <SolidColorBrush x:Key="BorderDefault" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="BorderSubtle" Color="#22000000" />
+    <SolidColorBrush x:Key="BorderSeparator" Color="#DDDDDD" />
+    <SolidColorBrush x:Key="BorderFooter" Color="#18000000" />
+
+    <!-- Progress -->
+    <SolidColorBrush x:Key="ProgressBackground" Color="#15000000" />
+    <SolidColorBrush x:Key="SessionDot" Color="#4CAF50" />
+
+    <!-- Status (constant in light, same in dark) -->
+    <SolidColorBrush x:Key="StatusSafe" Color="#4CAF50" />
+    <SolidColorBrush x:Key="StatusModerate" Color="#FF9800" />
+    <SolidColorBrush x:Key="StatusCritical" Color="#F44336" />
+
+    <!-- Accents -->
+    <SolidColorBrush x:Key="AccentPurple" Color="#009688" />
+    <SolidColorBrush x:Key="AccentBlue" Color="#2196F3" />
+    <SolidColorBrush x:Key="AccentCyan" Color="#00BCD4" />
+    <SolidColorBrush x:Key="AccentAmber" Color="#FFC107" />
+    <SolidColorBrush x:Key="AccentGreen" Color="#4CAF50" />
+    <SolidColorBrush x:Key="AccentTeal" Color="#009688" />
+    <SolidColorBrush x:Key="AccentMagenta" Color="#9C27B0" />
+</ResourceDictionary>

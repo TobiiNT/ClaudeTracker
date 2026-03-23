@@ -105,7 +105,7 @@ public class NotificationService : INotificationService
 
     public void SendNotification(string title, string message,
         NotificationPopup.NotificationLevel level = NotificationPopup.NotificationLevel.Warning,
-        string? cwd = null, long? consoleWindowHandle = null)
+        string? cwd = null, long? consoleWindowHandle = null, Action? onClick = null)
     {
         try
         {
@@ -114,6 +114,7 @@ public class NotificationService : INotificationService
                 var popup = new NotificationPopup(title, message, level);
                 popup.NotificationClicked += (_, _) =>
                 {
+                    if (onClick != null) { onClick(); return; }
                     // Try direct window handle first, then title match, then popover
                     if (consoleWindowHandle is > 0 && Utilities.TerminalFocusHelper.BringToFront(consoleWindowHandle.Value))
                         return;
@@ -152,9 +153,8 @@ public class NotificationService : INotificationService
         catch { /* ignore sound failures */ }
     }
 
-    // Keep the two-parameter overload for interface compatibility
-    void INotificationService.SendNotification(string title, string message)
+    void INotificationService.SendNotification(string title, string message, Action? onClick)
     {
-        SendNotification(title, message);
+        SendNotification(title, message, onClick: onClick);
     }
 }

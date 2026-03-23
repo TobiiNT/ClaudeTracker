@@ -210,8 +210,8 @@ internal static class Program
         {
             var process = Process.Start(new ProcessStartInfo
             {
-                FileName = "claude",
-                Arguments = "--version",
+                FileName = "cmd.exe",
+                Arguments = "/c claude --version",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true

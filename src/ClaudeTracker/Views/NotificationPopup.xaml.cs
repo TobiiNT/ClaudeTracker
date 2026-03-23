@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using ClaudeTracker.Utilities;
 
 namespace ClaudeTracker.Views;
 
@@ -20,15 +21,15 @@ public partial class NotificationPopup : Window
         {
             case NotificationLevel.Info:
                 IconText.Text = "ℹ";
-                IconText.Foreground = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
+                IconText.Foreground = new SolidColorBrush(ThemeColors.Get("AccentBlue"));
                 break;
             case NotificationLevel.Warning:
                 IconText.Text = "⚠";
-                IconText.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+                IconText.Foreground = new SolidColorBrush(ThemeColors.Get("StatusModerate"));
                 break;
             case NotificationLevel.Critical:
                 IconText.Text = "🔴";
-                IconText.Foreground = new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36));
+                IconText.Foreground = new SolidColorBrush(ThemeColors.Get("StatusCritical"));
                 break;
         }
 

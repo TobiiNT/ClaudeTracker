@@ -129,6 +129,44 @@ Note: Debug build will fail if the app is running (file lock). Use Release confi
 - WebView2 sign-in uses persistent `UserDataFolder` at `Constants.WebView2.ProfilePath` — users sign in once; don't omit `UserDataFolder` or they re-authenticate every time
 - `ReleaseSingleInstanceMutex()` is called by both UpdateService (pre-restart) and OnExit — catch `ApplicationException` to guard against the second call; don't remove this guard
 
+## Git Conventions
+
+### Branch Names
+Format: `<type>/<short-description>` using kebab-case.
+- **feat/** — new feature (`feat/personal-api-usage`, `feat/connection-ux-redesign`)
+- **fix/** — bug fix (`fix/onboarding-and-browser-login`, `fix/connect-ux-redesign`)
+- **refactor/** — code restructuring
+- **chore/** — maintenance, config, CI
+
+### Commit Messages
+Format: `<type>: <concise description>` — lowercase, imperative mood, no period.
+- Types: `feat`, `fix`, `refactor`, `chore`, `debug`, `docs`, `test`
+- First line ≤ 72 chars, describes the "what"
+- Body (optional, blank line after subject): bullet points explaining "why" and key changes
+- Use em dash (—) for inline separators, not hyphens
+- Examples from this repo:
+  - `feat: use console window handle for reliable terminal focus on notification click`
+  - `fix: auto-uninstall hooks before app uninstall`
+  - `refactor: align Settings API Console with onboarding multi-step pattern`
+  - `chore: bump version to 2.2.1`
+
+### PR Descriptions
+```
+## Summary
+<1-3 bullet points: what changed and why>
+
+## Test plan
+- [ ] <Manual verification steps>
+- [ ] <Edge cases checked>
+```
+- PR title follows the same `<type>: <description>` format as commits
+- The `## Test plan` section is auto-stripped from GitHub Release notes by release.yml
+
+## Documentation
+
+- Design specs and implementation plans go in `docs/plans/` with naming format `YYYY-MM-DD-<topic>.md`
+- Do NOT create docs in other locations (e.g., `docs/superpowers/`, `docs/specs/`)
+
 ## CI/CD
 
 - **build.yml**: Push to main / PR → restore → build → test

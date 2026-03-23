@@ -33,7 +33,8 @@ public class SessionTracker : IHookEventObserver
                     sessionId,
                     json[Fields.Cwd]?.GetValue<string>() ?? "",
                     json[Fields.PermissionMode]?.GetValue<string>() ?? "",
-                    json[Fields.Model]?.GetValue<string>());
+                    json[Fields.Model]?.GetValue<string>(),
+                    evt.ConsoleWindowHandle);
                 break;
 
             case Events.SessionEnd:

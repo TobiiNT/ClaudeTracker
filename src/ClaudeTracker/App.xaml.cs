@@ -9,6 +9,7 @@ using ClaudeTracker.ViewModels;
 using ClaudeTracker.TrayIcon;
 using ClaudeTracker.Services.Handlers;
 using ClaudeTracker.Services.Observers;
+using ClaudeTracker.Utilities;
 using static ClaudeTracker.Utilities.Constants.Hooks;
 
 namespace ClaudeTracker;
@@ -232,8 +233,8 @@ public partial class App : Application
                 if (e.NewItems == null) return;
                 foreach (Models.ActivityEntry entry in e.NewItems)
                 {
-                    // Suppress notifications while a permission popup is active
-                    if (pendingPopups.Count > 0)
+                    // Suppress notifications for sessions that have a permission popup active
+                    if (pendingPopups.ContainsKey(entry.SessionId))
                         continue;
 
                     var prefs = settingsService.Settings.HookNotificationPreferences;
@@ -264,12 +265,13 @@ public partial class App : Application
                         var body = !string.IsNullOrEmpty(entry.Detail)
                             ? $"{entry.Summary}\n{entry.Detail}" : entry.Summary;
 
-                        // Find cwd from session so clicking notification focuses the right terminal
-                        var sessionCwd = sessionTracking.ActiveSessions
-                            .FirstOrDefault(s => s.SessionId == entry.SessionId)?.Cwd;
+                        // Find session so clicking notification focuses the right terminal
+                        var session = sessionTracking.ActiveSessions
+                            .FirstOrDefault(s => s.SessionId == entry.SessionId);
 
                         ((NotificationService)notificationServiceForHooks).SendNotification(
-                            title, body, level, cwd: sessionCwd);
+                            title, body, level, cwd: session?.Cwd,
+                            consoleWindowHandle: session?.ConsoleWindowHandle);
                     }
                 }
             };
@@ -434,6 +436,7 @@ public partial class App : Application
         var mdTheme = paletteHelper.GetTheme();
         mdTheme.SetBaseTheme(isDark ? BaseTheme.Dark : BaseTheme.Light);
         paletteHelper.SetTheme(mdTheme);
+        ThemeColors.Apply(isDark);
     }
 
     private void CheckClaudeCodeVersion(ISettingsService settingsService)
@@ -442,8 +445,8 @@ public partial class App : Application
         {
             var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {
-                FileName = "claude",
-                Arguments = "--version",
+                FileName = "cmd.exe",
+                Arguments = "/c claude --version",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
