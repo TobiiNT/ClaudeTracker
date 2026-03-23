@@ -40,11 +40,11 @@
                         <StackPanel HorizontalAlignment="Center">
                             <materialDesign:PackIcon Kind="KeyVariant" Width="36" Height="36"
                                                      HorizontalAlignment="Center" Margin="0,0,0,10"
-                                                     Foreground="#999" />
+                                                     Foreground="{DynamicResource TextSubtle}" />
                             <TextBlock Text="{x:Static localization:Strings.NoCredentials}" TextAlignment="Center"
-                                       FontSize="15" FontWeight="SemiBold" Foreground="#555" />
+                                       FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" />
                             <TextBlock Text="Open Settings to get started" TextAlignment="Center"
-                                       FontSize="13" Margin="0,4,0,0" Foreground="#999" />
+                                       FontSize="13" Margin="0,4,0,0" Foreground="{DynamicResource TextSubtle}" />
                         </StackPanel>
                     </Border>
 
@@ -64,7 +64,7 @@
                                       Background="Transparent" />
                             <StackPanel Orientation="Horizontal" Margin="4,2,0,0">
                                 <Ellipse x:Name="StatusDot" Width="7" Height="7" Margin="0,0,5,0" />
-                                <TextBlock x:Name="StatusText" FontSize="12" Foreground="#888" />
+                                <TextBlock x:Name="StatusText" FontSize="12" Foreground="{DynamicResource TextMuted}" />
                             </StackPanel>
                         </StackPanel>
                         <Button Grid.Column="1" x:Name="RefreshButton"
@@ -72,7 +72,7 @@
                                 Width="30" Height="30" Padding="0"
                                 VerticalAlignment="Top" Margin="0,1,0,0"
                                 ToolTip="Refresh">
-                            <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Foreground="#777" />
+                            <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Foreground="{DynamicResource TextMuted}" />
                         </Button>
                     </Grid>
 
@@ -87,7 +87,7 @@
                             <Ellipse x:Name="ClaudeStatusDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
                             <TextBlock x:Name="ClaudeStatusText" FontSize="12" VerticalAlignment="Center" />
                             <materialDesign:PackIcon Kind="OpenInNew" Width="12" Height="12"
-                                                     Foreground="#999" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                                     Foreground="{DynamicResource TextSubtle}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
 
@@ -95,25 +95,25 @@
                     <Border x:Name="SessionCard" Style="{StaticResource UsageCardStyle}">
                         <StackPanel>
                             <Grid Margin="0,0,0,8">
-                                <TextBlock Text="{x:Static localization:Strings.SessionUsage}" FontSize="13.5" FontWeight="Medium" Foreground="#666" />
+                                <TextBlock Text="{x:Static localization:Strings.SessionUsage}" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextTertiary}" />
                                 <TextBlock x:Name="SessionPercentText" HorizontalAlignment="Right"
-                                           FontSize="24" FontWeight="Bold" Foreground="#333" />
+                                           FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" />
                             </Grid>
                             <Grid Height="7">
-                                <Border Background="#15000000" CornerRadius="3" ClipToBounds="True">
-                                    <Border x:Name="SessionProgressFill" Background="#4CAF50"
+                                <Border Background="{DynamicResource ProgressBackground}" CornerRadius="3" ClipToBounds="True">
+                                    <Border x:Name="SessionProgressFill" Background="{DynamicResource AccentGreen}"
                                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                                 </Border>
                                 <Border x:Name="SessionTimeMarker" Width="2" HorizontalAlignment="Left"
                                         CornerRadius="1" Visibility="Collapsed" />
                             </Grid>
                             <Grid Margin="0,6,0,0">
-                                <TextBlock x:Name="SessionResetText" FontSize="12" Foreground="#999" VerticalAlignment="Center" />
+                                <TextBlock x:Name="SessionResetText" FontSize="12" Foreground="{DynamicResource TextSubtle}" VerticalAlignment="Center" />
                                 <StackPanel x:Name="SessionPacePanel" Orientation="Horizontal"
                                             HorizontalAlignment="Right" Visibility="Collapsed"
                                             Background="Transparent" Cursor="Help">
                                     <TextBlock x:Name="SessionEstimateText" FontSize="11"
-                                               VerticalAlignment="Center" Foreground="#999" Margin="0,0,6,0" />
+                                               VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" Margin="0,0,6,0" />
                                     <TextBlock x:Name="SessionPaceText" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0" />
                                     <Ellipse x:Name="SessionPaceDot" Width="7" Height="7" VerticalAlignment="Center" />
                                 </StackPanel>
@@ -125,25 +125,25 @@
                     <Border x:Name="WeeklyCard" Style="{StaticResource UsageCardStyle}">
                         <StackPanel>
                             <Grid Margin="0,0,0,6">
-                                <TextBlock Text="{x:Static localization:Strings.WeeklyUsage}" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                                <TextBlock Text="{x:Static localization:Strings.WeeklyUsage}" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextTertiary}" />
                                 <TextBlock x:Name="WeeklyPercentText" HorizontalAlignment="Right"
-                                           FontSize="17" FontWeight="SemiBold" Foreground="#444" />
+                                           FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextData}" />
                             </Grid>
                             <Grid Height="6">
-                                <Border Background="#15000000" CornerRadius="3" ClipToBounds="True">
-                                    <Border x:Name="WeeklyProgressFill" Background="#4CAF50"
+                                <Border Background="{DynamicResource ProgressBackground}" CornerRadius="3" ClipToBounds="True">
+                                    <Border x:Name="WeeklyProgressFill" Background="{DynamicResource AccentGreen}"
                                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                                 </Border>
                                 <Border x:Name="WeeklyTimeMarker" Width="2" HorizontalAlignment="Left"
                                         CornerRadius="1" Visibility="Collapsed" />
                             </Grid>
                             <Grid Margin="0,5,0,0">
-                                <TextBlock x:Name="WeeklyResetText" FontSize="12" Foreground="#999" VerticalAlignment="Center" />
+                                <TextBlock x:Name="WeeklyResetText" FontSize="12" Foreground="{DynamicResource TextSubtle}" VerticalAlignment="Center" />
                                 <StackPanel x:Name="WeeklyPacePanel" Orientation="Horizontal"
                                             HorizontalAlignment="Right" Visibility="Collapsed"
                                             Background="Transparent" Cursor="Help">
                                     <TextBlock x:Name="WeeklyEstimateText" FontSize="11"
-                                               VerticalAlignment="Center" Foreground="#999" Margin="0,0,6,0" />
+                                               VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" Margin="0,0,6,0" />
                                     <TextBlock x:Name="WeeklyPaceText" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0" />
                                     <Ellipse x:Name="WeeklyPaceDot" Width="7" Height="7" VerticalAlignment="Center" />
                                 </StackPanel>
@@ -161,11 +161,11 @@
 
                         <Border Grid.Column="0" Style="{StaticResource UsageCardStyle}">
                             <StackPanel>
-                                <TextBlock Text="Opus" FontSize="12" FontWeight="Medium" Foreground="#888" />
+                                <TextBlock Text="Opus" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource TextMuted}" />
                                 <TextBlock x:Name="OpusPercentText" FontSize="18" FontWeight="Bold"
-                                           Foreground="#444" Margin="0,2,0,4" />
-                                <Border Background="#15000000" CornerRadius="2" Height="5" ClipToBounds="True">
-                                    <Border x:Name="OpusProgressFill" Background="#7C4DFF"
+                                           Foreground="{DynamicResource TextData}" Margin="0,2,0,4" />
+                                <Border Background="{DynamicResource ProgressBackground}" CornerRadius="2" Height="5" ClipToBounds="True">
+                                    <Border x:Name="OpusProgressFill" Background="{DynamicResource AccentPurple}"
                                             CornerRadius="2" HorizontalAlignment="Left" Width="0" />
                                 </Border>
                             </StackPanel>
@@ -173,11 +173,11 @@
 
                         <Border Grid.Column="2" Style="{StaticResource UsageCardStyle}">
                             <StackPanel>
-                                <TextBlock Text="Sonnet" FontSize="12" FontWeight="Medium" Foreground="#888" />
+                                <TextBlock Text="Sonnet" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource TextMuted}" />
                                 <TextBlock x:Name="SonnetPercentText" FontSize="18" FontWeight="Bold"
-                                           Foreground="#444" Margin="0,2,0,4" />
-                                <Border Background="#15000000" CornerRadius="2" Height="5" ClipToBounds="True">
-                                    <Border x:Name="SonnetProgressFill" Background="#00BCD4"
+                                           Foreground="{DynamicResource TextData}" Margin="0,2,0,4" />
+                                <Border Background="{DynamicResource ProgressBackground}" CornerRadius="2" Height="5" ClipToBounds="True">
+                                    <Border x:Name="SonnetProgressFill" Background="{DynamicResource AccentCyan}"
                                             CornerRadius="2" HorizontalAlignment="Left" Width="0" />
                                 </Border>
                             </StackPanel>
@@ -187,9 +187,9 @@
                     <!-- ── Cost/Overage ── -->
                     <Border x:Name="CostCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
                         <Grid>
-                            <TextBlock Text="{x:Static localization:Strings.OverageCost}" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                            <TextBlock Text="{x:Static localization:Strings.OverageCost}" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextTertiary}" />
                             <TextBlock x:Name="CostText" HorizontalAlignment="Right"
-                                       FontSize="16" FontWeight="SemiBold" Foreground="#444" />
+                                       FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextData}" />
                         </Grid>
                     </Border>
 
@@ -197,15 +197,15 @@
                     <Border x:Name="ApiCard" Style="{StaticResource UsageCardStyle}" Visibility="Collapsed">
                         <StackPanel>
                             <Grid Margin="0,0,0,6">
-                                <TextBlock Text="{x:Static localization:Strings.APICredits}" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                                <TextBlock Text="{x:Static localization:Strings.APICredits}" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextTertiary}" />
                                 <TextBlock x:Name="ApiPercentText" HorizontalAlignment="Right"
-                                           FontSize="17" FontWeight="SemiBold" Foreground="#444" />
+                                           FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextData}" />
                             </Grid>
                             <ProgressBar x:Name="ApiProgress" Style="{StaticResource UsageProgressBar}" />
                             <Grid Margin="0,5,0,0">
-                                <TextBlock x:Name="ApiUsedText" FontSize="12" Foreground="#999" />
+                                <TextBlock x:Name="ApiUsedText" FontSize="12" Foreground="{DynamicResource TextSubtle}" />
                                 <TextBlock x:Name="ApiRemainingText" HorizontalAlignment="Right"
-                                           FontSize="12" Foreground="#999" />
+                                           FontSize="12" Foreground="{DynamicResource TextSubtle}" />
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -216,29 +216,29 @@
                             <Grid Margin="0,0,0,6">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="AccountCircle" Width="15" Height="15"
-                                                             Foreground="#888" VerticalAlignment="Center"
+                                                             Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"
                                                              Margin="0,0,5,0" />
-                                    <TextBlock Text="My Claude Code" FontSize="13" FontWeight="Medium" Foreground="#666" />
+                                    <TextBlock Text="My Claude Code" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextTertiary}" />
                                 </StackPanel>
                                 <TextBlock x:Name="PersonalCostText" HorizontalAlignment="Right"
-                                           FontSize="17" FontWeight="SemiBold" Foreground="#444" />
+                                           FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextData}" />
                             </Grid>
                             <Grid Margin="0,2,0,0">
-                                <TextBlock x:Name="PersonalAvgCostText" FontSize="12" Foreground="#999" />
+                                <TextBlock x:Name="PersonalAvgCostText" FontSize="12" Foreground="{DynamicResource TextSubtle}" />
                                 <TextBlock x:Name="PersonalSessionsText" HorizontalAlignment="Center"
-                                           FontSize="12" Foreground="#999" />
+                                           FontSize="12" Foreground="{DynamicResource TextSubtle}" />
                                 <TextBlock x:Name="PersonalLinesText" HorizontalAlignment="Right"
-                                           FontSize="12" Foreground="#999" />
+                                           FontSize="12" Foreground="{DynamicResource TextSubtle}" />
                             </Grid>
                             <!-- Today's usage -->
                             <Grid x:Name="DailyMetricsRow" Margin="0,5,0,0" Visibility="Collapsed">
-                                <TextBlock FontSize="12" Foreground="#888">
+                                <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}">
                                     <Run Text="Today: " FontWeight="Medium" /><Run x:Name="DailyCostText" />
                                 </TextBlock>
                                 <TextBlock x:Name="DailySessionsText" HorizontalAlignment="Center"
-                                           FontSize="12" Foreground="#999" />
+                                           FontSize="12" Foreground="{DynamicResource TextSubtle}" />
                                 <TextBlock x:Name="DailyLinesText" HorizontalAlignment="Right"
-                                           FontSize="12" Foreground="#999" />
+                                           FontSize="12" Foreground="{DynamicResource TextSubtle}" />
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -249,19 +249,19 @@
                             <Grid Margin="0,0,0,6">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="Console" Width="15" Height="15"
-                                                             Foreground="#888" VerticalAlignment="Center"
+                                                             Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"
                                                              Margin="0,0,5,0" />
-                                    <TextBlock Text="Active Sessions" FontSize="13" FontWeight="Medium" Foreground="#666"
+                                    <TextBlock Text="Active Sessions" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextTertiary}"
                                                VerticalAlignment="Center" />
                                 </StackPanel>
                                 <TextBlock x:Name="SessionCountText" HorizontalAlignment="Right"
-                                           FontSize="13" FontWeight="SemiBold" Foreground="#444"
+                                           FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextData}"
                                            VerticalAlignment="Center" />
                             </Grid>
                             <ItemsControl x:Name="SessionsList">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="#08000000" CornerRadius="4" Padding="8,5" Margin="0,2"
+                                        <Border Background="{DynamicResource SurfaceCard}" CornerRadius="4" Padding="8,5" Margin="0,2"
                                                 Cursor="Hand">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
@@ -271,13 +271,13 @@
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding ProjectName}" FontSize="12"
-                                                               FontWeight="Medium" Foreground="#555"
+                                                               FontWeight="Medium" Foreground="{DynamicResource TextSecondary}"
                                                                TextTrimming="CharacterEllipsis" />
                                                     <TextBlock Text="{Binding CurrentActivity}" FontSize="10.5"
-                                                               Foreground="#999" TextTrimming="CharacterEllipsis"
+                                                               Foreground="{DynamicResource TextSubtle}" TextTrimming="CharacterEllipsis"
                                                                Margin="0,1,0,0" />
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="1" FontSize="11" Foreground="#888"
+                                                <TextBlock Grid.Column="1" FontSize="11" Foreground="{DynamicResource TextMuted}"
                                                            VerticalAlignment="Center" Margin="0,0,6,0">
                                                     <TextBlock.Text>
                                                         <MultiBinding StringFormat="{}{0}">
@@ -286,7 +286,7 @@
                                                     </TextBlock.Text>
                                                 </TextBlock>
                                                 <Ellipse Grid.Column="2" Width="7" Height="7"
-                                                         Fill="#4CAF50" VerticalAlignment="Center" />
+                                                         Fill="{DynamicResource SessionDot}" VerticalAlignment="Center" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -308,13 +308,13 @@
                                 </Grid.ColumnDefinitions>
                                 <materialDesign:PackIcon x:Name="ActivityChevron"
                                                          Kind="ChevronDown" Width="16" Height="16"
-                                                         Foreground="#888" VerticalAlignment="Center"
+                                                         Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"
                                                          Margin="0,0,4,0" />
                                 <TextBlock Grid.Column="1" Text="Recent Activity" FontSize="13"
-                                           FontWeight="Medium" Foreground="#666"
+                                           FontWeight="Medium" Foreground="{DynamicResource TextTertiary}"
                                            VerticalAlignment="Center" />
                                 <TextBlock x:Name="ActivityCountText" Grid.Column="2"
-                                           FontSize="11" Foreground="#999"
+                                           FontSize="11" Foreground="{DynamicResource TextSubtle}"
                                            VerticalAlignment="Center" />
                             </Grid>
                             <!-- Collapsible content -->
@@ -329,21 +329,21 @@
                                             </Grid.ColumnDefinitions>
                                             <TextBlock FontSize="10" Width="16"
                                                        FontFamily="Segoe UI Emoji"
-                                                       Foreground="#888" VerticalAlignment="Top"
+                                                       Foreground="{DynamicResource TextMuted}" VerticalAlignment="Top"
                                                        Margin="0,1,0,0"
                                                        Text="{Binding Icon, Converter={StaticResource ActivityIconConverter}}" />
                                             <StackPanel Grid.Column="1" Margin="2,0,0,0">
                                                 <TextBlock Text="{Binding Summary}"
-                                                           FontSize="11" Foreground="#666"
+                                                           FontSize="11" Foreground="{DynamicResource TextTertiary}"
                                                            TextTrimming="CharacterEllipsis" />
                                                 <TextBlock Text="{Binding Detail}"
-                                                           FontSize="10" Foreground="#555"
+                                                           FontSize="10" Foreground="{DynamicResource TextSecondary}"
                                                            FontFamily="Consolas, Segoe UI"
                                                            TextTrimming="CharacterEllipsis"
                                                            Visibility="{Binding Detail, Converter={StaticResource NullToCollapsedConverter}}" />
                                             </StackPanel>
                                             <TextBlock Grid.Column="2" Text="{Binding ProjectName}"
-                                                       FontSize="10" Foreground="#999"
+                                                       FontSize="10" Foreground="{DynamicResource TextSubtle}"
                                                        VerticalAlignment="Top" Margin="6,1,0,0"
                                                        FontStyle="Italic" />
                                         </Grid>
@@ -364,10 +364,10 @@
                 <Grid>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="Robot" Width="16" Height="16"
-                                                 Foreground="#888" Margin="0,0,6,0"
+                                                 Foreground="{DynamicResource TextMuted}" Margin="0,0,6,0"
                                                  VerticalAlignment="Center" />
                         <TextBlock Text="Claude Tracker" FontSize="13" FontWeight="Medium"
-                                   Foreground="#777" VerticalAlignment="Center" />
+                                   Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Cursor="Arrow">
@@ -375,19 +375,19 @@
                                 Style="{StaticResource MaterialDesignIconButton}"
                                 Width="28" Height="28" Padding="0"
                                 ToolTip="Switch to floating widget">
-                            <materialDesign:PackIcon Kind="OpenInNew" Width="17" Height="17" Foreground="#777" />
+                            <materialDesign:PackIcon Kind="OpenInNew" Width="17" Height="17" Foreground="{DynamicResource TextMuted}" />
                         </Button>
                         <Button x:Name="SettingsButton"
                                 Style="{StaticResource MaterialDesignIconButton}"
                                 Width="28" Height="28" Padding="0"
                                 ToolTip="Settings">
-                            <materialDesign:PackIcon Kind="CogOutline" Width="17" Height="17" Foreground="#777" />
+                            <materialDesign:PackIcon Kind="CogOutline" Width="17" Height="17" Foreground="{DynamicResource TextMuted}" />
                         </Button>
                         <Button x:Name="QuitButton"
                                 Style="{StaticResource MaterialDesignIconButton}"
                                 Width="28" Height="28" Padding="0"
                                 ToolTip="Quit">
-                            <materialDesign:PackIcon Kind="Power" Width="17" Height="17" Foreground="#999" />
+                            <materialDesign:PackIcon Kind="Power" Width="17" Height="17" Foreground="{DynamicResource TextSubtle}" />
                         </Button>
                     </StackPanel>
                 </Grid>
