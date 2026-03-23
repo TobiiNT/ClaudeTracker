@@ -75,8 +75,8 @@ public partial class PersonalUsageView : UserControl
 
             AutoDetectStatus.Text = _vm.AutoDetectStatusText;
             AutoDetectStatus.Foreground = _vm.AutoDetectSuccess
-                ? new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50))
-                : new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
+                ? new SolidColorBrush(ThemeColors.Get("StatusSafe"))
+                : new SolidColorBrush(ThemeColors.Get("TextMuted"));
         });
     }
 
@@ -142,7 +142,7 @@ public partial class PersonalUsageView : UserControl
         ApiStep1.Visibility = Visibility.Collapsed;
         ApiStep2.Visibility = Visibility.Collapsed;
         ApiSubtitle.Text = $"Connected to {_selectedOrg.DisplayName}";
-        ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+        ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusSafe"));
 
         await FetchUsersForOrg(_selectedOrg);
     }
@@ -193,7 +193,7 @@ public partial class PersonalUsageView : UserControl
         }
 
         ApiSubtitle.Text = "Validating session key...";
-        ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
+        ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("TextMuted"));
         ApiLoadingBar.Visibility = Visibility.Visible;
         ApiConnectButton.IsEnabled = false;
 
@@ -209,7 +209,7 @@ public partial class PersonalUsageView : UserControl
             _apiSessionKey = key;
 
             ApiSubtitle.Text = "Fetching billing data...";
-            ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+            ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusSafe"));
             ApiStep1.Visibility = Visibility.Collapsed;
 
             // Enrich orgs with spend data (best-effort)
@@ -232,7 +232,7 @@ public partial class PersonalUsageView : UserControl
         catch (Exception ex)
         {
             ApiSubtitle.Text = $"Failed: {ex.Message}";
-            ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36));
+            ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusCritical"));
         }
         finally
         {
@@ -273,7 +273,7 @@ public partial class PersonalUsageView : UserControl
             else
             {
                 ApiSubtitle.Text = $"Connected to {org.DisplayName}";
-                ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+                ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusModerate"));
                 ApiTip.Text = "No users found. Org spending will still be tracked. You can select a user later.";
                 ApiTip.Visibility = Visibility.Visible;
                 SaveApiConsoleOrg(org);
@@ -282,7 +282,7 @@ public partial class PersonalUsageView : UserControl
         catch (Exception ex)
         {
             ApiSubtitle.Text = $"Connected to {org.DisplayName}";
-            ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+            ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusModerate"));
             ApiTip.Text = $"Could not load users: {ex.Message}. Org spending will still be tracked.";
             ApiTip.Visibility = Visibility.Visible;
             SaveApiConsoleOrg(org);
@@ -355,7 +355,7 @@ public partial class PersonalUsageView : UserControl
         ApiTip.Visibility = Visibility.Collapsed;
         ApiKeyInput.Text = "";
         ApiSubtitle.Text = "Sign in to API Console to track Claude Code spending.";
-        ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
+        ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("TextMuted"));
         _apiSessionKey = "";
         _selectedOrg = null;
     }

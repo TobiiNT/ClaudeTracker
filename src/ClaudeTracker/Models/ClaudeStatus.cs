@@ -1,3 +1,5 @@
+using ClaudeTracker.Utilities;
+
 namespace ClaudeTracker.Models;
 
 public enum StatusIndicator
@@ -16,12 +18,12 @@ public record ClaudeStatus(StatusIndicator Indicator, string Description)
 
     public static string GetColorHex(StatusIndicator indicator) => indicator switch
     {
-        StatusIndicator.None     => "#4CAF50",
-        StatusIndicator.Minor    => "#FFC107",
-        StatusIndicator.Major    => "#FF9800",
-        StatusIndicator.Critical => "#F44336",
-        StatusIndicator.Unknown  => "#9E9E9E",
-        _                        => "#9E9E9E"
+        StatusIndicator.None     => ThemeColors.GetHex("StatusSafe"),
+        StatusIndicator.Minor    => ThemeColors.GetHex("AccentAmber"),
+        StatusIndicator.Major    => ThemeColors.GetHex("StatusModerate"),
+        StatusIndicator.Critical => ThemeColors.GetHex("StatusCritical"),
+        StatusIndicator.Unknown  => ThemeColors.GetHex("TextMuted"),
+        _                        => ThemeColors.GetHex("TextMuted")
     };
 
     public static StatusIndicator ParseIndicator(string value) => value switch

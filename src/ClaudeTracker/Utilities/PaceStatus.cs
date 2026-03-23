@@ -97,13 +97,13 @@ public static class PaceStatusCalculator
     {
         return status switch
         {
-            PaceStatus.Comfortable => "#4CAF50",
-            PaceStatus.OnTrack     => "#009688",
-            PaceStatus.Warming     => "#FFC107",
-            PaceStatus.Pressing    => "#FF9800",
-            PaceStatus.Critical    => "#F44336",
-            PaceStatus.Runaway     => "#9C27B0",
-            _                      => "#4CAF50"
+            PaceStatus.Comfortable => ThemeColors.GetHex("StatusSafe"),
+            PaceStatus.OnTrack     => ThemeColors.GetHex("AccentTeal"),
+            PaceStatus.Warming     => ThemeColors.GetHex("AccentAmber"),
+            PaceStatus.Pressing    => ThemeColors.GetHex("StatusModerate"),
+            PaceStatus.Critical    => ThemeColors.GetHex("StatusCritical"),
+            PaceStatus.Runaway     => ThemeColors.GetHex("AccentMagenta"),
+            _                      => ThemeColors.GetHex("StatusSafe")
         };
     }
 }

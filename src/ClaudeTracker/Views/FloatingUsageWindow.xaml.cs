@@ -5,6 +5,7 @@ using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services.Interfaces;
+using ClaudeTracker.Utilities;
 using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views;
@@ -194,27 +195,27 @@ public partial class FloatingUsageWindow : Window
             if (_viewModel.IsRateLimited)
             {
                 var remaining = _viewModel.RateLimitedUntilLocal - DateTime.Now;
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+                StatusDot.Fill = new SolidColorBrush(ThemeColors.Get("StatusModerate"));
                 LastUpdatedText.Text = $"Rate limited — {Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes))}m";
             }
             else if (_viewModel.IsRefreshing)
             {
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
+                StatusDot.Fill = new SolidColorBrush(ThemeColors.Get("AccentBlue"));
                 LastUpdatedText.Text = "Refreshing...";
             }
             else if (!_viewModel.HasCredentials)
             {
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
+                StatusDot.Fill = new SolidColorBrush(ThemeColors.Get("TextMuted"));
                 LastUpdatedText.Text = "No account connected";
             }
             else if (!hasSubscription && !hasApi)
             {
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+                StatusDot.Fill = new SolidColorBrush(ThemeColors.Get("StatusModerate"));
                 LastUpdatedText.Text = "Waiting for data...";
             }
             else
             {
-                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+                StatusDot.Fill = new SolidColorBrush(ThemeColors.Get("StatusSafe"));
                 LastUpdatedText.Text = _viewModel.LastUpdatedText;
             }
 

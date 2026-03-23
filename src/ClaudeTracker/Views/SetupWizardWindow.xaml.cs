@@ -8,6 +8,7 @@ using ClaudeTracker.Models;
 using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
 using ClaudeTracker.TrayIcon;
+using ClaudeTracker.Utilities;
 
 namespace ClaudeTracker.Views;
 
@@ -181,12 +182,12 @@ public partial class SetupWizardWindow : Window
 
             var planLabel = !string.IsNullOrEmpty(subType) ? $" ({subType})" : "";
             OAuthSubtitle.Text = $"Connected{planLabel} — fetching usage...";
-            OAuthSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+            OAuthSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusSafe"));
 
             try { await _apiService.FetchUsageData(); } catch { /* non-fatal */ }
 
             OAuthSubtitle.Text = $"Connected{planLabel}";
-            OAuthSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+            OAuthSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusSafe"));
             AutoDetectButton.Content = "✓";
             AutoDetectButton.IsEnabled = false;
             ShowDoneButton();
@@ -248,7 +249,7 @@ public partial class SetupWizardWindow : Window
         }
 
         ApiSubtitle.Text = "Validating session key...";
-        ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
+        ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("TextMuted"));
         ApiLoading.Visibility = Visibility.Visible;
         ConnectButton.IsEnabled = false;
 
@@ -266,7 +267,7 @@ public partial class SetupWizardWindow : Window
 
             // Step 1 complete
             ApiSubtitle.Text = "Fetching billing data...";
-            ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+            ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusSafe"));
             ApiStep1.Visibility = Visibility.Collapsed;
 
             // Enrich orgs with spend data (best-effort, don't block on failure)
@@ -288,7 +289,7 @@ public partial class SetupWizardWindow : Window
         catch (Exception ex)
         {
             ApiSubtitle.Text = $"Failed: {ex.Message}";
-            ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36));
+            ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusCritical"));
         }
         finally
         {
@@ -327,7 +328,7 @@ public partial class SetupWizardWindow : Window
             else
             {
                 ApiSubtitle.Text = $"Connected to {org.DisplayName}";
-                ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
+                ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusModerate"));
                 ShowApiTip("No users found. You can finish now to track org spending, and select a user later in Settings.");
                 SaveApiConsoleOrg(org);
                 ShowDoneButton();
@@ -404,7 +405,7 @@ public partial class SetupWizardWindow : Window
 
         ApiStep3.Visibility = Visibility.Collapsed;
         ApiSubtitle.Text = $"Tracking: {user.DisplayName} @ {_selectedOrg.DisplayName}";
-        ApiSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+        ApiSubtitle.Foreground = new SolidColorBrush(ThemeColors.Get("StatusSafe"));
         ShowDoneButton();
     }
 }

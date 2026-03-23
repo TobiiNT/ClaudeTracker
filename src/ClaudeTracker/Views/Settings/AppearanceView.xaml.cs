@@ -286,8 +286,8 @@ public partial class AppearanceView : UserControl
             displayPct, status, _vm.SessionIconStyle, _vm.MonochromeMode, isDark, 48, cc);
 
         PreviewBorder.Background = new SolidColorBrush(isDark
-            ? Color.FromRgb(0x33, 0x33, 0x33)
-            : Color.FromRgb(0xEE, 0xEE, 0xEE));
+            ? ThemeColors.Get("TextPrimary")
+            : ThemeColors.Get("SurfaceFooter"));
 
         var styleName = _vm.SessionIconStyle switch
         {
