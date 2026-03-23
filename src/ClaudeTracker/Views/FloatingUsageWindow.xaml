@@ -13,13 +13,13 @@
 
     <Grid Margin="10">
         <!-- Shadow layer -->
-        <Border CornerRadius="12" Background="#F5F5F5">
+        <Border CornerRadius="12" Background="{DynamicResource SurfacePopover}">
             <Border.Effect>
                 <DropShadowEffect ShadowDepth="3" Opacity="0.18" BlurRadius="14" Direction="270" />
             </Border.Effect>
         </Border>
         <!-- Content layer with clipping -->
-        <Border CornerRadius="12" Background="#F5F5F5" BorderBrush="#22000000" BorderThickness="0.5"
+        <Border CornerRadius="12" Background="{DynamicResource SurfacePopover}" BorderBrush="{DynamicResource BorderSubtle}" BorderThickness="0.5"
                 Padding="14,10,14,12" ClipToBounds="True"
                 MouseLeftButtonDown="DragHandle_MouseLeftButtonDown">
         <StackPanel>
@@ -32,30 +32,30 @@
                 </Grid.Background>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="Robot" Width="14" Height="14"
-                                             Foreground="#888" Margin="0,0,5,0"
+                                             Foreground="{DynamicResource TextMuted}" Margin="0,0,5,0"
                                              VerticalAlignment="Center" />
                     <TextBlock Text="Claude Tracker" FontSize="11.5" FontWeight="Medium"
-                               Foreground="#888" VerticalAlignment="Center" />
+                               Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Cursor="Arrow">
                     <Button x:Name="SwitchToPopoverButton" VerticalAlignment="Center"
                             Style="{StaticResource MaterialDesignIconButton}"
                             Width="22" Height="22" Padding="0"
                             ToolTip="Extend">
-                        <materialDesign:PackIcon Kind="ArrowExpand" Width="13" Height="13" Foreground="#999" />
+                        <materialDesign:PackIcon Kind="ArrowExpand" Width="13" Height="13" Foreground="{DynamicResource TextSubtle}" />
                     </Button>
                     <Button x:Name="DockButton" VerticalAlignment="Center"
                             Style="{StaticResource MaterialDesignIconButton}"
                             Width="22" Height="22" Padding="0"
                             ToolTip="Lock position">
                         <materialDesign:PackIcon x:Name="DockIcon" Kind="PinOutline"
-                                                 Width="13" Height="13" Foreground="#999" />
+                                                 Width="13" Height="13" Foreground="{DynamicResource TextSubtle}" />
                     </Button>
                     <Button x:Name="CloseButton" VerticalAlignment="Center"
                             Style="{StaticResource MaterialDesignIconButton}"
                             Width="22" Height="22" Padding="0"
                             ToolTip="Close widget">
-                        <materialDesign:PackIcon Kind="Close" Width="14" Height="14" Foreground="#999" />
+                        <materialDesign:PackIcon Kind="Close" Width="14" Height="14" Foreground="{DynamicResource TextSubtle}" />
                     </Button>
                 </StackPanel>
             </Grid>
@@ -63,21 +63,21 @@
             <!-- Session Usage (subscription) -->
             <StackPanel x:Name="SessionPanel" Margin="0,0,0,8">
                 <Grid Margin="0,0,0,4">
-                    <TextBlock Text="Session" FontSize="12" FontWeight="Medium" Foreground="#666" />
+                    <TextBlock Text="Session" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource TextTertiary}" />
                     <TextBlock x:Name="SessionPercentText" HorizontalAlignment="Right"
-                               FontSize="16" FontWeight="Bold" Foreground="#333" />
+                               FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" />
                 </Grid>
-                <Border Background="#15000000" CornerRadius="3" Height="6" ClipToBounds="True">
-                    <Border x:Name="SessionProgressFill" Background="#4CAF50"
+                <Border Background="{DynamicResource ProgressBackground}" CornerRadius="3" Height="6" ClipToBounds="True">
+                    <Border x:Name="SessionProgressFill" Background="{DynamicResource AccentGreen}"
                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                 </Border>
                 <Grid Margin="0,3,0,0">
-                    <TextBlock x:Name="SessionResetText" FontSize="11" Foreground="#999" VerticalAlignment="Center" />
+                    <TextBlock x:Name="SessionResetText" FontSize="11" Foreground="{DynamicResource TextSubtle}" VerticalAlignment="Center" />
                     <StackPanel x:Name="SessionPacePanel" Orientation="Horizontal"
                                 HorizontalAlignment="Right" Visibility="Collapsed"
                                 Background="Transparent" Cursor="Help">
                         <TextBlock x:Name="SessionEstimateText" FontSize="10"
-                                   VerticalAlignment="Center" Foreground="#999" Margin="0,0,4,0" />
+                                   VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" Margin="0,0,4,0" />
                         <TextBlock x:Name="SessionPaceText" FontSize="10" VerticalAlignment="Center" Margin="0,0,3,0" />
                         <Ellipse x:Name="SessionPaceDot" Width="6" Height="6" VerticalAlignment="Center" />
                     </StackPanel>
@@ -87,21 +87,21 @@
             <!-- Weekly Usage (subscription) -->
             <StackPanel x:Name="WeeklyPanel" Margin="0,0,0,6">
                 <Grid Margin="0,0,0,4">
-                    <TextBlock Text="Weekly" FontSize="12" FontWeight="Medium" Foreground="#666" />
+                    <TextBlock Text="Weekly" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource TextTertiary}" />
                     <TextBlock x:Name="WeeklyPercentText" HorizontalAlignment="Right"
-                               FontSize="14" FontWeight="SemiBold" Foreground="#444" />
+                               FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextData}" />
                 </Grid>
-                <Border Background="#15000000" CornerRadius="3" Height="5" ClipToBounds="True">
-                    <Border x:Name="WeeklyProgressFill" Background="#4CAF50"
+                <Border Background="{DynamicResource ProgressBackground}" CornerRadius="3" Height="5" ClipToBounds="True">
+                    <Border x:Name="WeeklyProgressFill" Background="{DynamicResource AccentGreen}"
                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                 </Border>
                 <Grid Margin="0,3,0,0">
-                    <TextBlock x:Name="WeeklyResetText" FontSize="11" Foreground="#999" VerticalAlignment="Center" />
+                    <TextBlock x:Name="WeeklyResetText" FontSize="11" Foreground="{DynamicResource TextSubtle}" VerticalAlignment="Center" />
                     <StackPanel x:Name="WeeklyPacePanel" Orientation="Horizontal"
                                 HorizontalAlignment="Right" Visibility="Collapsed"
                                 Background="Transparent" Cursor="Help">
                         <TextBlock x:Name="WeeklyEstimateText" FontSize="10"
-                                   VerticalAlignment="Center" Foreground="#999" Margin="0,0,4,0" />
+                                   VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" Margin="0,0,4,0" />
                         <TextBlock x:Name="WeeklyPaceText" FontSize="10" VerticalAlignment="Center" Margin="0,0,3,0" />
                         <Ellipse x:Name="WeeklyPaceDot" Width="6" Height="6" VerticalAlignment="Center" />
                     </StackPanel>
@@ -111,31 +111,31 @@
             <!-- Org Budget (API-only users) -->
             <StackPanel x:Name="ApiPanel" Margin="0,0,0,8" Visibility="Collapsed">
                 <Grid Margin="0,0,0,4">
-                    <TextBlock x:Name="ApiBudgetLabel" Text="Org Budget" FontSize="12" FontWeight="Medium" Foreground="#666" />
+                    <TextBlock x:Name="ApiBudgetLabel" Text="Org Budget" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource TextTertiary}" />
                     <TextBlock x:Name="ApiPercentText" HorizontalAlignment="Right"
-                               FontSize="16" FontWeight="Bold" Foreground="#333" />
+                               FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" />
                 </Grid>
-                <Border Background="#15000000" CornerRadius="3" Height="6" ClipToBounds="True">
-                    <Border x:Name="ApiProgressFill" Background="#2196F3"
+                <Border Background="{DynamicResource ProgressBackground}" CornerRadius="3" Height="6" ClipToBounds="True">
+                    <Border x:Name="ApiProgressFill" Background="{DynamicResource AccentBlue}"
                             CornerRadius="3" HorizontalAlignment="Left" Width="0" />
                 </Border>
-                <TextBlock x:Name="ApiBudgetText" FontSize="11" Foreground="#999" Margin="0,3,0,0" />
+                <TextBlock x:Name="ApiBudgetText" FontSize="11" Foreground="{DynamicResource TextSubtle}" Margin="0,3,0,0" />
             </StackPanel>
 
             <!-- My Usage (API-only users) -->
             <StackPanel x:Name="PersonalPanel" Margin="0,0,0,6" Visibility="Collapsed">
-                <TextBlock Text="My Usage" FontSize="12" FontWeight="Medium" Foreground="#666" Margin="0,0,0,4" />
+                <TextBlock Text="My Usage" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,4" />
                 <!-- This Month -->
                 <Border Background="#08000000" CornerRadius="4" Padding="8,5" Margin="0,0,0,3">
                     <Grid>
-                        <TextBlock FontSize="11" Foreground="#888" VerticalAlignment="Center">
+                        <TextBlock FontSize="11" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center">
                             <Run Text="Month" FontWeight="Medium" />
                         </TextBlock>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <TextBlock x:Name="PersonalCostText" FontSize="12" FontWeight="SemiBold"
-                                       Foreground="#444" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                       Foreground="{DynamicResource TextData}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock x:Name="PersonalSessionsText" FontSize="10"
-                                       Foreground="#999" VerticalAlignment="Center" />
+                                       Foreground="{DynamicResource TextSubtle}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -143,14 +143,14 @@
                 <Border x:Name="FloatingDailyRow" Background="#08000000" CornerRadius="4"
                         Padding="8,5" Visibility="Collapsed">
                     <Grid>
-                        <TextBlock FontSize="11" Foreground="#888" VerticalAlignment="Center">
+                        <TextBlock FontSize="11" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center">
                             <Run Text="Today" FontWeight="Medium" />
                         </TextBlock>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <TextBlock x:Name="FloatingDailyCostText" FontSize="12" FontWeight="SemiBold"
-                                       Foreground="#444" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                       Foreground="{DynamicResource TextData}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock x:Name="FloatingDailyLinesText" FontSize="10"
-                                       Foreground="#999" VerticalAlignment="Center" />
+                                       Foreground="{DynamicResource TextSubtle}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -159,7 +159,7 @@
             <!-- Status -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
                 <Ellipse x:Name="StatusDot" Width="6" Height="6" Margin="0,0,4,0" VerticalAlignment="Center" />
-                <TextBlock x:Name="LastUpdatedText" FontSize="10" Foreground="#BBB" VerticalAlignment="Center" />
+                <TextBlock x:Name="LastUpdatedText" FontSize="10" Foreground="{DynamicResource TextFaint}" VerticalAlignment="Center" />
             </StackPanel>
         </StackPanel>
         </Border>
