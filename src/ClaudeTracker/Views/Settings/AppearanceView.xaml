@@ -4,7 +4,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
         <StackPanel MaxWidth="480">
-            <TextBlock Text="Appearance" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="Appearance" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4" />
             <TextBlock Text="Customize the tray icon and theme"
                        FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
                        Margin="0,0,0,20" />
@@ -25,7 +25,7 @@
             </Border>
 
             <!-- Icon Style -->
-            <TextBlock Text="Icon Style" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="Icon Style" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <UniformGrid Columns="5" Margin="0,0,0,20">
                 <RadioButton x:Name="StyleBattery" GroupName="IconStyle"
                              Style="{StaticResource MaterialDesignChoiceChipOutlineRadioButton}"
@@ -75,7 +75,7 @@
             </UniformGrid>
 
             <!-- Theme -->
-            <TextBlock Text="Theme" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="Theme" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <ComboBox x:Name="ThemeCombo"
                       Style="{StaticResource MaterialDesignFilledComboBox}"
                       Margin="0,0,0,20" Width="200" HorizontalAlignment="Left"
@@ -86,7 +86,7 @@
             </ComboBox>
 
             <!-- Icon Color -->
-            <TextBlock Text="Icon Color" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="Icon Color" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <WrapPanel x:Name="ColorSwatches" Margin="0,0,0,8" />
             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                 <TextBlock Text="#" VerticalAlignment="Center" FontSize="13" Margin="0,0,4,0" />

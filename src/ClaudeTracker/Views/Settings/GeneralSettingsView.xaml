@@ -5,13 +5,13 @@
              xmlns:localization="clr-namespace:ClaudeTracker.Localization">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
         <StackPanel MaxWidth="480">
-            <TextBlock Text="{x:Static localization:Strings.General}" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="{x:Static localization:Strings.General}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4" />
             <TextBlock Text="Configure refresh, startup, and notifications"
                        FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
                        Margin="0,0,0,20" />
 
             <!-- Refresh Interval -->
-            <TextBlock Text="{x:Static localization:Strings.RefreshInterval}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+            <TextBlock Text="{x:Static localization:Strings.RefreshInterval}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4" />
             <Grid Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -25,7 +25,7 @@
             </Grid>
 
             <!-- Startup -->
-            <TextBlock Text="{x:Static localization:Strings.Startup}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="{x:Static localization:Strings.Startup}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="{x:Static localization:Strings.LaunchAtLogin}" FontSize="13" />
@@ -55,7 +55,7 @@
             </Grid>
 
             <!-- Time & Display -->
-            <TextBlock Text="{x:Static localization:Strings.TimeAndDisplay}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="{x:Static localization:Strings.TimeAndDisplay}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
                 <TextBlock Text="{x:Static localization:Strings.ResetTimeFormat}" VerticalAlignment="Center" FontSize="13" />
                 <ComboBox x:Name="TimeDisplayCombo" HorizontalAlignment="Right" Width="160"
@@ -68,7 +68,7 @@
             </Grid>
 
             <!-- Notifications -->
-            <TextBlock Text="{x:Static localization:Strings.Notifications}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="{x:Static localization:Strings.Notifications}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
                 <TextBlock Text="{x:Static localization:Strings.EnableNotifications}" VerticalAlignment="Center" FontSize="13" />
                 <ToggleButton x:Name="NotifyToggle" HorizontalAlignment="Right"

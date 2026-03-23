@@ -57,6 +57,7 @@
                         <StackPanel>
                             <ComboBox x:Name="ProfileCombo"
                                       Style="{StaticResource MaterialDesignComboBox}"
+                                      Foreground="{DynamicResource TextPrimary}"
                                       FontSize="14" Height="30" Padding="4,2"
                                       DisplayMemberPath="Name"
                                       SelectedValuePath="Id"

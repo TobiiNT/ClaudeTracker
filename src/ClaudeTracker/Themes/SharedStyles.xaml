@@ -143,6 +143,7 @@
         <Setter Property="Padding" Value="16,10" />
         <Setter Property="Height" Value="40" />
         <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
     </Style>
 
     <!-- Compact switch toggle (scaled down from default MaterialDesign) -->
@@ -159,7 +160,7 @@
     <Style x:Key="SectionHeader" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.ForegroundLight}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSubtle}" />
         <Setter Property="Margin" Value="16,12,16,4" />
     </Style>
 

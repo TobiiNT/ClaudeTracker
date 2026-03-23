@@ -4,7 +4,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
         <StackPanel MaxWidth="480">
-            <TextBlock Text="Profiles" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="Profiles" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4" />
             <TextBlock Text="Manage multiple Claude accounts"
                        FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
                        Margin="0,0,0,20" />
@@ -41,7 +41,7 @@
                                 <StackPanel VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
-                                                   VerticalAlignment="Center" />
+                                                   Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" />
                                         <Border x:Name="ActiveBadge" Visibility="Collapsed"
                                                 Background="#1B4CAF50" CornerRadius="4"
                                                 Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">

@@ -4,7 +4,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
         <StackPanel MaxWidth="480">
-            <TextBlock Text="Hooks Integration" FontSize="20" FontWeight="Bold" Margin="0,0,0,4" />
+            <TextBlock Text="Hooks Integration" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4" />
             <TextBlock Text="Configure Claude Code hooks for real-time event monitoring"
                        FontSize="13" Foreground="{DynamicResource MaterialDesign.Brush.ForegroundLight}"
                        Margin="0,0,0,20" />
@@ -40,7 +40,7 @@
             <StackPanel x:Name="HooksSettingsPanel">
 
             <!-- Popups -->
-            <TextBlock Text="POPUPS" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="POPUPS" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="Permission Popups" FontSize="13" />
@@ -71,7 +71,7 @@
             </Grid>
 
             <!-- Notifications -->
-            <TextBlock Text="NOTIFICATIONS" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="NOTIFICATIONS" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
                 <TextBlock Text="Task Complete" VerticalAlignment="Center" FontSize="13" />
                 <ToggleButton x:Name="NotifyStopToggle" HorizontalAlignment="Right"
@@ -109,7 +109,7 @@
             </Grid>
 
             <!-- Activity Feed -->
-            <TextBlock Text="ACTIVITY FEED" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="ACTIVITY FEED" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" />
             <Grid Margin="0,6,0,0">
                 <StackPanel VerticalAlignment="Center" Margin="0,0,120,0">
                     <TextBlock Text="Show Activity Feed" FontSize="13" />
