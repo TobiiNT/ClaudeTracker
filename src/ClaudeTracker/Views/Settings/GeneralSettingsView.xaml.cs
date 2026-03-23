@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using ClaudeTracker.Services.Interfaces;
+using ClaudeTracker.Utilities;
 using ClaudeTracker.ViewModels;
 
 namespace ClaudeTracker.Views.Settings;
@@ -19,6 +20,7 @@ public partial class GeneralSettingsView : UserControl
         // Refresh interval
         RefreshSlider.Value = _vm.RefreshInterval;
         RefreshValueText.Text = $"{_vm.RefreshInterval:F0}s";
+        RefreshSlider.PreviewMouseWheel += ScrollHelper.RouteMouseWheelToParent;
         RefreshSlider.ValueChanged += (_, e) =>
         {
             _vm.RefreshInterval = e.NewValue;
@@ -63,6 +65,7 @@ public partial class GeneralSettingsView : UserControl
         TimeDisplayCombo.DisplayMemberPath = "Display";
         TimeDisplayCombo.SelectedValuePath = "Value";
         TimeDisplayCombo.SelectedValue = _vm.PopoverTimeDisplay;
+        TimeDisplayCombo.PreviewMouseWheel += ScrollHelper.RouteMouseWheelToParent;
         TimeDisplayCombo.SelectionChanged += (_, _) =>
         {
             if (TimeDisplayCombo.SelectedValue is Models.PopoverTimeDisplay v) _vm.PopoverTimeDisplay = v;
@@ -77,6 +80,7 @@ public partial class GeneralSettingsView : UserControl
         TimeFormatCombo.DisplayMemberPath = "Display";
         TimeFormatCombo.SelectedValuePath = "Value";
         TimeFormatCombo.SelectedValue = _vm.TimeFormatPreference;
+        TimeFormatCombo.PreviewMouseWheel += ScrollHelper.RouteMouseWheelToParent;
         TimeFormatCombo.SelectionChanged += (_, _) =>
         {
             if (TimeFormatCombo.SelectedValue is Models.TimeFormatPreference v) _vm.TimeFormatPreference = v;
@@ -88,6 +92,7 @@ public partial class GeneralSettingsView : UserControl
         SoundToggle.Unchecked += (_, _) => { _vm.SoundEnabled = false; SoundPickerPanel.Visibility = Visibility.Collapsed; };
         SoundPickerPanel.Visibility = _vm.SoundEnabled ? Visibility.Visible : Visibility.Collapsed;
 
+        SoundCombo.PreviewMouseWheel += ScrollHelper.RouteMouseWheelToParent;
         SoundCombo.ItemsSource = new[] { "Default", "Hand", "Beep", "None" };
         SoundCombo.SelectedItem = _vm.SoundName;
         SoundCombo.SelectionChanged += (_, _) =>

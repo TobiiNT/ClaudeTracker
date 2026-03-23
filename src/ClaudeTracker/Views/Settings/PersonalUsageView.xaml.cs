@@ -1,14 +1,13 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
 using ClaudeTracker.Models;
 using ClaudeTracker.Services;
 using ClaudeTracker.Services.Interfaces;
-using ClaudeTracker.Utilities;
 using ClaudeTracker.ViewModels;
+using ClaudeTracker.Utilities;
 
 namespace ClaudeTracker.Views.Settings;
 
@@ -49,10 +48,10 @@ public partial class PersonalUsageView : UserControl
         ApiAutoSignInButton.Click += async (_, _) => await OnApiAutoSignIn();
         ApiOpenConsoleButton.Click += (_, _) => OnOpenConsole();
 
-        ApiOrgCombo.PreviewMouseWheel += BlockScrollWheel;
+        ApiOrgCombo.PreviewMouseWheel += ScrollHelper.RouteMouseWheelToParent;
         ApiOrgCombo.SelectionChanged += async (_, _) => await OnOrgSelected();
 
-        ApiUserCombo.PreviewMouseWheel += BlockScrollWheel;
+        ApiUserCombo.PreviewMouseWheel += ScrollHelper.RouteMouseWheelToParent;
         ApiConfirmButton.Click += (_, _) => OnApiConfirm();
 
         ApiDisconnectButton.Click += (_, _) => OnApiDisconnect();
@@ -360,9 +359,4 @@ public partial class PersonalUsageView : UserControl
         _selectedOrg = null;
     }
 
-    private static void BlockScrollWheel(object sender, MouseWheelEventArgs e)
-    {
-        if (sender is ComboBox combo && !combo.IsDropDownOpen)
-            e.Handled = true;
-    }
 }

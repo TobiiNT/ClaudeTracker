@@ -65,6 +65,7 @@ public partial class AppearanceView : UserControl
                 break;
             }
         }
+        ThemeCombo.PreviewMouseWheel += ScrollHelper.RouteMouseWheelToParent;
         ThemeCombo.SelectionChanged += (_, _) =>
         {
             if (ThemeCombo.SelectedItem is ComboBoxItem item)

@@ -131,7 +131,7 @@
                     </Grid.ColumnDefinitions>
                     <Slider x:Name="MaxFeedSlider" Minimum="5" Maximum="50"
                             TickFrequency="5" IsSnapToTickEnabled="True"
-                            TickPlacement="BottomRight" />
+                            TickPlacement="BottomRight" IsMoveToPointEnabled="True" />
                     <TextBlock Grid.Column="1" x:Name="MaxFeedValueText" FontSize="13"
                                VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </Grid>

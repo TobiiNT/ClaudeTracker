@@ -21,7 +21,7 @@
             <StackPanel x:Name="Step1" HorizontalAlignment="Center">
                 <materialDesign:PackIcon Kind="Robot" Width="48" Height="48"
                                          HorizontalAlignment="Center" Margin="0,0,0,16"
-                                         Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                         Foreground="{DynamicResource AccentTeal}" />
                 <TextBlock Text="Welcome to Claude Tracker" FontSize="22" FontWeight="Bold"
                            HorizontalAlignment="Center" Margin="0,0,0,8" />
                 <TextBlock Text="Track your Claude AI usage right from your system tray."
