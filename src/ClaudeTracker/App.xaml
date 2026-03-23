@@ -12,6 +12,7 @@
 
                 <!-- App themes -->
                 <ResourceDictionary Source="Themes/SharedStyles.xaml" />
+                <ResourceDictionary Source="Themes/ColorPalette.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

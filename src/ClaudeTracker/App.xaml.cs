@@ -9,6 +9,7 @@ using ClaudeTracker.ViewModels;
 using ClaudeTracker.TrayIcon;
 using ClaudeTracker.Services.Handlers;
 using ClaudeTracker.Services.Observers;
+using ClaudeTracker.Utilities;
 using static ClaudeTracker.Utilities.Constants.Hooks;
 
 namespace ClaudeTracker;
@@ -435,6 +436,7 @@ public partial class App : Application
         var mdTheme = paletteHelper.GetTheme();
         mdTheme.SetBaseTheme(isDark ? BaseTheme.Dark : BaseTheme.Light);
         paletteHelper.SetTheme(mdTheme);
+        ThemeColors.Apply(isDark);
     }
 
     private void CheckClaudeCodeVersion(ISettingsService settingsService)
