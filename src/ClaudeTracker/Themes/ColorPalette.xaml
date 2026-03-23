@@ -33,7 +33,7 @@
     <SolidColorBrush x:Key="StatusCritical" Color="#F44336" />
 
     <!-- Accents -->
-    <SolidColorBrush x:Key="AccentPurple" Color="#7C4DFF" />
+    <SolidColorBrush x:Key="AccentPurple" Color="#009688" />
     <SolidColorBrush x:Key="AccentBlue" Color="#2196F3" />
     <SolidColorBrush x:Key="AccentCyan" Color="#00BCD4" />
     <SolidColorBrush x:Key="AccentAmber" Color="#FFC107" />
