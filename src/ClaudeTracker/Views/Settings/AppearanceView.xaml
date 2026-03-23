@@ -12,14 +12,14 @@
             <!-- Live Preview -->
             <Border Style="{StaticResource UsageCardStyle}" Padding="16" Margin="0,0,0,16">
                 <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="Preview" FontSize="12" FontWeight="Medium" Foreground="#888"
+                    <TextBlock Text="Preview" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource TextMuted}"
                                HorizontalAlignment="Center" Margin="0,0,0,10" />
-                    <Border x:Name="PreviewBorder" Background="#333" CornerRadius="6"
+                    <Border x:Name="PreviewBorder" Background="{DynamicResource SurfacePreview}" CornerRadius="6"
                             Padding="20,8" HorizontalAlignment="Center">
                         <Image x:Name="PreviewImage" Width="32" Height="32"
                                RenderOptions.BitmapScalingMode="HighQuality" />
                     </Border>
-                    <TextBlock x:Name="PreviewLabel" FontSize="11" Foreground="#999"
+                    <TextBlock x:Name="PreviewLabel" FontSize="11" Foreground="{DynamicResource TextSubtle}"
                                HorizontalAlignment="Center" Margin="0,6,0,0" />
                 </StackPanel>
             </Border>

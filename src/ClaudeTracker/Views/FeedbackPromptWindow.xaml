@@ -15,7 +15,7 @@
         </Border.Effect>
         <StackPanel>
             <materialDesign:PackIcon Kind="MessageTextOutline" Width="36" Height="36"
-                                     Foreground="#2196F3" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                                     Foreground="{DynamicResource AccentBlue}" HorizontalAlignment="Center" Margin="0,0,0,12" />
             <TextBlock Text="How's your experience?" FontSize="18" FontWeight="Bold"
                        HorizontalAlignment="Center" Margin="0,0,0,8" />
             <TextBlock TextWrapping="Wrap" TextAlignment="Center" FontSize="13" Margin="0,0,0,16"
@@ -26,19 +26,19 @@
             <!-- Star Rating -->
             <StackPanel x:Name="StarPanel" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
                 <Button x:Name="Star1" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0" MinHeight="40" MinWidth="40">
-                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
+                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="{DynamicResource AccentAmber}" />
                 </Button>
                 <Button x:Name="Star2" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0" MinHeight="40" MinWidth="40">
-                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
+                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="{DynamicResource AccentAmber}" />
                 </Button>
                 <Button x:Name="Star3" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0" MinHeight="40" MinWidth="40">
-                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
+                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="{DynamicResource AccentAmber}" />
                 </Button>
                 <Button x:Name="Star4" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0" MinHeight="40" MinWidth="40">
-                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
+                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="{DynamicResource AccentAmber}" />
                 </Button>
                 <Button x:Name="Star5" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Margin="2,0" MinHeight="40" MinWidth="40">
-                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="#FFC107" />
+                    <materialDesign:PackIcon Kind="StarOutline" Width="32" Height="32" Foreground="{DynamicResource AccentAmber}" />
                 </Button>
             </StackPanel>
 

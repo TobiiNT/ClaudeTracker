@@ -14,7 +14,7 @@
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="Enable Hooks Integration" FontSize="13" />
                     <TextBlock Text="When enabled, ClaudeTracker receives real-time events from Claude Code"
-                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                               FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <ToggleButton x:Name="HooksEnabledToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
@@ -23,7 +23,7 @@
             <!-- Installation (shown only when hooks enabled) -->
             <StackPanel x:Name="InstallationPanel" Margin="0,0,0,20">
                 <TextBlock Text="Install or remove the HookBridge relay into Claude Code's hooks configuration"
-                           FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,0,0,8" />
+                           FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,0,0,8" />
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                     <Button x:Name="InstallButton" Content="Install Hooks"
                             Style="{StaticResource MaterialDesignOutlinedButton}"
@@ -32,7 +32,7 @@
                             Style="{StaticResource MaterialDesignOutlinedButton}"
                             Height="34" FontSize="12" />
                 </StackPanel>
-                <TextBlock x:Name="InstallStatusText" FontSize="11" Foreground="#999"
+                <TextBlock x:Name="InstallStatusText" FontSize="11" Foreground="{DynamicResource TextSubtle}"
                            TextWrapping="Wrap" Margin="0,4,0,0" />
             </StackPanel>
 
@@ -45,7 +45,7 @@
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="Permission Popups" FontSize="13" />
                     <TextBlock Text="Show popup when Claude Code requests tool permission"
-                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                               FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <ToggleButton x:Name="PermissionPopupsToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
@@ -64,7 +64,7 @@
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="Elicitation Popups (MCP)" FontSize="13" />
                     <TextBlock Text="Show popup when Claude Code requests user input via MCP"
-                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                               FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <ToggleButton x:Name="ElicitationPopupsToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
@@ -114,7 +114,7 @@
                 <StackPanel VerticalAlignment="Center" Margin="0,0,120,0">
                     <TextBlock Text="Show Activity Feed" FontSize="13" />
                     <TextBlock Text="Display recent hook events in the popover"
-                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                               FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Button x:Name="ClearFeedButton" Content="Clear" FontSize="10" Height="24"

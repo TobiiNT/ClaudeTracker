@@ -14,7 +14,7 @@
                     Style="{StaticResource UsageCardStyle}" Padding="16">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <materialDesign:PackIcon Kind="CheckCircle" Foreground="#4CAF50"
+                        <materialDesign:PackIcon Kind="CheckCircle" Foreground="{DynamicResource StatusSafe}"
                                                  Width="20" Height="20" Margin="0,0,8,0" />
                         <TextBlock x:Name="ConnectedText" FontSize="14" FontWeight="SemiBold"
                                    VerticalAlignment="Center" />
@@ -60,7 +60,7 @@
                     Style="{StaticResource UsageCardStyle}" Padding="16">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <materialDesign:PackIcon Kind="CheckCircle" Foreground="#4CAF50"
+                        <materialDesign:PackIcon Kind="CheckCircle" Foreground="{DynamicResource StatusSafe}"
                                                  Width="20" Height="20" Margin="0,0,8,0" />
                         <TextBlock x:Name="ApiConnectedText" FontSize="14" FontWeight="SemiBold"
                                    VerticalAlignment="Center" Text="Connected" />
@@ -82,7 +82,7 @@
             <Border x:Name="ApiSetupPanel" Style="{StaticResource UsageCardStyle}" Padding="16">
                 <StackPanel>
                     <TextBlock x:Name="ApiSubtitle" Text="Sign in to API Console to track Claude Code spending."
-                               FontSize="12" Foreground="#999" TextWrapping="Wrap" Margin="0,0,0,10" />
+                               FontSize="12" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,0,0,10" />
 
                     <!-- Step 1: Session key -->
                     <StackPanel x:Name="ApiStep1">
@@ -120,7 +120,7 @@
                     <!-- Step 2: Organization picker -->
                     <StackPanel x:Name="ApiStep2" Visibility="Collapsed">
                         <TextBlock Text="Select Organization" FontSize="12" FontWeight="Medium"
-                                   Foreground="#888" Margin="0,0,0,6" />
+                                   Foreground="{DynamicResource TextMuted}" Margin="0,0,0,6" />
                         <ComboBox x:Name="ApiOrgCombo"
                                   Style="{StaticResource MaterialDesignFilledComboBox}"
                                   DisplayMemberPath="DisplayName" FontSize="12" />
@@ -129,7 +129,7 @@
                     <!-- Step 3: User picker -->
                     <StackPanel x:Name="ApiStep3" Visibility="Collapsed">
                         <TextBlock Text="Select your identity" FontSize="12" FontWeight="Medium"
-                                   Foreground="#888" Margin="0,4,0,6" />
+                                   Foreground="{DynamicResource TextMuted}" Margin="0,4,0,6" />
                         <Grid>
                             <ComboBox x:Name="ApiUserCombo"
                                       Style="{StaticResource MaterialDesignFilledComboBox}"
@@ -143,7 +143,7 @@
                     </StackPanel>
 
                     <TextBlock x:Name="ApiTip" Visibility="Collapsed"
-                               FontSize="11" Foreground="#888" TextWrapping="Wrap" Margin="0,8,0,0"
+                               FontSize="11" Foreground="{DynamicResource TextMuted}" TextWrapping="Wrap" Margin="0,8,0,0"
                                FontStyle="Italic" />
 
                     <ProgressBar x:Name="ApiLoadingBar" IsIndeterminate="True" Visibility="Collapsed"

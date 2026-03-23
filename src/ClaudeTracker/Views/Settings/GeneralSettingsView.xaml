@@ -30,7 +30,7 @@
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="{x:Static localization:Strings.LaunchAtLogin}" FontSize="13" />
                     <TextBlock Text="Automatically start Claude Tracker when you log in to Windows"
-                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                               FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <ToggleButton x:Name="LaunchToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
@@ -39,7 +39,7 @@
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="{x:Static localization:Strings.AutoStartSession}" FontSize="13" />
                     <TextBlock Text="When usage resets to 0%, automatically send a message to start a new session so tracking begins immediately"
-                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                               FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <ToggleButton x:Name="AutoStartToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
@@ -48,7 +48,7 @@
                 <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
                     <TextBlock Text="{x:Static localization:Strings.CheckOverageLimit}" FontSize="13" />
                     <TextBlock Text="Track and display overage costs when you exceed your plan's included usage"
-                               FontSize="11" Foreground="#999" TextWrapping="Wrap" Margin="0,2,0,0" />
+                               FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" Margin="0,2,0,0" />
                 </StackPanel>
                 <ToggleButton x:Name="OverageToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource CompactSwitch}" />
